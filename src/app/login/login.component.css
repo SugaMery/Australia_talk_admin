@@ -1,0 +1,9 @@
+.login-wrapper .login-content .login-logo {
+    display: block;
+    max-width: 200px;
+}
+
+
+.login-wrapper.bg-img {
+    background-image: url(../../assets/img/authentication/login-img.jpg);
+}
