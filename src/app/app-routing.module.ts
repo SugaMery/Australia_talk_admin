@@ -7,6 +7,8 @@ import { CanActivate, Router } from '@angular/router';
 import { CategoryComponent } from './category/category.component';
 import { MediasComponent } from './medias/medias.component';
 import { ArtisansComponent } from './artisans/artisans.component';
+import { TagService } from './services/tag.service';
+import { TagsComponent } from './tags/tags.component';
 
 // AuthGuard implementation
 @Injectable({ providedIn: 'root' })
@@ -31,9 +33,10 @@ export class AuthGuard implements CanActivate {
 const routes: Routes = [
   { path: '', component: HomeComponent, canActivate: [AuthGuard] },
   { path: 'connexion', component: LoginComponent },
-  { path: 'categories', component: CategoryComponent, canActivate: [AuthGuard] },
-  { path: 'medias', component: MediasComponent, canActivate: [AuthGuard] },
-    { path: 'artisans', component: ArtisansComponent, canActivate: [AuthGuard] },
+  { path: 'categories', component: CategoryComponent },
+  { path: 'medias', component: MediasComponent },
+  { path: 'artisans', component: ArtisansComponent },
+  { path: 'tags', component: TagsComponent },
 
 ];
 

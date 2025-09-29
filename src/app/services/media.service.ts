@@ -87,6 +87,16 @@ export class MediaService {
     );
   }
 
+  restore(id: number): Observable<{ message: string; media: Media }> {
+    return this.http.post<{ message: string; media: Media }>(
+      `${this.apiUrl}/${id}/restore`,
+      {},
+      { headers: this.getHeaders() }
+    ).pipe(
+      catchError(this.handleError)
+    );
+  }
+
   private handleError(error: HttpErrorResponse): Observable<never> {
     let errorMessage = 'Une erreur inattendue est survenue';
     if (error.status === 0) {

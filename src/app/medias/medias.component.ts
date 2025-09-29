@@ -1,10 +1,13 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
-import { MediaService } from '../services/media.service';
+import { MediaService, Media } from '../services/media.service';
+import { jsPDF } from 'jspdf';
+import { MessageService } from 'primeng/api'; // Add this import
 
 @Component({
   selector: 'app-medias',
   templateUrl: './medias.component.html',
-  styleUrl: './medias.component.css'
+  styleUrl: './medias.component.css',
+  providers: [MessageService] // Add provider if not global
 })
 export class MediasComponent implements OnInit {
   medias: any[] = [];
@@ -12,7 +15,7 @@ export class MediasComponent implements OnInit {
   selectedFile: File | null = null;
   previewUrl: string | ArrayBuffer | null = null;
 
-  constructor(private mediaService: MediaService) {}
+  constructor(private mediaService: MediaService, private messageService: MessageService) {}
   ngOnInit(): void {
     this.reloadMedias();
   }
@@ -81,6 +84,7 @@ export class MediasComponent implements OnInit {
       },
       error: (err) => {
         console.error('Erreur lors du chargement des médias:', err);
+        this.messageService.add({severity:'error', summary:'Erreur', detail:'Erreur lors du chargement des médias'});
       }
     });
   }
@@ -90,10 +94,12 @@ export class MediasComponent implements OnInit {
     this.selectedMedia.deleted_at = new Date().toISOString();
     this.mediaService.delete(this.selectedMedia.id).subscribe({
       next: () => {
-        console.log('Média supprimé avec succès');
+        this.messageService.add({severity:'success', summary:'Succès', detail:'Média supprimé avec succès'});
+        this.reloadMedias();
       },
       error: (err) => {
         console.error('Erreur lors de la suppression du média:', err);
+        this.messageService.add({severity:'error', summary:'Erreur', detail:'Erreur lors de la suppression du média'});
       }
     });
     this.selectedMedia = null;
@@ -101,12 +107,28 @@ export class MediasComponent implements OnInit {
 
   onADDIconFileChange(event: any) {
     const file = event.target.files && event.target.files[0];
-    this.selectedFile = file ? file : null;
-    if (this.selectedFile) {
+    if (file) {
+      const allowedTypes = ['image/jpeg', 'image/png', 'video/mp4'];
+      if (!allowedTypes.includes(file.type)) {
+        this.selectedFile = null;
+        this.previewUrl = null;
+        this.messageService.add({severity:'error', summary:'Erreur', detail:'Seuls les fichiers JPG, PNG et MP4 sont autorisés'});
+        return;
+      }
+      // Only restrict image size, allow any video size
+      if (file.type.startsWith('image/') && file.size > 2 * 1024 * 1024) {
+        this.selectedFile = null;
+        this.previewUrl = null;
+        this.messageService.add({severity:'error', summary:'Erreur', detail:'Image max 2MB'});
+        return;
+      }
+      this.selectedFile = file;
       const reader = new FileReader();
       reader.onload = e => this.previewUrl = reader.result;
-      reader.readAsDataURL(this.selectedFile);
+      // Use DataURL for both image and video preview
+      reader.readAsDataURL(this.selectedFile!);
     } else {
+      this.selectedFile = null;
       this.previewUrl = null;
     }
   }
@@ -137,22 +159,26 @@ export class MediasComponent implements OnInit {
   addMedia() {
     if (!this.selectedFile) return;
     const formData = new FormData();
-    formData.append('file', this.selectedFile);
+    // Only append if selectedFile is not null
+    if (this.selectedFile) {
+      formData.append('file', this.selectedFile);
+    }
 
     this.mediaService.upload(formData).subscribe({
       next: (media) => {
         this.medias.unshift(media);
         this.selectedFile = null;
         this.previewUrl = null;
+        this.messageService.add({severity:'success', summary:'Succès', detail:'Média ajouté avec succès'});
         // Fermer le modal après ajout
         const modal: any = document.getElementById('add_blog');
         if (modal) {
-          // Bootstrap 5 modal hide
           (window as any).bootstrap?.Modal.getOrCreateInstance(modal).hide();
         }
       },
       error: (err) => {
         console.error('Erreur lors de l\'upload du média:', err);
+        this.messageService.add({severity:'error', summary:'Erreur', detail:'Erreur lors de l\'upload du média'});
       }
     });
   }
@@ -160,6 +186,59 @@ export class MediasComponent implements OnInit {
   goToPage(page: number) {
     if (page < 1 || page > this.totalPages) return;
     this.currentPage = page;
+  }
+
+  exportPDF() {
+		const doc = new jsPDF();
+		let y = 10;
+		doc.setFontSize(16);
+		doc.text('Liste des médias', 10, y);
+		y += 10;
+		doc.setFontSize(12);
+
+		this.pagedMedias().forEach((media, idx) => {
+			doc.text(`Nom: ${media.filename}`, 10, y);
+			y += 7;
+			doc.text(`Taille: ${media.size} octets`, 10, y);
+			y += 7;
+			doc.text(`Date ajout: ${this.formatDate(media.created_at)}`, 10, y);
+			y += 7;
+			doc.text(`Statut: ${media.deleted_at ? 'Inactif' : 'Actif'}`, 10, y);
+			y += 10;
+			// Saut de page si nécessaire
+			if (y > 270 && idx < this.pagedMedias().length - 1) {
+				doc.addPage();
+				y = 10;
+			}
+		});
+
+		doc.save('medias.pdf');
+	}
+
+  openMediaInNewTab(event: Event, media: any): void {
+  event.preventDefault();
+  const url = media.path && media.path.startsWith('http')
+    ? media.path
+    : 'http://localhost:5000/uploads/' + media.filename;
+  window.open(url, '_blank');
+}
+
+	formatDate(dateStr: string) {
+		const date = new Date(dateStr);
+		return date.toLocaleString('fr-FR');
+	}
+
+	restoreMedia(media: Media): void {
+    if (!media.id) return;
+    this.mediaService.restore(media.id).subscribe({
+      next: () => {
+        this.messageService.add({severity:'success', summary:'Succès', detail:'Média restauré avec succès'});
+        this.reloadMedias();
+      },
+      error: err => {
+        this.messageService.add({severity:'error', summary:'Erreur', detail: err.message});
+      }
+    });
   }
 }
 

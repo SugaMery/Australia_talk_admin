@@ -19,6 +19,7 @@ import { CategoryComponent } from './category/category.component';
 import { FilePreviewPipe } from './pipes/file-preview.pipe';
 import { MediasComponent } from './medias/medias.component';
 import { ArtisansComponent } from './artisans/artisans.component';
+import { TagsComponent } from './tags/tags.component';
 
 @NgModule({
   declarations: [
@@ -33,7 +34,8 @@ import { ArtisansComponent } from './artisans/artisans.component';
     CategoryComponent,
     FilePreviewPipe,
     MediasComponent,
-    ArtisansComponent
+    ArtisansComponent,
+    TagsComponent
   ],
   imports: [
     BrowserModule,

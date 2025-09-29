@@ -1,6 +1,6 @@
 <app-header></app-header>
 <app-sidebar></app-sidebar>
-
+<p-toast></p-toast>
 <div class="page-wrapper">
 				<div class="content">
 					<div class="page-header">
@@ -11,12 +11,7 @@
 							</div>
 						</div>
 						<ul class="table-top-head">
-							<li>
-								<a data-bs-toggle="tooltip" data-bs-placement="top" title="PDF"><img src="assets/img/icons/pdf.svg" alt="img"></a>
-							</li>
-							<li>
-								<a data-bs-toggle="tooltip" data-bs-placement="top" title="Excel"><img src="assets/img/icons/excel.svg" alt="img"></a>
-							</li>
+
 							<li>
 								<a data-bs-toggle="tooltip" data-bs-placement="top" title="Rafraîchir" (click)="reloadMedias()"><i class="ti ti-refresh"></i></a>
 							</li>
@@ -79,13 +74,29 @@
 					</div>
 	
 					<div class="row justify-content-center">
-    <div class="col-xxl-4 col-md-6" *ngFor="let media of pagedMedias()">
+    <div class="col-xxl-3 col-md-6" *ngFor="let media of pagedMedias()">
 							<div class="card">
 								<div class="card-body">
 									<div class="img-sec w-100 position-relative mb-3">
 										<a [href]="media.path.startsWith('http') ? media.path : 'http://localhost:5000/uploads/' + media.filename" target="_blank">
-											<img style="height: 200px; object-fit: cover;"       [src]="media.path.startsWith('http') ? media.path : 'http://localhost:5000/uploads/' + media.filename"
-				[alt]="media.filename" class="img-fluid rounded w-100" ></a>
+											<ng-container *ngIf="media.extension === 'mp4'; else imagePreview">
+												<video
+													[src]="media.path.startsWith('http') ? media.path : 'http://localhost:5000/uploads/' + media.filename"
+													controls
+													style="height: 200px; object-fit: cover;"
+													class="img-fluid rounded w-100"
+													(click)="openMediaInNewTab($event, media)"
+												></video>
+											</ng-container>
+											<ng-template #imagePreview>
+												<img
+													style="height: 200px; object-fit: cover;"
+													[src]="media.path.startsWith('http') ? media.path : 'http://localhost:5000/uploads/' + media.filename"
+													[alt]="media.filename"
+													class="img-fluid rounded w-100"
+												>
+											</ng-template>
+										</a>
 										<div>
 											<span *ngIf="!media.deleted_at" class="badge badge-success dot-icon"><i class="ti ti-point-filled"></i> Actif</span>
 											<span *ngIf="media.deleted_at" class="badge badge-danger dot-icon"><i class="ti ti-point-filled"></i> Inactif</span>
@@ -98,11 +109,31 @@
 										</div>
 										<div class="d-flex align-items-center">
 											<!-- Bouton supprimer avec confirmation -->
-											<a href="#" class="link-default p-1 d-flex align-items-center"
+											 			<a href="#" *ngIf="media.deleted_at" class="link-default p-1 d-flex align-items-center"
 											   (click)="selectedMedia = media"
-											   data-bs-toggle="modal" data-bs-target="#delete_modal">
-												<i class="ti ti-trash"></i>
-											</a>
+											   data-bs-toggle="modal" data-bs-target="#restore_modal">
+    <i class="ti ti-refresh"></i>
+</a>
+
+<a href="#" class="link-default p-1 d-flex align-items-center"
+   (click)="selectedMedia = media"
+   data-bs-toggle="modal" data-bs-target="#delete_modal">
+    <i class="ti ti-trash"></i>
+</a>
+
+<a
+  class="link-default p-1 d-flex align-items-center"
+  [href]="media.path.startsWith('http') ? media.path : 'http://localhost:5000/uploads/' + media.filename"
+  [attr.download]="media.extension !== 'mp4' ? media.filename : null"
+  title="Télécharger"
+  (click)="media.extension !== 'mp4' ? null : $event.preventDefault()"
+  target="{{ media.extension === 'mp4' ? '_blank' : '_self' }}"
+>
+  <i class="ti ti-download"></i>
+</a>
+		
+													
+						
 										</div>
                                         
 									</div>
@@ -157,18 +188,22 @@
 													<i data-feather="plus-circle" class="plus-down-add"></i> Ajouter une image
 												</span>
 												<ng-container *ngIf="previewUrl">
-													<img  [src]="previewUrl" alt="Aperçu" style="display:block;max-width:150px;max-height:150px;margin-top:10px;border-radius:8px;width: 100px !important;
-    height: 110px !important;
-    object-fit: cover !important;">
+													<img *ngIf="selectedFile && selectedFile.type.startsWith('image/')" [src]="previewUrl" alt="Aperçu"
+      style="display:block;max-width:150px;max-height:150px;margin-top:10px;border-radius:8px;width: 100px !important; height: 110px !important; object-fit: cover !important;">
+    <video *ngIf="selectedFile && selectedFile.type === 'video/mp4'" [src]="previewUrl" controls
+      style="display:block;max-width:150px;max-height:150px;margin-top:10px;border-radius:8px;width: 100px !important; height: 110px !important; object-fit: cover !important;">
+    </video>
 												</ng-container>
 											</div>
 											<div class="mb-3">
 												<div class="image-upload mb-0">
-													<input type="file" (change)="onADDIconFileChange($event)">
+													<input type="file" (change)="onADDIconFileChange($event)" accept=".jpg,.jpeg,.png,.mp4">
 													<div class="image-uploads">
 														<h4>Uploader une image</h4>
 													</div>
-													<p class="mb-0 mt-1 fs-13 no-wrap">Téléchargez une image au formats de fichier acceptés JPG, PNG</p>
+													<p class="mb-0 mt-1 fs-13 no-wrap">
+  Téléchargez une image (JPG, PNG) ou une vidéo (MP4)
+</p>
 												</div>
 											</div>
 										</div>
@@ -209,6 +244,27 @@
 			</div>
 		</div>
 		<!-- /Delete Modal -->
+
+		<!-- Restore Modal -->
+<div class="modal fade" id="restore_modal">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-body text-center">
+        <span class="avatar avatar-xl bg-soft-success rounded-circle text-success mb-3">
+          <i class="ti ti-refresh fs-36"></i>
+        </span>
+        <h4 class="mb-1">Restaurer le fichier</h4>
+        <p class="mb-3">Êtes-vous sûr de vouloir restaurer ce fichier/image ?</p>
+        <div class="d-flex justify-content-center">
+          <a href="javascript:void(0);" class="btn btn-secondary me-3" data-bs-dismiss="modal">Annuler</a>
+          <button class="btn btn-primary" (click)="restoreMedia(selectedMedia);"
+            data-bs-dismiss="modal">Oui, restaurer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- /Restore Modal -->
 
         
 		<!-- /Main Wrapper -->

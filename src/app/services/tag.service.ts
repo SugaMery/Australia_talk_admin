@@ -54,13 +54,14 @@ export class TagService {
     );
   }
 
-  create(tag: { name: string; slug: string }): Observable<Tag> {
+  create(tag: { name: string; active: boolean }): Observable<Tag> {
     return this.http.post<Tag>(this.apiUrl, tag, { headers: this.getHeaders() }).pipe(
       catchError(this.handleError)
     );
   }
 
-  update(id: number, tag: { name: string; slug: string }): Observable<Tag> {
+  update(id: number, tag: { name: string; active: boolean }): Observable<Tag> {
+    console.log("Updating tag with ID:", id, "and data:", tag);
     return this.http.put<Tag>(`${this.apiUrl}/${id}`, tag, { headers: this.getHeaders() }).pipe(
       catchError(this.handleError)
     );

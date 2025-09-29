@@ -1,4 +1,4 @@
-::ng-deep .dropdown-item.active {
+::ng-deep a.dropdown-item.rounded-1.active {
     background-color: #37773aa3 !important;
 }
 
@@ -10,4 +10,13 @@
 
 ::ng-deep .new-employee-field .image-upload {
     width: 150px !important;
+}
+
+::ng-deep .dropdown-menu.active {
+background-color: #37773aa3 !important;
+}
+
+::ng-deep .dropdown-item:not(.active):hover, ::ng-deep .dropdown-item:not(.active):focus, ::ng-deep .dropdown-item:not(.active):active {
+    color: #ffffff;
+background-color: #37773aa3 !important;
 }

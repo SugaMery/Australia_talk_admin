@@ -1,5 +1,6 @@
 <app-header></app-header>
 <app-sidebar></app-sidebar>
+<p-toast></p-toast>
 
 <div class="page-wrapper">
   <div class="content">
@@ -43,26 +44,28 @@
               Statut
             </a>
             <ul class="dropdown-menu dropdown-menu-end p-3">
-                              <li>
+              <li>
                 <a href="javascript:void(0);" class="dropdown-item rounded-1" (click)="filterStatus('')">Tous</a>
               </li>
               <li>
                 <a href="javascript:void(0);" class="dropdown-item rounded-1" (click)="filterStatus('active')">Actif</a>
               </li>
-              <li>
+<!--               <li>
                 <a href="javascript:void(0);" class="dropdown-item rounded-1" (click)="filterStatus('inactive')">Inactif</a>
+              </li> -->
+              <li>
+                <a href="javascript:void(0);" class="dropdown-item rounded-1" (click)="filterStatus('blacklisted')">Bloqué</a>
               </li>
-
             </ul>
           </div>
         </div>
       </div>
       <div class="card-body p-0">
+
         <div class="table-responsive">
           <table class="table datatable">
             <thead class="thead-light">
               <tr>
-
                 <th>Nom</th>
                 <th>Email</th>
                 <th>Téléphone</th>
@@ -71,32 +74,126 @@
               </tr>
             </thead>
             <tbody>
-  <tr *ngFor="let person of filteredList">
-    <ng-container *ngIf="person.type === 'artisan'">
-      <td>{{ person.name || (person.first_name + ' ' + person.last_name) }}</td>
-      <td>{{ person.email }}</td>
-      <td>{{ person.phone }}</td>
-      <td>
-        <span [ngClass]="{'bg-success': person.status === 'active', 'bg-danger': person.status !== 'active'}"
-              class="d-inline-flex align-items-center p-1 pe-2 rounded-1 text-white fs-10">
-        <i class="ti ti-point-filled me-1 fs-11"></i>
-        {{ person.status === 'active' ? 'Actif' : 'Inactif' }}
-        </span>
-      </td>
-      <td class="d-flex">
-        <div class="edit-delete-action d-flex align-items-center">
-          <a class="me-2 p-2 d-flex align-items-center border rounded" href="#" (click)="editPerson(person)" data-bs-toggle="modal" data-bs-target="#edit-artisan">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-edit"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-          </a>
-          <a class="p-2 d-flex align-items-center border rounded" href="javascript:void(0);" (click)="confirmDelete(person)" data-bs-toggle="modal" data-bs-target="#delete-modal">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
-          </a>
-        </div>
-      </td>
-    </ng-container>
-  </tr>
-</tbody>
+              <tr *ngFor="let person of filteredList">
+                <ng-container *ngIf="person.type === 'artisan'">
+                  <td>{{ person.name || (person.first_name + ' ' + person.last_name) }}</td>
+                  <td>{{ person.email }}</td>
+                  <td>{{ person.phone }}</td>
+                    <td>
+                    <span [ngClass]="{
+                      'bg-success': person.status === 'active',
+                      'bg-danger': person.status === 'inactive',
+                      'bg-dark': person.status === 'blacklisted'
+                      }"
+                      class="d-inline-flex align-items-center p-1 pe-2 rounded-1 text-white fs-10">
+                      <i class="ti ti-point-filled me-1 fs-11"></i>
+                      {{
+                      person.status === 'active' ? 'Actif' :
+                      person.status === 'blacklisted' ? 'Blacklisted' :
+                      'Inactif'
+                      }}
+                    </span>
+                    </td>
+                  <td class="d-flex">
+                    <div class="edit-delete-action d-flex align-items-center">
+                      <a class="me-2 p-2 d-flex align-items-center border rounded" href="#" (click)="editPerson(person)" data-bs-toggle="modal" data-bs-target="#edit-artisan">
+                        <!-- Modifier -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-edit"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                      </a>
+                      <a class="p-2 d-flex align-items-center border rounded" href="javascript:void(0);" (click)="confirmDelete(person)" data-bs-toggle="modal" data-bs-target="#delete-modal">
+                        <!-- Supprimer -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                      </a>
+                    </div>
+                  </td>
+                </ng-container>
+              </tr>
+            </tbody>
           </table>
+        </div>
+                <!-- Pagination length selector -->
+        <div class="dataTables_length mb-2" id="artisanTable_length">
+          <label>
+            Lignes par page
+            <select name="artisanTable_length"
+                    aria-controls="artisanTable"
+                    class="form-select form-select-sm d-inline-block w-auto ms-2 me-2"
+                    [(ngModel)]="pageSize"
+                    (change)="onPageSizeChange($event)">
+              <option *ngFor="let size of [10,25,50,100]" [value]="size">{{size}}</option>
+            </select>
+            entrées
+          </label>
+        </div>
+        <!-- Pagination controls -->
+        <div class="dataTables_paginate paging_simple_numbers " id="artisanTable_paginate">
+          <ul class="pagination mb-0" style="margin: 2px 0 !important;
+    white-space: nowrap !important;
+    justify-content: flex-end !important;">
+            <li class="paginate_button page-item previous"
+                [class.disabled]="currentPage === 1"
+                style="
+    border: none;
+    color: #646B72 !important;
+    background-color: transparent !important;
+    color: #646B72;
+    width: 24px;
+    height: 24px;
+    border: 1px solid #E6EAED;
+    border-radius: 50px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 8px;
+    margin: 0 5px;
+"
+                id="artisanTable_previous">
+              <a class="page-link"
+                 href="javascript:void(0);"
+                 (click)="goToPage(currentPage - 1)"
+               
+                 [attr.aria-disabled]="currentPage === 1"
+                 tabindex="-1">
+                <i class="fa fa-angle-left"></i>
+              </a>
+            </li>
+            <li *ngFor="let page of totalPagesArray; let i = index"
+                class="paginate_button page-item"
+                [class.active]="currentPage === (i+1)">
+              <a class="page-link"
+                 href="javascript:void(0);"
+                 (click)="goToPage(i+1)">
+                {{i+1}}
+              </a>
+            </li>
+            <li class="paginate_button page-item next"
+        style="
+    border: none;
+    color: #646B72 !important;
+    background-color: transparent !important;
+    color: #646B72;
+    width: 24px;
+    height: 24px;
+    border: 1px solid #E6EAED;
+    border-radius: 50px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 8px;
+    margin: 0 5px;
+"
+                [class.disabled]="currentPage === totalPages"
+                id="artisanTable_next">
+              <a class="page-link"
+             
+
+                 href="javascript:void(0);"
+                 (click)="goToPage(currentPage + 1)"
+                 [attr.aria-disabled]="currentPage === totalPages">
+                <i class="fa fa-angle-right"></i>
+              </a>
+            </li>
+          </ul>
         </div>
       </div>
     </div>
@@ -113,7 +210,7 @@
         <div class="page-title">
           <h4>Ajouter Artisan</h4>
         </div>
-        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Fermer">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
@@ -129,7 +226,7 @@
               <input type="text" class="form-control" [(ngModel)]="addModel.first_name" name="first_name">
             </div>
             <div class="col-lg-6 mb-3">
-              <label class="form-label">Last Name</label>
+              <label class="form-label">Nom de famille</label>
               <input type="text" class="form-control" [(ngModel)]="addModel.last_name" name="last_name">
             </div>
             <div class="col-lg-6 mb-3">
@@ -141,7 +238,7 @@
               <input type="text" class="form-control" [(ngModel)]="addModel.phone" name="phone">
             </div>
             <div class="col-lg-6 mb-3">
-              <label class="form-label">Phone 2</label>
+              <label class="form-label">Téléphone 2</label>
               <input type="text" class="form-control" [(ngModel)]="addModel.phone_2" name="phone_2">
             </div>
             <div class="col-lg-12 mb-3">
@@ -149,7 +246,7 @@
               <textarea class="form-control" rows="3" [(ngModel)]="addModel.address" name="address"></textarea>
             </div>
             <div class="col-lg-12 mb-3">
-              <label class="form-label">Address (rest)</label>
+              <label class="form-label">Adresse (complément)</label>
               <input type="text" class="form-control" [(ngModel)]="addModel.address_rest" name="address_rest">
             </div>
             <div class="col-lg-6 mb-3">
@@ -196,7 +293,7 @@
         <div class="content">
           <div class="modal-header">
             <div class="page-title">
-              <h4>Edit Artisan</h4>
+              <h4>Editer Artisan</h4>
             </div>
             <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
               <span aria-hidden="true">&times;</span>
@@ -205,46 +302,46 @@
           <form (ngSubmit)="updateArtisan()" #editForm="ngForm">
             <div class="modal-body">
               <div class="row">
-                <div class="col-lg-6 mb-3">
-                  <label class="form-label">Name</label>
+                <div class="col-lg-12 mb-3">
+                  <label class="form-label">Nom de Société</label>
                   <input type="text" class="form-control" [(ngModel)]="editModel.name" name="name" required>
                 </div>
                 <div class="col-lg-6 mb-3">
-                  <label class="form-label">First Name</label>
+                  <label class="form-label">Prénom</label>
                   <input type="text" class="form-control" [(ngModel)]="editModel.first_name" name="first_name">
                 </div>
                 <div class="col-lg-6 mb-3">
-                  <label class="form-label">Last Name</label>
+                  <label class="form-label">Nom de famille</label>
                   <input type="text" class="form-control" [(ngModel)]="editModel.last_name" name="last_name">
                 </div>
-                <div class="col-lg-6 mb-3">
+                <div class="col-lg-12 mb-3">
                   <label class="form-label">Email</label>
                   <input type="email" class="form-control" [(ngModel)]="editModel.email" name="email" required>
                 </div>
                 <div class="col-lg-6 mb-3">
-                  <label class="form-label">Phone</label>
+                  <label class="form-label">Téléphone</label>
                   <input type="text" class="form-control" [(ngModel)]="editModel.phone" name="phone">
                 </div>
                 <div class="col-lg-6 mb-3">
-                  <label class="form-label">Phone 2</label>
+                  <label class="form-label">Téléphone 2</label>
                   <input type="text" class="form-control" [(ngModel)]="editModel.phone_2" name="phone_2">
                 </div>
                 <div class="col-lg-12 mb-3">
-                  <label class="form-label">Address</label>
+                  <label class="form-label">Adresse</label>
                   <textarea class="form-control" rows="3" [(ngModel)]="editModel.address" name="address"></textarea>
                 </div>
                 <div class="col-lg-12 mb-3">
-                  <label class="form-label">Address (rest)</label>
+                  <label class="form-label">Adresse (complément)</label>
                   <input type="text" class="form-control" [(ngModel)]="editModel.address_rest" name="address_rest">
                 </div>
                 <div class="col-lg-6 mb-3">
-                  <label class="form-label">City</label>
+                  <label class="form-label">Ville</label>
                   <select class="form-select" [(ngModel)]="editModel.city" name="city">
                     <option *ngFor="let city of franceCities" [value]="city">{{ city }}</option>
                   </select>
                 </div>
                 <div class="col-lg-6 mb-3">
-                  <label class="form-label">Postal Code</label>
+                  <label class="form-label">Code Postal</label>
                   <input type="text" class="form-control" [(ngModel)]="editModel.postal_code" name="postal_code">
                 </div>
 
@@ -257,11 +354,13 @@
                   <div class="mb-0">
                     <div class="status-toggle modal-status d-flex justify-content-between align-items-center">
                       <span class="status-label">Statut<span class="text-danger ms-1">*</span></span>
-                      <input type="checkbox" id="edit-active" class="check"
-      [(ngModel)]="editModel.active"
-      name="editActive"
-      [checked]="editModel.active === 'active'"
-      (ngModelChange)="editModel.active = $event ? 'active' : 'inactive'">
+                      <input
+                        type="checkbox"
+                        id="edit-active"
+                        class="check"
+                        [ngModel]="editModel.status === 'active'"
+                        (ngModelChange)="editModel.status = $event ? 'active' : 'blacklisted'"
+                        name="editActive">
                       <label for="edit-active" class="checktoggle"></label>
                     </div>
                   </div>
@@ -288,10 +387,8 @@
           <span class="rounded-circle d-inline-flex p-2 bg-danger-transparent mb-2"><i class="ti ti-trash fs-24 text-danger"></i></span>
           <h4 class="fs-20 fw-bold mb-2 mt-1">Supprimer l'utilisateur</h4>
           <p class="mb-0 fs-16">Êtes-vous sûr de vouloir supprimer cet utilisateur&nbsp;?</p>
-          <div class="modal-footer-btn mt-3 d-flex justify-content-center">
-            <button type="button" class="btn me-2 btn-secondary fs-13 fw-medium p-2 px-3 shadow-none" data-bs-dismiss="modal">Annuler</button>
-            <button type="button" class="btn btn-primary fs-13 fw-medium p-2 px-3" (click)="deleteArtisan()">Oui, supprimer</button>
-          </div>
+          <button type="button" class="btn me-2 btn-secondary fs-13 fw-medium p-2 px-3 shadow-none" data-bs-dismiss="modal">Annuler</button>
+          <button type="button" class="btn btn-primary fs-13 fw-medium p-2 px-3" (click)="deleteArtisan()">Oui, supprimer</button>
         </div>
       </div>
     </div>
@@ -319,4 +416,5 @@
 		</div>
 	</div>
 </div>
+
 

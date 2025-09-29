@@ -1,4 +1,4 @@
-import { Component, OnInit, Renderer2 } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CategoryService } from '../services/category.service';
 import { MediaService } from '../services/media.service';
 import { environment } from '../environments/environment';
@@ -6,11 +6,13 @@ import { finalize } from 'rxjs/operators';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-category',
   templateUrl: './category.component.html',
-  styleUrl: './category.component.css'
+  styleUrls: ['./category.component.css'], // <-- FIX: should be styleUrls (array), not styleUrl
+  providers: [MessageService]
 })
 export class CategoryComponent implements OnInit {
   name: string = '';
@@ -24,106 +26,95 @@ export class CategoryComponent implements OnInit {
   loading: boolean = false;
   iconPreview: string | ArrayBuffer | null = null; // New property for preview
   categories: any[] = [];
-  fallbackImage: string = 'assets/default-category.png'; // Add a fallback image path
-  currentPage: number = 1;
-  pageSize: number = 10; // 10 éléments par page
-  searchTerm: string = '';
-  statusFilter: 'all' | 'active' | 'inactive' = 'all';
+  pagedCategories: any[] = [];
+  filteredCategories: any[] = [];
 
+  pageSize: number = 10;
+  currentPage: number = 1;
+  totalPages: number = 1;
+  totalPagesArray: number[] = [];
+
+  // Add missing properties for edit modal
   selectedCategory: any = null;
   selectedEditIconFile: File | null = null;
   selectedEditIconPreview: string | ArrayBuffer | null = null;
   previousEditIconId: number | null = null;
   categoryToDelete: any = null;
 
-  get filteredCategories(): any[] {
-    let filtered = this.categories;
-    if (this.statusFilter === 'active') {
-      filtered = filtered.filter(cat => !!cat.active);
-    } else if (this.statusFilter === 'inactive') {
-      filtered = filtered.filter(cat => !cat.active);
-    }
-    if (this.searchTerm) {
-      const term = this.searchTerm.toLowerCase();
-      filtered = filtered.filter(cat =>
-        (cat.name && cat.name.toLowerCase().includes(term)) ||
-        (cat.slug && cat.slug.toLowerCase().includes(term)) ||
-        (cat.type && cat.type.toLowerCase().includes(term))
-      );
-    }
-    return filtered;
+  // Fix: ensure searchTerm and statusFilter are initialized and used with ngModel in template
+  private _searchTerm: string = '';
+  private _statusFilter: string = 'all';
+
+  get searchTerm(): string {
+    return this._searchTerm;
+  }
+  set searchTerm(val: string) {
+    this._searchTerm = val;
+    this.applyFilters();
   }
 
-  get pagedCategories(): any[] {
-    const start = (this.currentPage - 1) * this.pageSize;
-    return this.filteredCategories.slice(start, start + this.pageSize);
+  get statusFilter(): string {
+    return this._statusFilter;
   }
-
-  get totalPages(): number {
-    return Math.ceil(this.filteredCategories.length / this.pageSize) || 1;
-  }
-
-  prevPage() {
-    if (this.currentPage > 1) this.currentPage--;
-  }
-
-  nextPage() {
-    if (this.currentPage < this.totalPages) this.currentPage++;
+  set statusFilter(val: string) {
+    this._statusFilter = val;
+    this.applyFilters();
   }
 
   constructor(
     private categoryService: CategoryService,
     private mediaService: MediaService,
-    private renderer: Renderer2 // Inject Renderer2
+    private messageService: MessageService
   ) {}
 
   ngOnInit() {
     this.fetchCategories();
-    //this.loadScripts(); // Load external JS files
   }
 
   fetchCategories() {
     this.categoryService.getAll().subscribe({
       next: (cats) => {
         this.categories = cats;
-        console.log('Fetched categories:', cats);
+        this.applyFilters();
       },
       error: (err) => {
-        console.error('Error fetching categories:', err);
+        this.messageService.add({severity:'error', summary:'Erreur', detail:'Erreur lors du chargement des catégories'});
       }
     });
   }
 
-  private loadScripts() {
-    const scripts = [
-      'assets/js/jquery-3.7.1.min.js',
-      'assets/js/feather.min.js',
-      'assets/js/jquery.slimscroll.min.js',
-      'assets/js/jquery.dataTables.min.js',
-      'assets/js/dataTables.bootstrap5.min.js',
-      'assets/js/bootstrap.bundle.min.js',
-      'https://cdn.jsdelivr.net/npm/apexcharts@3.41.0/dist/apexcharts.min.js',
-      'assets/plugins/apexchart/chart-data.js',
-      'assets/js/moment.min.js',
-      'assets/plugins/daterangepicker/daterangepicker.js',
-      'assets/plugins/jvectormap/jquery-jvectormap-2.0.5.min.js',
-      'assets/plugins/jvectormap/jquery-jvectormap-world-mill.js',
-      'assets/plugins/jvectormap/jquery-jvectormap-ru-mill.js',
-      'assets/plugins/jvectormap/jquery-jvectormap-us-aea.js',
-      'assets/plugins/jvectormap/jquery-jvectormap-uk_countries-mill.js',
-      'assets/plugins/jvectormap/jquery-jvectormap-in-mill.js',
-      'assets/js/jvectormap.js',
-      'assets/plugins/@simonwep/pickr/pickr.es5.min.js',
-      'assets/js/theme-colorpicker.js',
-      'assets/js/script.js'
-    ];
-    scripts.forEach(src => {
-      const script = this.renderer.createElement('script');
-      script.type = 'text/javascript';
-      script.src = src;
-      script.async = false;
-      this.renderer.appendChild(document.body, script);
+  applyFilters() {
+    this.filteredCategories = this.categories.filter(cat => {
+      const matchesSearch = !this._searchTerm || cat.name?.toLowerCase().includes(this._searchTerm.toLowerCase());
+      const matchesStatus =
+        this._statusFilter === 'all' ||
+        (this._statusFilter === 'active' && cat.active) ||
+        (this._statusFilter === 'inactive' && !cat.active);
+      return matchesSearch && matchesStatus;
     });
+    this.currentPage = 1;
+    this.updatePagination();
+  }
+
+  onPageSizeChange(event: any) {
+    this.pageSize = +event.target.value || this.pageSize;
+    this.currentPage = 1;
+    this.updatePagination();
+  }
+
+  goToPage(page: number) {
+    if (page < 1 || page > this.totalPages) return;
+    this.currentPage = page;
+    this.updatePagination();
+  }
+
+  updatePagination() {
+    const totalItems = this.filteredCategories.length;
+    this.totalPages = Math.max(1, Math.ceil(totalItems / this.pageSize));
+    this.totalPagesArray = Array(this.totalPages).fill(0).map((_, i) => i + 1);
+    const start = (this.currentPage - 1) * this.pageSize;
+    const end = start + this.pageSize;
+    this.pagedCategories = this.filteredCategories.slice(start, end);
   }
 
   onIconFileChange(event: any) {
@@ -132,7 +123,7 @@ export class CategoryComponent implements OnInit {
       if (file.size > 2 * 1024 * 1024 || !['image/jpeg', 'image/png'].includes(file.type)) {
         this.iconFile = null;
         this.iconPreview = null;
-        console.log('Invalid file type or size exceeds 2MB');
+        this.messageService.add({severity:'error', summary:'Erreur', detail:'Type de fichier invalide ou taille > 2Mo'});
         return;
       }
       this.iconFile = file;
@@ -141,25 +132,20 @@ export class CategoryComponent implements OnInit {
         this.iconPreview = e.target?.result ?? null;
       };
       reader.readAsDataURL(file);
-      console.log('iconFile set:', this.iconFile);
     } else {
       this.iconFile = null;
       this.iconPreview = null;
-      console.log('iconFile cleared');
     }
   }
 
   getImageUrl(cat: any): string {
-    if (!cat.path) return this.fallbackImage;
-    // Use your backend URL for images
-    // Remove local path and use API url
+    if (!cat.path) return 'assets/default-category.png';
     const filename = cat.filename || cat.path.split('\\').pop();
     return `${environment.apiUrl}/uploads/${filename}`;
   }
 
   onImageError(event: any) {
-    event.target.src = this.fallbackImage;
-    console.log('Image failed to load, fallback used.');
+    event.target.src = 'assets/default-category.png';
   }
 
   async addCategory() {
@@ -168,44 +154,41 @@ export class CategoryComponent implements OnInit {
 
     if (this.iconFile) {
       try {
-        // Upload image and get id
         const formData = new FormData();
         formData.append('file', this.iconFile);
         const mediaResp: any = await this.mediaService.upload(formData).toPromise();
         icon_id = mediaResp.id;
       } catch (err) {
         this.loading = false;
-        console.log('Image upload failed:', err);
+        this.messageService.add({severity:'error', summary:'Erreur', detail:'Échec de l\'upload de l\'image'});
         return;
       }
     }
 
-    // Ensure boolean for active (fix for always 1 in DB)
     const payload: any = {
       name: this.name,
       type: this.type,
       parent_id: this.parent_id,
-      active: !!this.active, // force boolean
+      active: !!this.active,
       icon_id: icon_id
     };
 
-    console.log('Submitting payload:', payload);
     this.categoryService.create(payload).subscribe({
       next: (category) => {
         this.loading = false;
         this.resetForm();
-        // Refresh categories to get latest image and data
         this.fetchCategories();
-        // Close modal
+        this.messageService.add({severity:'success', summary:'Succès', detail:'Catégorie ajoutée avec succès'});
+        // Close modal (Bootstrap 5)
         const modal = document.getElementById('add-category');
-        if (modal) {
-          // @ts-ignore
-          const bsModal = bootstrap.Modal.getInstance(modal) || new bootstrap.Modal(modal);
+        if (modal && (window as any).bootstrap) {
+          const bsModal = (window as any).bootstrap.Modal.getInstance(modal) || new (window as any).bootstrap.Modal(modal);
           bsModal.hide();
         }
       },
       error: (err) => {
         this.loading = false;
+        this.messageService.add({severity:'error', summary:'Erreur', detail:'Erreur lors de l\'ajout de la catégorie'});
       }
     });
   }
@@ -222,23 +205,20 @@ export class CategoryComponent implements OnInit {
     this.model = '';
   }
 
-  // Remplacez le texte du statut par du français
   getStatusText(cat: any): string {
-    return cat.active ? 'Active' : 'Inactive'; // Pour le français, utilisez 'Active'/'Inactive' ou 'Actif'/'Inactif'
+    return cat.active ? 'Active' : 'Inactive';
   }
 
   onEditCategory(cat: any) {
-    // Create a shallow copy to avoid two-way binding issues until save
     this.selectedCategory = { ...cat };
     this.selectedEditIconFile = null;
     this.selectedEditIconPreview = null;
     this.previousEditIconId = cat.icon_id || null;
-    // Optionally, fetch image preview if needed
     if (cat.path) {
       const filename = cat.filename || cat.path.split('\\').pop();
       this.selectedEditIconPreview = `${environment.apiUrl}/uploads/${filename}`;
     } else {
-      this.selectedEditIconPreview = this.fallbackImage;
+      this.selectedEditIconPreview = 'assets/default-category.png';
     }
   }
 
@@ -248,7 +228,7 @@ export class CategoryComponent implements OnInit {
       if (file.size > 2 * 1024 * 1024 || !['image/jpeg', 'image/png'].includes(file.type)) {
         this.selectedEditIconFile = null;
         this.selectedEditIconPreview = null;
-        console.log('Invalid file type or size exceeds 2MB');
+        this.messageService.add({severity:'error', summary:'Erreur', detail:'Type de fichier invalide ou taille > 2Mo'});
         return;
       }
       this.selectedEditIconFile = file;
@@ -267,7 +247,6 @@ export class CategoryComponent implements OnInit {
     if (!this.selectedCategory) return;
     let icon_id = this.selectedCategory.icon_id;
 
-    // If a new image is selected, upload it and delete the old one
     if (this.selectedEditIconFile) {
       try {
         const formData = new FormData();
@@ -278,36 +257,40 @@ export class CategoryComponent implements OnInit {
         if (this.previousEditIconId && this.previousEditIconId !== icon_id) {
           this.mediaService.delete(this.previousEditIconId).subscribe({
             next: () => {},
-            error: (err) => { console.log('Failed to delete previous media:', err); }
+            error: () => {
+              this.messageService.add({severity:'warn', summary:'Avertissement', detail:'Suppression de l\'ancienne image échouée'});
+            }
           });
         }
       } catch (err) {
-        console.log('Image upload failed:', err);
+        this.messageService.add({severity:'error', summary:'Erreur', detail:'Échec de l\'upload de l\'image'});
         return;
       }
     }
 
-    // Ensure boolean for active (fix for always 1 in DB)
     const payload: any = {
       ...this.selectedCategory,
       icon_id: icon_id,
-      active: !!this.selectedCategory.active // force boolean
+      active: !!this.selectedCategory.active
     };
 
-    // Update backend
     this.categoryService.update(this.selectedCategory.id, payload).subscribe({
-      next: (updatedCat) => {
-        // Refresh categories to get latest image and data
+      next: () => {
         this.fetchCategories();
-        // Close modal (Bootstrap way)
-        (window as any).$(`#edit-category`).modal('hide');
+        this.messageService.add({severity:'success', summary:'Succès', detail:'Catégorie mise à jour avec succès'});
+        // Close modal (Bootstrap 5)
+        const modal = document.getElementById('edit-category');
+        if (modal && (window as any).bootstrap) {
+          const bsModal = (window as any).bootstrap.Modal.getInstance(modal) || new (window as any).bootstrap.Modal(modal);
+          bsModal.hide();
+        }
         this.selectedCategory = null;
         this.selectedEditIconFile = null;
         this.selectedEditIconPreview = null;
         this.previousEditIconId = null;
       },
-      error: (err) => {
-        console.log('Update failed:', err);
+      error: () => {
+        this.messageService.add({severity:'error', summary:'Erreur', detail:'Erreur lors de la mise à jour de la catégorie'});
       }
     });
   }
@@ -321,13 +304,17 @@ export class CategoryComponent implements OnInit {
     this.categoryService.delete(this.categoryToDelete.id).subscribe({
       next: () => {
         this.categories = this.categories.filter((c: any) => c.id !== this.categoryToDelete.id);
-        // Close modal (Bootstrap way)
-        (window as any).$(`#delete-modal`).modal('hide');
+        this.messageService.add({severity:'success', summary:'Succès', detail:'Catégorie supprimée avec succès'});
+        // Close modal (Bootstrap 5)
+        const modal = document.getElementById('delete-modal');
+        if (modal && (window as any).bootstrap) {
+          const bsModal = (window as any).bootstrap.Modal.getInstance(modal) || new (window as any).bootstrap.Modal(modal);
+          bsModal.hide();
+        }
         this.categoryToDelete = null;
       },
-      error: (err) => {
-        console.error('Failed to delete category:', err);
-        // Optionally close modal or show error
+      error: () => {
+        this.messageService.add({severity:'error', summary:'Erreur', detail:'Erreur lors de la suppression de la catégorie'});
       }
     });
   }

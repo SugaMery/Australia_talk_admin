@@ -1,5 +1,6 @@
 <app-header></app-header>
 <app-sidebar></app-sidebar>
+<p-toast></p-toast>
 
 <div class="page-wrapper">
   <div class="content">
@@ -71,6 +72,7 @@
         </div>
       </div>
       <div class="card-body p-0">
+
         <div class="table-responsive" [class.no-category-data]="pagedCategories.length === 0">
 <table class="table datatable">
   <thead class="thead-light">
@@ -164,6 +166,88 @@
     </tr>
   </tbody>
 </table>
+        </div>
+
+                <!-- Pagination length selector -->
+        <div class="dataTables_length mb-2" id="artisanTable_length">
+          <label>
+            Lignes par page
+            <select name="artisanTable_length"
+                    aria-controls="artisanTable"
+                    class="form-select form-select-sm d-inline-block w-auto ms-2 me-2"
+                    [(ngModel)]="pageSize"
+                    (change)="onPageSizeChange($event)">
+              <option *ngFor="let size of [10,25,50,100]" [value]="size">{{size}}</option>
+            </select>
+            entrées
+          </label>
+        </div>
+        <!-- Pagination controls -->
+        <div class="dataTables_paginate paging_simple_numbers " id="artisanTable_paginate">
+          <ul class="pagination mb-0" style="margin: 2px 0 !important; white-space: nowrap !important; justify-content: flex-end !important;">
+            <li class="paginate_button page-item previous"
+                [class.disabled]="currentPage === 1"
+                style="
+    border: none;
+    color: #646B72 !important;
+    background-color: transparent !important;
+    color: #646B72;
+    width: 24px;
+    height: 24px;
+    border: 1px solid #E6EAED;
+    border-radius: 50px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 8px;
+    margin: 0 5px;
+"
+                id="artisanTable_previous">
+              <a class="page-link"
+                 href="javascript:void(0);"
+                 (click)="goToPage(currentPage - 1)"
+                
+                 [attr.aria-disabled]="currentPage === 1"
+                 tabindex="-1">
+                <i class="fa fa-angle-left"></i>
+              </a>
+            </li>
+            <li *ngFor="let page of totalPagesArray; let i = index"
+                class="paginate_button page-item"
+                [class.active]="currentPage === (i+1)">
+              <a class="page-link"
+                 href="javascript:void(0);"
+                 (click)="goToPage(i+1)">
+                {{i+1}}
+              </a>
+            </li>
+            <li class="paginate_button page-item next"
+                [class.disabled]="currentPage === totalPages"
+                style="
+    border: none;
+    color: #646B72 !important;
+    background-color: transparent !important;
+    color: #646B72;
+    width: 24px;
+    height: 24px;
+    border: 1px solid #E6EAED;
+    border-radius: 50px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 8px;
+    margin: 0 5px;
+"
+                id="artisanTable_next">
+              <a class="page-link"
+                
+                 href="javascript:void(0);"
+                 (click)="goToPage(currentPage + 1)"
+                 [attr.aria-disabled]="currentPage === totalPages">
+                <i class="fa fa-angle-right"></i>
+              </a>
+            </li>
+          </ul>
         </div>
       </div>
     </div>
