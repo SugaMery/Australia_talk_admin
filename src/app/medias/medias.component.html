@@ -1,0 +1,214 @@
+<app-header></app-header>
+<app-sidebar></app-sidebar>
+
+<div class="page-wrapper">
+				<div class="content">
+					<div class="page-header">
+						<div class="add-item d-flex">
+							<div class="page-title">
+								<h4>Médias</h4>
+								<h6>Gérez vos médias</h6>
+							</div>
+						</div>
+						<ul class="table-top-head">
+							<li>
+								<a data-bs-toggle="tooltip" data-bs-placement="top" title="PDF"><img src="assets/img/icons/pdf.svg" alt="img"></a>
+							</li>
+							<li>
+								<a data-bs-toggle="tooltip" data-bs-placement="top" title="Excel"><img src="assets/img/icons/excel.svg" alt="img"></a>
+							</li>
+							<li>
+								<a data-bs-toggle="tooltip" data-bs-placement="top" title="Rafraîchir" (click)="reloadMedias()"><i class="ti ti-refresh"></i></a>
+							</li>
+							<li>
+								<a data-bs-toggle="tooltip" data-bs-placement="top" title="Réduire" id="collapse-header"><i class="ti ti-chevron-up"></i></a>
+							</li>
+						</ul>
+						<div class="page-btn">
+							<a href="#" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add_blog"><i class="ti ti-circle-plus me-1"></i>Ajouter un média</a>
+						</div>
+					</div>
+
+					<!-- /product list -->
+					<div class="card">
+						<div class="card-body p-3">
+							<div class="d-flex align-items-center justify-content-between flex-wrap row-gap-3">
+								<div class="position-relative input-icon me-3">
+									<span class="input-icon-addon">
+										<i class="ti ti-search"></i>
+									</span>
+									<input type="text" class="form-control" placeholder="Rechercher" [(ngModel)]="searchText">
+								</div>
+								<div class="d-flex my-xl-auto right-content align-items-center flex-wrap row-gap-3">
+									
+									<div class="dropdown me-3">
+										<a href="javascript:void(0);" class="dropdown-toggle btn btn-white btn-md d-inline-flex align-items-center" data-bs-toggle="dropdown">
+											{{ filterStatus === null ? 'Filtrer par statut' : (filterStatus ? 'Actif' : 'Inactif') }}
+										</a>
+										<ul class="dropdown-menu dropdown-menu-end p-3">
+											<li>
+												<a href="javascript:void(0);" class="dropdown-item rounded-1" (click)="filterStatus = null">Tous</a>
+											</li>
+											<li>
+												<a href="javascript:void(0);" class="dropdown-item rounded-1" (click)="filterStatus = true">Actif</a>
+											</li>
+											<li>
+												<a href="javascript:void(0);" class="dropdown-item rounded-1" (click)="filterStatus = false">Inactif</a>
+											</li>
+										</ul>
+									</div>
+									<div class="dropdown">
+										<a href="javascript:void(0);" class="dropdown-toggle btn btn-white d-inline-flex align-items-center" data-bs-toggle="dropdown">
+											Trier : {{ sortLabel }}
+										</a>
+										<ul class="dropdown-menu dropdown-menu-end p-3">
+											<li>
+												<a href="javascript:void(0);" class="dropdown-item rounded-1" (click)="setSort('recent')">Récemment ajouté</a>
+											</li>
+											<li>
+												<a href="javascript:void(0);" class="dropdown-item rounded-1" (click)="setSort('asc')">Ascendant</a>
+											</li>
+											<li>
+												<a href="javascript:void(0);" class="dropdown-item rounded-1" (click)="setSort('desc')">Descendant</a>
+											</li>
+										</ul>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+	
+					<div class="row justify-content-center">
+    <div class="col-xxl-4 col-md-6" *ngFor="let media of pagedMedias()">
+							<div class="card">
+								<div class="card-body">
+									<div class="img-sec w-100 position-relative mb-3">
+										<a [href]="media.path.startsWith('http') ? media.path : 'http://localhost:5000/uploads/' + media.filename" target="_blank">
+											<img style="height: 200px; object-fit: cover;"       [src]="media.path.startsWith('http') ? media.path : 'http://localhost:5000/uploads/' + media.filename"
+				[alt]="media.filename" class="img-fluid rounded w-100" ></a>
+										<div>
+											<span *ngIf="!media.deleted_at" class="badge badge-success dot-icon"><i class="ti ti-point-filled"></i> Actif</span>
+											<span *ngIf="media.deleted_at" class="badge badge-danger dot-icon"><i class="ti ti-point-filled"></i> Inactif</span>
+										</div>
+									</div>   
+									<div class="d-flex align-items-center justify-content-between mb-3">
+										<div class="d-flex align-items-center">
+											<span class="me-2 d-flex align-items-center"><i class="ti ti-calendar me-1"></i> {{ media.created_at | date:'dd/MM/yyyy HH:mm' }}</span>
+											<a  class="border-start link-default fs-14 fw-normal ps-2 me-2 text-truncate d-inline-flex align-items-center d-inline-flex align-items-center">{{ media.size | number }} octets</a>
+										</div>
+										<div class="d-flex align-items-center">
+											<!-- Bouton supprimer avec confirmation -->
+											<a href="#" class="link-default p-1 d-flex align-items-center"
+											   (click)="selectedMedia = media"
+											   data-bs-toggle="modal" data-bs-target="#delete_modal">
+												<i class="ti ti-trash"></i>
+											</a>
+										</div>
+                                        
+									</div>
+                                    <h5>
+										<a [href]="media.path.startsWith('http') ? media.path : 'http://localhost:5000/uploads/' + media.filename" class="fs-16 text-truncate">{{media.filename}}</a>
+									</h5>
+
+								</div>
+							</div>
+						</div>
+
+					</div>
+					<!-- Pagination controls -->
+<div class="d-flex justify-content-center my-3" *ngIf="totalPages > 1">
+    <nav>
+        <ul class="pagination">
+            <li class="page-item" [class.disabled]="currentPage === 1">
+                <a class="page-link" href="#" (click)="goToPage(currentPage - 1); $event.preventDefault();">&laquo;</a>
+            </li>
+            <li class="page-item" *ngFor="let page of [].constructor(totalPages); let i = index" [class.active]="currentPage === (i+1)">
+                <a class="page-link" href="#" (click)="goToPage(i+1); $event.preventDefault();">{{ i+1 }}</a>
+            </li>
+            <li class="page-item" [class.disabled]="currentPage === totalPages">
+                <a class="page-link" href="#" (click)="goToPage(currentPage + 1); $event.preventDefault();">&raquo;</a>
+            </li>
+        </ul>
+    </nav>
+</div>
+					<!-- /product list -->
+				</div>
+
+</div>
+
+		<!-- Add Blog -->
+        <div class="modal fade" id="add_blog">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Ajouter un média</h4>
+                        <button type="button" class="btn-close custom-btn-close p-0" data-bs-dismiss="modal" aria-label="Close">
+                            <i class="ti ti-x"></i>
+                        </button>
+                    </div>
+                    <form (ngSubmit)="addMedia()">
+    <div class="modal-body pb-0">
+        <div class="row">
+            <div class="col-md-12">
+									<div class="new-employee-field">
+										<div class="profile-pic-upload">
+											<div class="profile-pic">
+												<span *ngIf="!previewUrl">
+													<i data-feather="plus-circle" class="plus-down-add"></i> Ajouter une image
+												</span>
+												<ng-container *ngIf="previewUrl">
+													<img  [src]="previewUrl" alt="Aperçu" style="display:block;max-width:150px;max-height:150px;margin-top:10px;border-radius:8px;width: 100px !important;
+    height: 110px !important;
+    object-fit: cover !important;">
+												</ng-container>
+											</div>
+											<div class="mb-3">
+												<div class="image-upload mb-0">
+													<input type="file" (change)="onADDIconFileChange($event)">
+													<div class="image-uploads">
+														<h4>Uploader une image</h4>
+													</div>
+													<p class="mb-0 mt-1 fs-13 no-wrap">Téléchargez une image au formats de fichier acceptés JPG, PNG</p>
+												</div>
+											</div>
+										</div>
+									</div>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Annuler</button>
+                            <button type="submit" class="btn btn-primary">Ajouter le média</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- /Add Blog -->
+        
+
+
+		<!-- Delete Modal -->
+		<div class="modal fade" id="delete_modal">
+			<div class="modal-dialog modal-dialog-centered">
+				<div class="modal-content">
+					<div class="modal-body text-center">
+						<span class="avatar avatar-xl bg-soft-danger rounded-circle text-danger mb-3">
+							<i class="ti ti-trash-x fs-36"></i>
+						</span>
+						<h4 class="mb-1">Supprimer le fichier</h4>
+						<p class="mb-3">Êtes-vous sûr de vouloir supprimer ce fichier/image?</p>
+						<div class="d-flex justify-content-center">
+							<a href="javascript:void(0);" class="btn btn-secondary me-3" data-bs-dismiss="modal">Annuler</a>
+							<button class="btn btn-primary" (click)="deleteMedia();"
+								data-bs-dismiss="modal">Oui, supprimer</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- /Delete Modal -->
+
+        
+		<!-- /Main Wrapper -->

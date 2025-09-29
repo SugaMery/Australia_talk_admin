@@ -1,17 +1,19 @@
+<p-toast></p-toast>
 <div class="account-content">
+    
             <div class="login-wrapper bg-img">
                 <div class="login-content authent-content">
-                    <form action="index.html">
+                    <form >
                         <div class="login-userset">
                             <div class="login-logo logo-normal">
                                 <img src="assets/img/logoausturalia1.png" alt="img">
                             </div>
-                            <a href="index.html" class="login-logo logo-white">
+                            <a  class="login-logo logo-white">
                                    <img src="assets/img/logoausturalia1.png"  alt="Img">
                                </a>
                             <div class="login-userheading">
                                 <h3>Connecter à Australia Talk</h3>
-                                <h4 class="fs-16">Accédez au panneau Dreamspos avec votre email et mot de passe.</h4>
+                                <h4 class="fs-16">Accédez au dashboard de Australia Talk en saisissant votre email et mot de passe.</h4>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Email <span class="text-danger"> *</span></label>
@@ -35,7 +37,7 @@
                                     <div class="col-12 d-flex align-items-center justify-content-between">
                                         <div class="custom-control custom-checkbox">
                                             <label class="checkboxs ps-4 mb-0 pb-0 line-height-1 fs-16 text-gray-6">
-                                                   <input type="checkbox" class="form-control">
+                                                   <input type="checkbox" class="form-control" [(ngModel)]="rememberMe" name="rememberMe">
                                                    <span class="checkmarks"></span>Se souvenir de moi
                                                </label>
                                         </div>
@@ -51,7 +53,7 @@
                                 </button>
                             </div>
                             <div class="signinform">
-                                <h4>Nouveau sur notre plateforme ?<a href="register.html" class="hover-a"> Créer un compte</a></h4>
+                                <h4>Nouveau sur notre plateforme ?<a href="" class="hover-a"> Créer un compte</a></h4>
                             </div>
                             <div class="form-setlogin or-text">
                                 <h4>OU</h4>

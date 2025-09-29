@@ -123,18 +123,17 @@ $(document).ready(function(){
 			"language": {
 				search: ' ',
 				sLengthMenu: '_MENU_',
-				searchPlaceholder: "Search",
-				sLengthMenu: 'Row Per Page _MENU_ Entries',
-				info: "_START_ - _END_ of _TOTAL_ items",
+				searchPlaceholder: "Rechercher",
+				sLengthMenu: 'Lignes par page _MENU_ entrées',
+				info: "_START_ - _END_ sur _TOTAL_ éléments",
 				paginate: {
 					next: ' <i class=" fa fa-angle-right"></i>',
 					previous: '<i class="fa fa-angle-left"></i> '
 				},
-			 },
+			},
 			initComplete: (settings, json)=>{
 				$('.dataTables_filter').appendTo('#tableSearch');
 				$('.dataTables_filter').appendTo('.search-input');
-
 			},	
 		});
 	}

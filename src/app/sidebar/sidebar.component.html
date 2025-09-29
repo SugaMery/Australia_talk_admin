@@ -1,0 +1,461 @@
+<!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <!-- Logo -->
+            <div class="sidebar-logo">
+                <a href="index.html" class="logo logo-normal">
+					<img src="assets/img/logoausturalia1.png" alt="Img">
+				</a>
+                <a href="index.html" class="logo logo-white">
+					<img src="assets/img/logoausturalia1.png" alt="Img">
+				</a>
+                <a href="index.html" class="logo-small">
+					<img src="assets/img/logo-small2.png" alt="Img">
+				</a>
+                <a id="toggle_btn" href="javascript:void(0);">
+					<i data-feather="chevrons-left" class="feather-16"></i>
+				</a>
+            </div>
+            <!-- /Logo -->
+            <div class="modern-profile p-3 pb-0">
+                <div class="text-center rounded bg-light p-3 mb-4 user-profile">
+                    <div class="avatar avatar-lg online mb-3">
+                        <img src="assets/img/customer/customer15.jpg" alt="Img" class="img-fluid rounded-circle">
+                    </div>
+                    <h6 class="fs-14 fw-bold mb-1">Adrian Herman</h6>
+                    <p class="fs-12 mb-0">System Admin</p>
+                </div>
+                <div class="sidebar-nav mb-3">
+                    <ul class="nav nav-tabs nav-tabs-solid nav-tabs-rounded nav-justified bg-transparent" role="tablist">
+                        <li class="nav-item"><a class="nav-link active border-0" href="#">Menu</a></li>
+                        <li class="nav-item"><a class="nav-link border-0" href="chat.html">Chats</a></li>
+                        <li class="nav-item"><a class="nav-link border-0" href="email.html">Inbox</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="sidebar-header p-3 pb-0 pt-2">
+                <div class="text-center rounded bg-light p-2 mb-4 sidebar-profile d-flex align-items-center">
+                    <div class="avatar avatar-md onlin">
+                        <img src="assets/img/customer/customer15.jpg" alt="Img" class="img-fluid rounded-circle">
+                    </div>
+                    <div class="text-start sidebar-profile-info ms-2">
+                        <h6 class="fs-14 fw-bold mb-1">Adrian Herman</h6>
+                        <p class="fs-12">System Admin</p>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center justify-content-between menu-item mb-3">
+                    <div>
+                        <a href="index.html" class="btn btn-sm btn-icon bg-light">
+							<i class="ti ti-layout-grid-remove"></i>
+						</a>
+                    </div>
+                    <div>
+                        <a href="chat.html" class="btn btn-sm btn-icon bg-light">
+							<i class="ti ti-brand-hipchat"></i>
+						</a>
+                    </div>
+                    <div>
+                        <a href="email.html" class="btn btn-sm btn-icon bg-light position-relative">
+							<i class="ti ti-message"></i>
+						</a>
+                    </div>
+                    <div class="notification-item">
+                        <a href="activities.html" class="btn btn-sm btn-icon bg-light position-relative">
+							<i class="ti ti-bell"></i>
+							<span class="notification-status-dot"></span>
+						</a>
+                    </div>
+                    <div class="me-0">
+                        <a href="general-settings.html" class="btn btn-sm btn-icon bg-light">
+							<i class="ti ti-settings"></i>
+						</a>
+                    </div>
+                </div>
+            </div>
+            <div class="sidebar-inner slimscroll">
+                <div id="sidebar-menu" class="sidebar-menu">
+                    <ul>
+                        <!-- Tableau de bord & Application -->
+                        <li class="submenu-open">
+                            <h6 class="submenu-hdr">Tableau de bord & Application</h6>
+                            <ul>
+                                <li class="submenu" [class.active]="selectedMenu === 'dashboard'">
+                                    <a href="javascript:void(0);" (click)="selectedMenu = 'dashboard'">
+                                        <i class="ti ti-layout-grid fs-16 me-2"></i>
+                                        <span>Tableau de bord</span>
+      
+                                    </a>
+
+                                </li>
+                                <li class="submenu" [class.active]="selectedMenu === 'application'">
+                                    <a href="javascript:void(0);" (click)="selectedMenu = 'application'">
+                                        <i class="ti ti-brand-apple-arcade fs-16 me-2"></i>
+                                        <span>Application</span>
+                   
+                                    </a>
+
+                                </li>
+                            </ul>
+                        </li>
+                        <!-- Contenus -->
+                        <li class="submenu-open">
+                            <h6 class="submenu-hdr">Contenus</h6>
+                            <ul>
+                                <li [class.active]="selectedMenu === 'medias'">
+                                    <a href="medias" (click)="selectedMenu = 'medias'"><i class="ti ti-photo fs-16 me-2"></i><span>Médias</span></a>
+                                </li>
+                                <li [class.active]="selectedMenu === 'articles'">
+                                    <a href="articles.html" (click)="selectedMenu = 'articles'"><i class="ti ti-file-text fs-16 me-2"></i><span>Articles</span></a>
+                                </li>
+                                <li [class.active]="selectedMenu === 'categories'">
+                                    <a href="categories" (click)="selectedMenu = 'categories'"><i class="ti ti-list-details fs-16 me-2"></i><span>Catégories</span></a>
+                                </li>
+                                <li [class.active]="selectedMenu === 'tags'">
+                                    <a href="blog-tag.html" (click)="selectedMenu = 'tags'"><i class="ti ti-tag fs-16 me-2"></i><span>Tags</span></a>
+                                </li>
+                                <li [class.active]="selectedMenu === 'artisans'">
+                                    <a href="artisans" (click)="selectedMenu = 'artisans'"><i class="ti ti-user fs-16 me-2"></i><span>Artisans</span></a>
+                                </li>
+                                <li [class.active]="selectedMenu === 'newsletter'">
+                                    <a href="newsletter.html" (click)="selectedMenu = 'newsletter'"><i class="ti ti-mail fs-16 me-2"></i><span>Newsletter</span></a>
+                                </li>
+                            </ul>
+                        </li>
+                        <!-- Gestion des utilisateurs -->
+                        <li class="submenu-open">
+                            <h6 class="submenu-hdr">Gestion des utilisateurs</h6>
+                            <ul>
+                                <li><a href="users.html"><i class="ti ti-shield-up fs-16 me-2"></i><span>Utilisateurs</span></a></li>
+                                <li><a href="customers.html"><i class="ti ti-users-group fs-16 me-2"></i><span>Clients</span></a></li>
+                                <li><a href="roles-permissions.html"><i class="ti ti-jump-rope fs-16 me-2"></i><span>Rôles & Permissions</span></a></li>
+                                <li><a href="delete-account.html"><i class="ti ti-trash-x fs-16 me-2"></i><span>Demande de suppression</span></a></li>
+                            </ul>
+                        </li>
+                        <!-- Site Web -->
+                        <li class="submenu-open">
+                            <h6 class="submenu-hdr">Site Web</h6>
+                            <ul>
+                                <li><a href="system-settings.html"><i class="ti ti-world fs-16 me-2"></i><span>Paramètres du site web</span></a></li>
+                                <li><a href="system-settings.html"><i class="ti ti-link fs-16 me-2"></i><span>Lien système</span></a></li>
+                                <li><a href="company-settings.html"><i class="ti ti-building fs-16 me-2"></i><span>Lien entreprise</span></a></li>
+                                <li><a href="localization-settings.html"><i class="ti ti-map-pin fs-16 me-2"></i><span>Localisation</span></a></li>
+                            </ul>
+                        </li>
+                        <!-- Paramètres -->
+                        <li class="submenu-open">
+                            <h6 class="submenu-hdr">Paramètres</h6>
+                            <ul>
+                                <li class="submenu">
+                                    <a href="javascript:void(0);"><i class="ti ti-settings fs-16 me-2"></i><span>Paramètres généraux</span><span class="menu-arrow"></span></a>
+                                    <ul>
+                                        <li><a href="general-settings.html">Profil</a></li>
+                                        <li><a href="security-settings.html">Sécurité</a></li>
+                                        <li><a href="notification.html">Mes notifications</a></li>
+                                    </ul>
+                                </li>
+                                <li class="submenu">
+                                    <a href="javascript:void(0);"><i class="ti ti-device-desktop fs-16 me-2"></i><span>Paramètres système</span><span class="menu-arrow"></span></a>
+                                    <ul>
+                                        <li class="submenu submenu-two">
+                                            <a href="javascript:void(0);">Email<span class="menu-arrow inside-submenu"></span></a>
+                                            <ul>
+                                                <li><a href="email-settings.html">Paramètres Email</a></li>
+                                                <li><a href="email-template.html">Templates Email</a></li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li><a href="notification.html"><i class="ti ti-bell fs-16 me-2"></i><span>Notifications</span></a></li>
+                                <li class="submenu">
+                                    <a href="javascript:void(0);"><i class="ti ti-history fs-16 me-2"></i><span>Historique</span><span class="menu-arrow"></span></a>
+                                    <ul>
+                                        <li><a href="log-mailing.html">Log Mailing</a></li>
+                                        <li><a href="log-users.html">Log Utilisateurs</a></li>
+                                    </ul>
+                                </li>
+                                <li>
+                                    <a href="signin.html"><i class="ti ti-logout fs-16 me-2"></i><span>Déconnexion</span></a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!-- /Sidebar -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+                <!-- Horizontal Sidebar -->
+        <div class="sidebar sidebar-horizontal" id="horizontal-menu">
+    <div id="sidebar-menu-3" class="sidebar-menu">
+        <div class="main-menu">
+            <ul class="nav-menu">
+                <li>
+                    <a href="index.html"><i class="ti ti-layout-grid fs-16 me-2"></i><span>Tableau de bord & Application</span></a>
+                </li>
+                <li>
+                    <a href="#"><i class="ti ti-photo fs-16 me-2"></i><span>Médias</span></a>
+                </li>
+                <li>
+                    <a href="#"><i class="ti ti-file-text fs-16 me-2"></i><span>Articles</span></a>
+                </li>
+                <li>
+                    <a href="#"><i class="ti ti-list-details fs-16 me-2"></i><span>Catégories</span></a>
+                </li>
+                <li>
+                    <a href="#"><i class="ti ti-tag fs-16 me-2"></i><span>Tags</span></a>
+                </li>
+                <li>
+                    <a href="#"><i class="ti ti-user fs-16 me-2"></i><span>Artisans</span></a>
+                </li>
+                <li>
+                    <a href="#"><i class="ti ti-mail fs-16 me-2"></i><span>Newsletter</span></a>
+                </li>
+                <li>
+                    <a href="#"><i class="ti ti-shield-up fs-16 me-2"></i><span>Utilisateurs</span></a>
+                </li>
+                <li>
+                    <a href="#"><i class="ti ti-users-group fs-16 me-2"></i><span>Clients</span></a>
+                </li>
+                <li>
+                    <a href="#"><i class="ti ti-jump-rope fs-16 me-2"></i><span>Rôles & Permissions</span></a>
+                </li>
+                <li>
+                    <a href="#"><i class="ti ti-trash-x fs-16 me-2"></i><span>Demande de suppression</span></a>
+                </li>
+                <li>
+                    <a href="#"><i class="ti ti-world fs-16 me-2"></i><span>Paramètres du site web</span></a>
+                </li>
+                <li>
+                    <a href="#"><i class="ti ti-link fs-16 me-2"></i><span>Lien système</span></a>
+                </li>
+                <li>
+                    <a href="#"><i class="ti ti-building fs-16 me-2"></i><span>Lien entreprise</span></a>
+                </li>
+                <li>
+                    <a href="#"><i class="ti ti-map-pin fs-16 me-2"></i><span>Localisation</span></a>
+                </li>
+                <li>
+                    <a href="#"><i class="ti ti-settings fs-16 me-2"></i><span>Paramètres généraux</span></a>
+                </li>
+                <li>
+                    <a href="#"><i class="ti ti-device-desktop fs-16 me-2"></i><span>Paramètres système</span></a>
+                </li>
+                <li>
+                    <a href="#"><i class="ti ti-bell fs-16 me-2"></i><span>Notifications</span></a>
+                </li>
+                <li>
+                    <a href="#"><i class="ti ti-history fs-16 me-2"></i><span>Historique</span></a>
+                </li>
+                <li>
+                    <a href="signin.html"><i class="ti ti-logout fs-16 me-2"></i><span>Déconnexion</span></a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+<!-- /Horizontal Sidebar -->
+
+<!-- Two Col Sidebar -->
+<div class="two-col-sidebar" id="two-col-sidebar">
+    <div class="sidebar sidebar-twocol">
+        <div class="twocol-mini">
+            <div class="sidebar-left slimscroll">
+                <div class="nav flex-column align-items-center nav-pills" id="sidebar-tabs" role="tablist" aria-orientation="vertical">
+                    <a href="#" class="nav-link active" title="Tableau de bord" data-bs-toggle="tab" data-bs-target="#dashboard">
+                        <i class="ti ti-layout-grid"></i>
+                    </a>
+                    <a href="#" class="nav-link" title="Médias" data-bs-toggle="tab" data-bs-target="#media">
+                        <i class="ti ti-photo"></i>
+                    </a>
+                    <a href="#" class="nav-link" title="Articles" data-bs-toggle="tab" data-bs-target="#articles">
+                        <i class="ti ti-file-text"></i>
+                    </a>
+                    <a href="#" class="nav-link" title="Catégories" data-bs-toggle="tab" data-bs-target="#categories">
+                        <i class="ti ti-list-details"></i>
+                    </a>
+                    <a href="#" class="nav-link" title="Tags" data-bs-toggle="tab" data-bs-target="#tags">
+                        <i class="ti ti-tag"></i>
+                    </a>
+                    <a href="#" class="nav-link" title="Artisans" data-bs-toggle="tab" data-bs-target="#artisans">
+                        <i class="ti ti-user"></i>
+                    </a>
+                    <a href="#" class="nav-link" title="Newsletter" data-bs-toggle="tab" data-bs-target="#newsletter">
+                        <i class="ti ti-mail"></i>
+                    </a>
+                    <a href="#" class="nav-link" title="Utilisateurs" data-bs-toggle="tab" data-bs-target="#users">
+                        <i class="ti ti-shield-up"></i>
+                    </a>
+                    <a href="#" class="nav-link" title="Clients" data-bs-toggle="tab" data-bs-target="#clients">
+                        <i class="ti ti-users-group"></i>
+                    </a>
+                    <a href="#" class="nav-link" title="Rôles & Permissions" data-bs-toggle="tab" data-bs-target="#roles">
+                        <i class="ti ti-jump-rope"></i>
+                    </a>
+                    <a href="#" class="nav-link" title="Demande de suppression" data-bs-toggle="tab" data-bs-target="#delete-account">
+                        <i class="ti ti-trash-x"></i>
+                    </a>
+                    <a href="#" class="nav-link" title="Paramètres du site web" data-bs-toggle="tab" data-bs-target="#siteweb">
+                        <i class="ti ti-world"></i>
+                    </a>
+                    <a href="#" class="nav-link" title="Lien système" data-bs-toggle="tab" data-bs-target="#liensysteme">
+                        <i class="ti ti-link"></i>
+                    </a>
+                    <a href="#" class="nav-link" title="Lien entreprise" data-bs-toggle="tab" data-bs-target="#lientreprise">
+                        <i class="ti ti-building"></i>
+                    </a>
+                    <a href="#" class="nav-link" title="Localisation" data-bs-toggle="tab" data-bs-target="#localisation">
+                        <i class="ti ti-map-pin"></i>
+                    </a>
+                    <a href="#" class="nav-link" title="Paramètres généraux" data-bs-toggle="tab" data-bs-target="#parametresgeneraux">
+                        <i class="ti ti-settings"></i>
+                    </a>
+                    <a href="#" class="nav-link" title="Paramètres système" data-bs-toggle="tab" data-bs-target="#parametressysteme">
+                        <i class="ti ti-device-desktop"></i>
+                    </a>
+                    <a href="#" class="nav-link" title="Notifications" data-bs-toggle="tab" data-bs-target="#notifications">
+                        <i class="ti ti-bell"></i>
+                    </a>
+                    <a href="#" class="nav-link" title="Historique" data-bs-toggle="tab" data-bs-target="#historique">
+                        <i class="ti ti-history"></i>
+                    </a>
+                    <a href="signin.html" class="nav-link" title="Déconnexion">
+                        <i class="ti ti-logout"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="sidebar-right">
+            <!-- Logo -->
+            <div class="sidebar-logo">
+                <a href="index.html" class="logo logo-normal">
+							<img src="assets/img/logo.svg" alt="Img">
+						</a>
+                <a href="index.html" class="logo logo-white">
+							<img src="assets/img/logo-white.svg" alt="Img">
+						</a>
+                <a href="index.html" class="logo-small">
+							<img src="assets/img/logo-small.png" alt="Img">
+						</a>
+            </div>
+            <!-- /Logo -->
+            <div class="sidebar-scroll">
+                <div class="tab-content" id="v-pills-tabContent">
+                    <div class="tab-pane fade show active" id="dashboard">
+                        <ul>
+                            <li><a href="index.html">Tableau de bord Admin</a></li>
+                            <li><a href="admin-dashboard.html">Tableau de bord Admin 2</a></li>
+                            <li><a href="sales-dashboard.html">Tableau de bord Ventes</a></li>
+                        </ul>
+                    </div>
+                    <div class="tab-pane fade" id="media">
+                        <ul>
+                            <li><a href="media.html">Médias</a></li>
+                        </ul>
+                    </div>
+                    <div class="tab-pane fade" id="articles">
+                        <ul>
+                            <li><a href="articles.html">Articles</a></li>
+                        </ul>
+                    </div>
+                    <div class="tab-pane fade" id="categories">
+                        <ul>
+                            <li><a href="category-list.html">Catégories</a></li>
+                        </ul>
+                    </div>
+                    <div class="tab-pane fade" id="tags">
+                        <ul>
+                            <li><a href="blog-tag.html">Tags</a></li>
+                        </ul>
+                    </div>
+                    <div class="tab-pane fade" id="artisans">
+                        <ul>
+                            <li><a href="artisans.html">Artisans</a></li>
+                        </ul>
+                    </div>
+                    <div class="tab-pane fade" id="newsletter">
+                        <ul>
+                            <li><a href="newsletter.html">Newsletter</a></li>
+                        </ul>
+                    </div>
+                    <div class="tab-pane fade" id="users">
+                        <ul>
+                            <li><a href="users.html">Utilisateurs</a></li>
+                        </ul>
+                    </div>
+                    <div class="tab-pane fade" id="clients">
+                        <ul>
+                            <li><a href="customers.html">Clients</a></li>
+                        </ul>
+                    </div>
+                    <div class="tab-pane fade" id="roles">
+                        <ul>
+                            <li><a href="roles-permissions.html">Rôles & Permissions</a></li>
+                        </ul>
+                    </div>
+                    <div class="tab-pane fade" id="delete-account">
+                        <ul>
+                            <li><a href="delete-account.html">Demande de suppression</a></li>
+                        </ul>
+                    </div>
+                    <div class="tab-pane fade" id="siteweb">
+                        <ul>
+                            <li><a href="system-settings.html">Paramètres du site web</a></li>
+                        </ul>
+                    </div>
+                    <div class="tab-pane fade" id="liensysteme">
+                        <ul>
+                            <li><a href="system-settings.html">Lien système</a></li>
+                        </ul>
+                    </div>
+                    <div class="tab-pane fade" id="lientreprise">
+                        <ul>
+                            <li><a href="company-settings.html">Lien entreprise</a></li>
+                        </ul>
+                    </div>
+                    <div class="tab-pane fade" id="localisation">
+                        <ul>
+                            <li><a href="localization-settings.html">Localisation</a></li>
+                        </ul>
+                    </div>
+                    <div class="tab-pane fade" id="parametresgeneraux">
+                        <ul>
+                            <li><a href="general-settings.html">Profil</a></li>
+                            <li><a href="security-settings.html">Sécurité</a></li>
+                            <li><a href="notification.html">Mes notifications</a></li>
+                        </ul>
+                    </div>
+                    <div class="tab-pane fade" id="parametressysteme">
+                        <ul>
+                            <li><a href="email-settings.html">Paramètres Email</a></li>
+                            <li><a href="email-template.html">Templates Email</a></li>
+                        </ul>
+                    </div>
+                    <div class="tab-pane fade" id="notifications">
+                        <ul>
+                            <li><a href="notification.html">Notifications</a></li>
+                        </ul>
+                    </div>
+                    <div class="tab-pane fade" id="historique">
+                        <ul>
+                            <li><a href="log-mailing.html">Log Mailing</a></li>
+                            <li><a href="log-users.html">Log Utilisateurs</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /Two Col Sidebar -->

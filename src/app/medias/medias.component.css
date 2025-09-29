@@ -1,0 +1,13 @@
+::ng-deep .dropdown-item.active {
+    background-color: #37773aa3 !important;
+}
+
+ @media (min-width: 992px) {
+  ::ng-deep  .modal-lg, .modal-xl {
+        --bs-modal-width: 600px;
+    }
+}
+
+::ng-deep .new-employee-field .image-upload {
+    width: 150px !important;
+}
