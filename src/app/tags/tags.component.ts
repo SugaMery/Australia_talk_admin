@@ -106,7 +106,7 @@ export class TagsComponent implements OnInit {
     this.loading = true;
     const payload: any = {
       name: this.name,
-       active: this.active == false ? 0 : 1,
+      active: this.active == false ? 0 : 1,
     };
     console.log("Payload:", payload);
     this.tagService.create(payload).subscribe({
@@ -121,9 +121,14 @@ export class TagsComponent implements OnInit {
           bsModal.hide();
         }
       },
-      error: () => {
+      error: (err) => {
         this.loading = false;
-        this.messageService.add({severity:'error', summary:'Erreur', detail:'Erreur lors de l\'ajout du tag'});
+        console.error("Error adding tag:", err , err == "Error: Slug already exists");
+        if ( err == "Error: Slug already exists") {
+          this.messageService.add({severity:'error', summary:'Erreur', detail:'Ce tag existe déjà.'});
+        } else {
+          this.messageService.add({severity:'error', summary:'Erreur', detail:'Erreur lors de l\'ajout du tag'});
+        }
       }
     });
   }

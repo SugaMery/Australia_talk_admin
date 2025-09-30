@@ -106,11 +106,14 @@
                                 <li [class.active]="selectedMenu === 'articles'">
                                     <a href="articles.html" (click)="selectedMenu = 'articles'"><i class="ti ti-file-text fs-16 me-2"></i><span>Articles</span></a>
                                 </li>
+                                <li [class.active]="selectedMenu === 'create-article'">
+                                    <a href="create-article" (click)="selectedMenu = 'create-article'"><i class="ti ti-table-plus fs-16 me-2"></i><span>Créer Article</span></a>
+                                </li>
                                 <li [class.active]="selectedMenu === 'categories'">
                                     <a href="categories" (click)="selectedMenu = 'categories'"><i class="ti ti-list-details fs-16 me-2"></i><span>Catégories</span></a>
                                 </li>
                                 <li [class.active]="selectedMenu === 'tags'">
-                                    <a href="blog-tag.html" (click)="selectedMenu = 'tags'"><i class="ti ti-tag fs-16 me-2"></i><span>Tags</span></a>
+                                    <a href="tags" (click)="selectedMenu = 'tags'"><i class="ti ti-tag fs-16 me-2"></i><span>Tags</span></a>
                                 </li>
                                 <li [class.active]="selectedMenu === 'artisans'">
                                     <a href="artisans" (click)="selectedMenu = 'artisans'"><i class="ti ti-user fs-16 me-2"></i><span>Artisans</span></a>

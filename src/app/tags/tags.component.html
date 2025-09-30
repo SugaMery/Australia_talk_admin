@@ -78,7 +78,7 @@
           <table class="table datatable">
             <thead class="thead-light">
               <tr>
-                <th class="no-sort">
+                <th class="no-sort" style="width: 100px;">
                   <label class="checkboxs">
                     <input type="checkbox" id="select-all">
                     <span class="checkmarks"></span>
@@ -93,7 +93,7 @@
             </thead>
             <tbody>
               <tr *ngFor="let tag of pagedTags">
-                <td>
+                <td style="width: 100px;">
                   <label class="checkboxs">
                     <input type="checkbox">
                     <span class="checkmarks"></span>
@@ -200,13 +200,13 @@
             <input type="text" class="form-control" [(ngModel)]="name" name="name" required>
           </div>
 
-          <div class="mb-0">
+<!--           <div class="mb-0">
             <div class="status-toggle modal-status d-flex justify-content-between align-items-center">
               <span class="status-label">Statut<span class="text-danger ms-1">*</span></span>
               <input type="checkbox" id="active" class="check" [(ngModel)]="active" name="active">
               <label for="active" class="checktoggle"></label>
             </div>
-          </div>
+          </div> -->
         </div>
         <div class="modal-footer">
           <button type="button" class="btn me-2 btn-secondary" data-bs-dismiss="modal">Annuler</button>

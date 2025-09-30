@@ -20,7 +20,9 @@ import { FilePreviewPipe } from './pipes/file-preview.pipe';
 import { MediasComponent } from './medias/medias.component';
 import { ArtisansComponent } from './artisans/artisans.component';
 import { TagsComponent } from './tags/tags.component';
-
+import { ArticlesComponent } from './articles/articles.component';
+import { AddArticleComponent } from './add-article/add-article.component';
+import { EditorModule } from 'primeng/editor';
 @NgModule({
   declarations: [
     AppComponent,
@@ -35,14 +37,17 @@ import { TagsComponent } from './tags/tags.component';
     FilePreviewPipe,
     MediasComponent,
     ArtisansComponent,
-    TagsComponent
+    TagsComponent,
+    ArticlesComponent,
+    AddArticleComponent
   ],
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
     AppRoutingModule,
     FormsModule,
-    ToastModule
+    ToastModule,
+    EditorModule
   ],
   providers: [
     provideClientHydration(),
