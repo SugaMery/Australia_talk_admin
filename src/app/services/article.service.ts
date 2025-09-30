@@ -71,7 +71,8 @@ export class ArticleService {
     );
   }
 
-  create(article: { title: string; content?: string; type: string; author_id?: number; isfree?: boolean; validation_status?: string; status?: string; views_count?: number; likes_count?: number }): Observable<Article> {
+  create(article: { title: string; content?: string; type: string; author_id?: number; isfree?: boolean }): Observable<Article> {
+    // The backend sets default values for validation_status, status, views_count, likes_count
     return this.http.post<Article>(this.apiUrl, article, { headers: this.getHeaders() }).pipe(
       catchError(this.handleError)
     );
