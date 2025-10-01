@@ -23,6 +23,8 @@ import { TagsComponent } from './tags/tags.component';
 import { ArticlesComponent } from './articles/articles.component';
 import { AddArticleComponent } from './add-article/add-article.component';
 import { EditorModule } from 'primeng/editor';
+import { MultiSelectModule } from 'primeng/multiselect';
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -47,7 +49,8 @@ import { EditorModule } from 'primeng/editor';
     AppRoutingModule,
     FormsModule,
     ToastModule,
-    EditorModule
+    EditorModule,
+    MultiSelectModule
   ],
   providers: [
     provideClientHydration(),

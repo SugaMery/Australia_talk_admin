@@ -18,15 +18,15 @@
 }
 
 ::ng-deep .select2-container--default .select2-selection--multiple .select2-selection__choice {
-    background-color: #009688 !important;
-    border-color: #009688 !important;
+    background-color: #37773a  !important;
+    border-color: #37773a  !important;
     color: #ffffff;
 }
 
 
  ::ng-deep .select2-container--default .select2-selection--multiple .select2-selection__choice__remove  {
-    background-color: #009688 !important;
-    border-color: #009688 !important;
+    background-color: #37773a  !important;
+    border-color: #37773a  !important;
     color: #ffffff;
  }
 
@@ -49,4 +49,59 @@
     background-color: #37773a;
     font-size: 10px;
     color: #ffffff;
+}
+
+
+
+
+.badge {
+  font-size: 14px;
+  padding: 5px 10px;
+  margin-right: 5px;
+}
+
+.select2-container {
+  width: 100% !important;
+}
+
+.phone-img {
+  display: inline-block;
+  position: relative;
+  margin-right: 10px;
+  margin-bottom: 10px;
+
+  .remove-product {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    cursor: pointer;
+  }
+}
+
+.mb-3 {
+  margin-bottom: 1rem !important;
+}
+
+.list-inline {
+  padding-left: 0;
+  list-style: none;
+
+  .list-inline-item {
+    display: inline-block;
+    margin-right: 5px;
+  }
+}
+
+
+::ng-deep .select2-container--default .select2-selection--multiple .select2-selection__choice__display {
+    cursor: default;
+    /* padding-left: 2px; */
+    font-size: smaller;
+    padding-right: 5px !important;
+}
+
+
+::ng-deep .select2-dropdown {
+border: 1px solid #e6eaed !important;
+
 }
