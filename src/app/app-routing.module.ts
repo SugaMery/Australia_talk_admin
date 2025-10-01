@@ -10,6 +10,7 @@ import { ArtisansComponent } from './artisans/artisans.component';
 import { TagService } from './services/tag.service';
 import { TagsComponent } from './tags/tags.component';
 import { AddArticleComponent } from './add-article/add-article.component';
+import { ArticlesComponent } from './articles/articles.component';
 
 // AuthGuard implementation
 @Injectable({ providedIn: 'root' })
@@ -38,7 +39,8 @@ const routes: Routes = [
   { path: 'medias', component: MediasComponent },
   { path: 'artisans', component: ArtisansComponent },
   { path: 'tags', component: TagsComponent },
-{ path: 'create-article', component: AddArticleComponent },
+  { path: 'create-article', component: AddArticleComponent },
+  { path: 'articles', component: ArticlesComponent },
 ];
 
 @NgModule({

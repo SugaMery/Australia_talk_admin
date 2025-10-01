@@ -30,6 +30,12 @@ export interface ArticleRelated {
   media: Media[];
 }
 
+export interface ArticleWithRelated extends Article {
+  tags: Tag[];
+  categories: Category[];
+  media: Media[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -71,12 +77,20 @@ export class ArticleService {
     );
   }
 
-  create(article: { title: string; content?: string; type: string; author_id?: number; isfree?: boolean }): Observable<Article> {
-    // The backend sets default values for validation_status, status, views_count, likes_count
-    return this.http.post<Article>(this.apiUrl, article, { headers: this.getHeaders() }).pipe(
+  create(article: { title: string; content?: string; type: string; author_id?: number; isfree?: number }): Observable<Article> {
+    // Get author_id from localStorage if not provided
+    let userId = localStorage.getItem('user_id');
+    let author_id = article.author_id;
+    if (!author_id && userId) {
+      author_id = Number(userId);
+    }
+    const payload = { ...article, author_id };
+    return this.http.post<Article>(this.apiUrl, payload, { headers: this.getHeaders() }).pipe(
       catchError(this.handleError)
     );
   }
+
+
 
   update(id: number, article: { title: string; content?: string; type: string; author_id?: number; isfree?: boolean; validation_status?: string; status?: string; views_count?: number; likes_count?: number }): Observable<Article> {
     return this.http.put<Article>(`${this.apiUrl}/${id}`, article, { headers: this.getHeaders() }).pipe(
@@ -92,6 +106,12 @@ export class ArticleService {
 
   getRelated(id: number): Observable<ArticleRelated> {
     return this.http.get<ArticleRelated>(`${this.apiUrl}/${id}/related`, { headers: this.getHeaders() }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  getAllWithRelated(): Observable<ArticleWithRelated[]> {
+    return this.http.get<ArticleWithRelated[]>(`${this.apiUrl}/with-related`, { headers: this.getHeaders() }).pipe(
       catchError(this.handleError)
     );
   }

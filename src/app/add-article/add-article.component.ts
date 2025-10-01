@@ -1,7 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { CategoryService } from '../services/category.service';
 import { TagService } from '../services/tag.service';
+import { MediaArticleService } from '../services/media-article.service';
+import { ArticleCategoryService } from '../services/article-category.service';
+import { ArticleTagService } from '../services/article-tag.service';
+import { ArticleService } from '../services/article.service';
+import { MediaService } from '../services/media.service';
 import $ from 'jquery';
+import nlp from 'compromise'; // Import compromise for NLP
+import { HttpClient } from '@angular/common/http';
+import { MessageService } from 'primeng/api';
 
 export interface ArticleType {
   id: number;
@@ -14,7 +22,8 @@ export interface ArticleType {
 @Component({
   selector: 'app-add-article',
   templateUrl: './add-article.component.html',
-  styleUrls: ['./add-article.component.scss']
+  styleUrls: ['./add-article.component.scss'],
+  providers: [MessageService]
 })
 export class AddArticleComponent implements OnInit {
   // Track article types by ID for better performance in ngFor
@@ -23,70 +32,15 @@ export class AddArticleComponent implements OnInit {
   }
 
   // Form properties
-  accessType: string = '';
+  accessType: string =  'gratuit';
   articleTitle: string = '';
-  articleTags: any[] = []; // Now stores tag IDs (number[])
+  articleTags: any[] = []; // Stores tag IDs (number[])
   categories: any[] = []; // Categories loaded from service
   availableTags: any[] = []; // Tags loaded from service
   selectedCategory: any = null;
   isFree: boolean = false;
   isGratuite: boolean = false;
   text: string = '';
-getTagNameById(tagId: any): string {
-  const tag = this.availableTags?.find((t: any) => t.id === tagId);
-  return tag ? tag.name : tagId;
-}
-getSelectedItemsPureWithIds(): { id: number | string, name: string }[] {
-  const selectedItems: { id: number | string, name: string }[] = [];
-  const elements = document.querySelectorAll<HTMLLIElement>('.select2-selection__choice');
-
-  elements.forEach(el => {
-    const name = el.getAttribute('title') || el.textContent?.trim() || '';
-    // Find the tag object by name
-    const tag = this.availableTags.find((t: any) => t.name === name);
-    if (tag) {
-      selectedItems.push( tag.id);
-    } else if (name) {
-      selectedItems.push({ id: name, name });
-    }
-  });
-
-  return selectedItems;
-}
-
-// Get list of articleTags IDs with corresponding tag names
-getArticleTagsWithNames(): { id: number, name: string }[] {
-  return this.articleTags.map(tagId => {
-    const tag = this.availableTags.find((t: any) => t.id === tagId);
-    return {
-      id: tagId,
-      name: tag ? tag.name : String(tagId)
-    };
-  });
-}
-
-
-getSelectedItems(): string[] {
-  const selectedItems: string[] = [];
-
-  // Récupère tous les éléments <li> contenant les choix
-  $('.select2-selection__choice').each(function () {
-    // Dans Select2, le texte affiché est souvent dans title ou dans le span interne
-    const text = $(this).attr('title') || $(this).text().trim();
-    if (text) {
-      selectedItems.push(text);
-    }
-  });
-
-  return selectedItems;
-}
-
-
-checkTags() {
-  console.log('Tags via jQuery:', this.getSelectedItems());
-  console.log('Tags via TS pur:', this.getSelectedItemsPureWithIds());
-}
-
 
   // Media properties
   mediaPreviews: { url: string; type: 'image' | 'video' }[] = [];
@@ -106,7 +60,14 @@ checkTags() {
 
   constructor(
     private categoryService: CategoryService,
-    private tagsService: TagService
+    private tagsService: TagService,
+    private http: HttpClient,
+    private mediaArticleService: MediaArticleService,
+    private articleCategoryService: ArticleCategoryService,
+    private articleTagService: ArticleTagService,
+    private articleService: ArticleService,
+    private mediaService: MediaService,
+    private messageService: MessageService
   ) {}
 
   ngOnInit(): void {
@@ -138,8 +99,113 @@ checkTags() {
     const quillScript = document.createElement('script');
     quillScript.src = 'assets/plugins/quill/quill.min.js';
     document.body.appendChild(quillScript);
+  }
 
-    // Remove Select2 initialization and handlers
+  // Generate title using compromise NLP
+  generateTitleFromContent() {
+    if (!this.text || !this.text.trim()) {
+      this.articleTitle = '';
+      return;
+    }
+
+    // Use compromise to analyze the text
+    const doc = nlp(this.text);
+
+    // Extract key topics (nouns, verbs, or topics) to form a title
+    const topics = doc.topics().out('array'); // Get key terms/topics
+    let title = '';
+
+    if (topics.length > 0) {
+      // Combine up to 3 key topics for the title
+      title = topics.slice(0, 3).join(' ');
+    } else {
+      // Fallback: Use first sentence or first 8 words
+      const trimmed = this.text.trim();
+      title = trimmed.split(/[.!?\n]/)[0]; // First sentence
+      if (!title || title.length < 3) {
+        title = trimmed.split(/\s+/).slice(0, 8).join(' '); // First 8 words
+      }
+    }
+
+    // Capitalize the title and limit to 60 characters
+    title = title
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+    this.articleTitle = title.length > 60 ? title.slice(0, 60) + '...' : title;
+  }
+
+  // Get tag name by ID
+  getTagNameById(tagId: any): string {
+    const tag = this.availableTags?.find((t: any) => t.id === tagId);
+    return tag ? tag.name : tagId;
+  }
+
+  // Get selected items with IDs
+  getSelectedItemsPureWithIds(): { id: number | string, name: string }[] {
+    const selectedItems: { id: number | string, name: string }[] = [];
+    const elements = document.querySelectorAll<HTMLLIElement>('.select2-selection__choice');
+
+    elements.forEach(el => {
+      const name = el.getAttribute('title') || el.textContent?.trim() || '';
+      const tag = this.availableTags.find((t: any) => t.name === name);
+      if (tag) {
+        selectedItems.push({ id: tag.id, name });
+      } else if (name) {
+        selectedItems.push({ id: name, name });
+      }
+    });
+
+    return selectedItems;
+  }
+
+  // Get list of articleTags IDs with corresponding tag names
+  getArticleTagsWithNames(): { id: number, name: string }[] {
+    return this.articleTags.map(tagId => {
+      const tag = this.availableTags.find((t: any) => t.id === tagId);
+      return {
+        id: tagId,
+        name: tag ? tag.name : String(tagId)
+      };
+    });
+  }
+
+  // Get selected items via jQuery
+  getSelectedItems(): string[] {
+    const selectedItems: string[] = [];
+    $('.select2-selection__choice').each(function () {
+      const text = $(this).attr('title') || $(this).text().trim();
+      if (text) {
+        selectedItems.push(text);
+      }
+    });
+    return selectedItems;
+  }
+
+  // Check tags
+  checkTags() {
+    console.log('Tags via jQuery:', this.getSelectedItems());
+    console.log('Tags via TS pur:', this.getSelectedItemsPureWithIds());
+  }
+
+  // Get selected category from Select2
+  getSelectedCategoryFromSelect2(): { id: number | string, name: string } | null {
+    const rendered = document.querySelector('.select2-selection__rendered[id^="select2-category"]');
+    if (rendered) {
+      const name = rendered.getAttribute('title') || rendered.textContent?.trim() || '';
+      const cat = this.categories.find((c: any) => c.name === name);
+      if (cat) {
+        return { id: cat.id, name: cat.name };
+      } else if (name) {
+        return { id: name, name };
+      }
+    }
+    return null;
+  }
+
+  // Check selected category
+  checkCategory() {
+    console.log('Catégorie via Select2:', this.getSelectedCategoryFromSelect2());
   }
 
   // Handle checkbox changes for article types
@@ -194,56 +260,113 @@ checkTags() {
     console.log('Selected tag IDs:', this.articleTags);
   }
 
-  // Get selected category from Select2
-getSelectedCategoryFromSelect2(): { id: number | string, name: string } | null {
-  const rendered = document.querySelector('.select2-selection__rendered[id^="select2-category"]');
-  if (rendered) {
-    const name = rendered.getAttribute('title') || rendered.textContent?.trim() || '';
-    // Find the category object by name
-    const cat = this.categories.find((c: any) => c.name === name);
-    if (cat) {
-      return { id: cat.id, name: cat.name };
-    } else if (name) {
-      return { id: name, name };
-    }
-  }
-  return null;
-}
-
-// Check selected category
-checkCategory() {
-  console.log('Catégorie via Select2:', this.getSelectedCategoryFromSelect2());
-}
-
   // Submit article form
-  addArticle() {
-    const selectedTypes = this.articleTypes.filter(t => t.model).map(t => t.type);
-    if (selectedTypes.length === this.articleTypes.length) {
-      selectedTypes.push('update', 'tutorial');
-    }
-
+  async addArticle() {
+    // Check and get tags and category from UI
     this.checkTags();
     this.checkCategory();
 
-    const selectedTags = this.articleTags;
-    // Utilise la catégorie récupérée via Select2
+    const selectedTags = this.getSelectedItemsPureWithIds();
     const selectedCategoryObj = this.getSelectedCategoryFromSelect2();
-    const selectedCategory = selectedCategoryObj ? selectedCategoryObj.id : (this.selectedCategory && this.selectedCategory.id ? this.selectedCategory.id : this.selectedCategory);
+    const selectedCategory = selectedCategoryObj
+      ? selectedCategoryObj.id
+      : (this.selectedCategory && this.selectedCategory.id
+        ? this.selectedCategory.id
+        : this.selectedCategory);
 
-    const allMediaFiles = this.selectedMedia.length > 0 ? this.selectedMedia : [];
+    // Validation: all fields required, at least one image
+    if (!this.articleTitle.trim()) {
+      this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Le titre est obligatoire.' });
+      return;
+    }
+    if (!this.text.trim()) {
+      this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'La description est obligatoire.' });
+      return;
+    }
+    if (!selectedCategory) {
+      this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'La catégorie est obligatoire.' });
+      return;
+    }
+    if (!selectedTags || selectedTags.length === 0) {
+      this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Au moins un tag est obligatoire.' });
+      return;
+    }
+    if (!this.selectedMedia || this.selectedMedia.length === 0) {
+      this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Au moins une image/vidéo est obligatoire.' });
+      return;
+    }
+    if (!this.articleTypes.some(t => t.model)) {
+      this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Au moins un type de produit est obligatoire.' });
+      return;
+    }
 
-    const articlePayload = {
-      title: this.articleTitle,
-      content: this.text,
-      types: selectedTypes,
-      tags: selectedTags,
-      category: selectedCategory,
-      medias: allMediaFiles
-    };
+    try {
+      // 1. Create article (get article ID)
+      const articlePayload = {
+        title: this.articleTitle,
+        content: this.text,
+        isfree: this.accessType == 'gratuit' ? 1 : 0,
+        type: this.articleTypes.filter(t => t.model).map(t => t.type).join(','),
+      };
 
-    console.log('Article à créer :', articlePayload);
-    console.log('Tags sélectionnés :', selectedTags);
-    console.log('Catégorie sélectionnée :', selectedCategory);
-    console.log('Fichiers média sélectionnés :', allMediaFiles);
+      const articleResp = await this.articleService.create(articlePayload).toPromise();
+      const articleId = articleResp && articleResp.id ? articleResp.id : null;
+      if (!articleId) {
+        this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Erreur lors de la création de l\'article.' });
+        throw new Error('Article ID not returned from API');
+      }
+
+      // 2. Upload medias using MediaService.upload and link to article
+      let mediaIds: number[] = [];
+      const uploadedMediaResults = await Promise.all(
+        this.selectedMedia.map(file => {
+          const formData = new FormData();
+          formData.append('file', file);
+          return this.mediaService.upload(formData).toPromise();
+        })
+      );
+      mediaIds = uploadedMediaResults
+        .map(res => res && res.id)
+        .filter((id): id is number => typeof id === 'number');
+      if (mediaIds.length === 0) {
+        this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Erreur lors du téléversement des médias.' });
+        throw new Error('Aucun média téléversé');
+      }
+      await Promise.all(
+        mediaIds.map(mediaId =>
+          this.mediaArticleService.create({ media_id: mediaId, article_id: articleId }).toPromise()
+        )
+      );
+
+      // 3. Link article to category
+      await this.articleCategoryService.create({
+        article_id: articleId,
+        category_id: selectedCategory
+      }).toPromise();
+
+      // 4. Link article to tags
+      await Promise.all(
+        selectedTags.map(tag =>
+          this.articleTagService.create({
+            article_id: articleId,
+            tag_id: Number(tag.id)
+          }).toPromise()
+        )
+      );
+
+      // Succès final unique
+      this.messageService.add({ severity: 'success', summary: 'Succès', detail: 'Article ajouté avec succès !' });
+      setTimeout(() => window.location.href = '/articles', 1200);
+    } catch (error) {
+      this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Erreur lors de l\'ajout de l\'article.' });
+      console.error('Erreur lors du workflow de création d\'article:', error);
+    }
   }
+
+  annulerArticle() {
+    // Redirection vers la liste des articles
+    window.location.href = '/articles';
+  }
+
+
 }

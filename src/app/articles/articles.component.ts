@@ -8,6 +8,22 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { MessageService } from 'primeng/api';
 
+export interface Article {
+  id: number;
+  title: string;
+  categories?: { name?: string; type?: string }[];
+  type?: string;
+  isfree?: number | boolean;
+  status?: string;
+  tags?: any[];
+  views_count?: number;
+  likes_count?: number;
+   media?: any[];
+  author_id?: string | number | null;
+  active?: boolean; // Ajouté pour correspondre à l'utilisation dans le code
+  // ...autres propriétés selon vos besoins...
+}
+
 @Component({
   selector: 'app-articles',
   templateUrl: './articles.component.html',
@@ -25,7 +41,7 @@ export class ArticlesComponent implements OnInit {
   content: string = '';
   loading: boolean = false;
   imagePreview: string | ArrayBuffer | null = null;
-  articles: any[] = [];
+  articles: Article[] = [];
   pagedArticles: any[] = [];
   filteredArticles: any[] = [];
 
@@ -70,10 +86,12 @@ export class ArticlesComponent implements OnInit {
   }
 
   fetchArticles() {
-    this.articleService.getAll().subscribe({
+    this.articleService.getAllWithRelated().subscribe({
       next: (arts) => {
         this.articles = arts;
+        console.log('Fetched articles:', this.articles);
         this.applyFilters();
+        this.updatePagination();
       },
       error: () => {
         this.messageService.add({severity:'error', summary:'Erreur', detail:'Erreur lors du chargement des articles'});
@@ -94,8 +112,16 @@ export class ArticlesComponent implements OnInit {
     this.updatePagination();
   }
 
+  updatePagination() {
+    const total = this.articles?.length || 0;
+    this.totalPages = Math.ceil(total / this.pageSize) || 1;
+    this.totalPagesArray = Array(this.totalPages).fill(0).map((x, i) => i + 1);
+    const start = (this.currentPage - 1) * this.pageSize;
+    const end = start + this.pageSize;
+    this.pagedArticles = this.articles.slice(start, end);
+  }
+
   onPageSizeChange(event: any) {
-    this.pageSize = +event.target.value || this.pageSize;
     this.currentPage = 1;
     this.updatePagination();
   }
@@ -104,15 +130,6 @@ export class ArticlesComponent implements OnInit {
     if (page < 1 || page > this.totalPages) return;
     this.currentPage = page;
     this.updatePagination();
-  }
-
-  updatePagination() {
-    const totalItems = this.filteredArticles.length;
-    this.totalPages = Math.max(1, Math.ceil(totalItems / this.pageSize));
-    this.totalPagesArray = Array(this.totalPages).fill(0).map((_, i) => i + 1);
-    const start = (this.currentPage - 1) * this.pageSize;
-    const end = start + this.pageSize;
-    this.pagedArticles = this.filteredArticles.slice(start, end);
   }
 
   onImageFileChange(event: any) {
@@ -350,4 +367,3 @@ export class ArticlesComponent implements OnInit {
     doc.save('articles.pdf');
   }
 }
- 
