@@ -45,6 +45,11 @@ export class ArticlesComponent implements OnInit {
   pagedArticles: any[] = [];
   filteredArticles: any[] = [];
 
+  allCategories: string[] = [];
+  allTags: string[] = [];
+  selectedCategoryFilter: string = '';
+  selectedTagFilter: string = '';
+
   pageSize: number = 10;
   currentPage: number = 1;
   totalPages: number = 1;
@@ -90,6 +95,7 @@ export class ArticlesComponent implements OnInit {
       next: (arts) => {
         this.articles = arts;
         console.log('Fetched articles:', this.articles);
+        this.extractCategoriesAndTags();
         this.applyFilters();
         this.updatePagination();
       },
@@ -99,26 +105,54 @@ export class ArticlesComponent implements OnInit {
     });
   }
 
+  extractCategoriesAndTags() {
+    const categoriesSet = new Set<string>();
+    const tagsSet = new Set<string>();
+    for (const article of this.articles) {
+      if (article.categories && article.categories.length > 0) {
+        for (const cat of article.categories) {
+          if (cat.name) categoriesSet.add(cat.name);
+        }
+      }
+      if (article.tags && article.tags.length > 0) {
+        for (const tag of article.tags) {
+          if (tag.name) tagsSet.add(tag.name);
+        }
+      }
+    }
+    this.allCategories = Array.from(categoriesSet);
+    this.allTags = Array.from(tagsSet);
+  }
+
   applyFilters() {
-    this.filteredArticles = this.articles.filter(art => {
-      const matchesSearch = !this._searchTerm || art.title?.toLowerCase().includes(this._searchTerm.toLowerCase());
-      const matchesStatus =
-        this._statusFilter === 'all' ||
-        (this._statusFilter === 'active' && art.active) ||
-        (this._statusFilter === 'inactive' && !art.active);
-      return matchesSearch && matchesStatus;
-    });
-    this.currentPage = 1;
+    let filtered = this.articles;
+    if (this.selectedCategoryFilter) {
+      filtered = filtered.filter(a =>
+        a.categories && a.categories.some((c: any) => c.name === this.selectedCategoryFilter)
+      );
+    }
+    if (this.selectedTagFilter) {
+      filtered = filtered.filter(a =>
+        a.tags && a.tags.some((t: any) => t.name === this.selectedTagFilter)
+      );
+    }
+    if (this.searchTerm && this.searchTerm.trim().length > 0) {
+      const term = this.searchTerm.trim().toLowerCase();
+      filtered = filtered.filter(a =>
+        (a.title || '').toLowerCase().includes(term)
+      );
+    }
+    this.filteredArticles = filtered;
     this.updatePagination();
   }
 
   updatePagination() {
-    const total = this.articles?.length || 0;
+    const total = this.filteredArticles?.length || 0;
     this.totalPages = Math.ceil(total / this.pageSize) || 1;
     this.totalPagesArray = Array(this.totalPages).fill(0).map((x, i) => i + 1);
     const start = (this.currentPage - 1) * this.pageSize;
     const end = start + this.pageSize;
-    this.pagedArticles = this.articles.slice(start, end);
+    this.pagedArticles = this.filteredArticles.slice(start, end);
   }
 
   onPageSizeChange(event: any) {
@@ -333,14 +367,23 @@ export class ArticlesComponent implements OnInit {
     });
   }
 
+  refreshArticles() {
+    // Recharge la liste des articles depuis l'API ou le service
+    this.fetchArticles();
+  }
+
   exportExcel() {
-    const data = this.filteredArticles.map(art => ({
-      'Titre': art.title,
-      'Slug': art.slug,
-      'Type': art.type === 'Free' ? 'Gratuit' : 'Payant',
-      'Auteur': art.author_id,
-      'Créé le': art.created_at,
-      'Statut': art.active ? 'Active' : 'Inactive'
+    const data = this.filteredArticles.map(article => ({
+      'Titre': article.title,
+      'Catégorie': article.categories && article.categories.length > 0 ? (article.categories[0].name || article.categories[0].type) : article.type,
+      'Est gratuit': article.isfree ? 'Oui' : 'Non',
+      'Statut': article.status === 'published' ? 'Publié' : (article.status === 'pending' ? 'En attente' : article.status),
+      'Tags': article.tags && article.tags.length > 0 ? article.tags.map((t: { name: any; }) => t.name).join(', ') : '-',
+      'Nombre de vues': article.views_count ?? 0,
+      'Nombre de likes': article.likes_count ?? 0,
+      'Créé par': article.author ? `${article.author.first_name} ${article.author.last_name}` : 'N/A',
+      'Contenu': article.content ?? '',
+      'Image': article.media && article.media.length > 0 ? article.media[0].path : ''
     }));
     const worksheet = XLSX.utils.json_to_sheet(data);
     const workbook = XLSX.utils.book_new();
@@ -350,14 +393,16 @@ export class ArticlesComponent implements OnInit {
 
   exportPdf() {
     const doc = new jsPDF();
-    const columns = ['Titre', 'Slug', 'Type', 'Auteur', 'Créé le', 'Statut'];
-    const rows = this.filteredArticles.map(art => [
-      art.title,
-      art.slug,
-      art.type === 'Free' ? 'Gratuit' : 'Payant',
-      art.author_id,
-      art.created_at,
-      art.active ? 'Active' : 'Inactive'
+    const columns = ['Titre', 'Catégorie', 'Est gratuit', 'Statut', 'Tags', 'Nombre de vues', 'Nombre de likes', 'Créé par'];
+    const rows = this.filteredArticles.map(article => [
+      article.title,
+      article.categories && article.categories.length > 0 ? (article.categories[0].name || article.categories[0].type) : article.type,
+      article.isfree ? 'Oui' : 'Non',
+      article.status === 'published' ? 'Publié' : (article.status === 'pending' ? 'En attente' : article.status),
+      article.tags && article.tags.length > 0 ? article.tags.map((t: { name: any; }) => t.name).join(', ') : '-',
+      article.views_count ?? 0,
+      article.likes_count ?? 0,
+      article.author ? `${article.author.first_name} ${article.author.last_name}` : 'N/A'
     ]);
     autoTable(doc, {
       head: [columns],

@@ -91,12 +91,21 @@ export class ArticleService {
   }
 
 
-
-  update(id: number, article: { title: string; content?: string; type: string; author_id?: number; isfree?: boolean; validation_status?: string; status?: string; views_count?: number; likes_count?: number }): Observable<Article> {
-    return this.http.put<Article>(`${this.apiUrl}/${id}`, article, { headers: this.getHeaders() }).pipe(
+    update(id: number,article: { title: string; content?: string; type: string; author_id?: number; isfree?: number }): Observable<Article> {
+    // Get author_id from localStorage if not provided
+    let userId = localStorage.getItem('user_id');
+    let author_id = article.author_id;
+    if (!author_id && userId) {
+      author_id = Number(userId);
+    }
+    const payload = { ...article, author_id };
+    return this.http.post<Article>(this.apiUrl, payload, { headers: this.getHeaders() }).pipe(
       catchError(this.handleError)
     );
   }
+
+
+
 
   delete(id: number): Observable<{ message: string }> {
     return this.http.delete<{ message: string }>(`${this.apiUrl}/${id}`, { headers: this.getHeaders() }).pipe(
@@ -104,6 +113,10 @@ export class ArticleService {
     );
   }
 
+  /**
+   * Get article with related tags, categories, and media.
+   * Matches backend route: GET /articles/:id/related
+   */
   getRelated(id: number): Observable<ArticleRelated> {
     return this.http.get<ArticleRelated>(`${this.apiUrl}/${id}/related`, { headers: this.getHeaders() }).pipe(
       catchError(this.handleError)

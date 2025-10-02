@@ -103,3 +103,23 @@
     color: #ffffff;
 background-color: #37773a56 !important;
 }
+
+
+::ng-deep .badge.tag-custom {
+	background-color: #092C4C !important;
+	color: #fff !important;
+	margin-right: 6px;
+}
+::ng-deep .author-avatar-custom {
+    background: #37773a !important;
+    color: #fff !important;
+    font-weight: bold;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    /* border-radius: 50%; */
+    font-size: 1rem;
+    text-transform: uppercase;
+}

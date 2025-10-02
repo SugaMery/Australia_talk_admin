@@ -24,7 +24,8 @@ import { ArticlesComponent } from './articles/articles.component';
 import { AddArticleComponent } from './add-article/add-article.component';
 import { EditorModule } from 'primeng/editor';
 import { MultiSelectModule } from 'primeng/multiselect';
-
+import { EditArticleComponent } from './edit-article/edit-article.component';
+import { DropdownModule } from 'primeng/dropdown';
 @NgModule({
   declarations: [
     AppComponent,
@@ -41,7 +42,8 @@ import { MultiSelectModule } from 'primeng/multiselect';
     ArtisansComponent,
     TagsComponent,
     ArticlesComponent,
-    AddArticleComponent
+    AddArticleComponent,
+    EditArticleComponent
   ],
   imports: [
     BrowserModule,
@@ -50,7 +52,8 @@ import { MultiSelectModule } from 'primeng/multiselect';
     FormsModule,
     ToastModule,
     EditorModule,
-    MultiSelectModule
+    MultiSelectModule,
+    DropdownModule
   ],
   providers: [
     provideClientHydration(),

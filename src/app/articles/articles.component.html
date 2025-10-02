@@ -7,135 +7,78 @@
 					<div class="page-header">
 						<div class="add-item d-flex">
 							<div class="page-title">
-								<h4 class="fw-bold">Product List</h4>
-								<h6>Manage your products</h6>
+								<h4 class="fw-bold">Liste des articles</h4>
+								<h6>Gérez vos articles</h6>
 							</div>
 						</div>
 						<ul class="table-top-head">
 							<li>
-								<a data-bs-toggle="tooltip" data-bs-placement="top" title="Pdf"><img src="assets/img/icons/pdf.svg" alt="img"></a>
+								<a data-bs-toggle="tooltip" data-bs-placement="top" title="PDF" (click)="exportPdf()"><img src="assets/img/icons/pdf.svg" alt="img"></a>
 							</li>
 							<li>
-								<a data-bs-toggle="tooltip" data-bs-placement="top" title="Excel"><img src="assets/img/icons/excel.svg" alt="img"></a>
+								<a data-bs-toggle="tooltip" data-bs-placement="top" title="Excel" (click)="exportExcel()"><img src="assets/img/icons/excel.svg" alt="img"></a>
 							</li>
 							<li>
-								<a data-bs-toggle="tooltip" data-bs-placement="top" title="Refresh"><i class="ti ti-refresh"></i></a>
+								<a data-bs-toggle="tooltip" data-bs-placement="top" title="Rafraîchir" (click)="refreshArticles()"><i class="ti ti-refresh"></i></a>
 							</li>
 							<li>
-								<a data-bs-toggle="tooltip" data-bs-placement="top" title="Collapse" id="collapse-header"><i class="ti ti-chevron-up"></i></a>
+								<a data-bs-toggle="tooltip" data-bs-placement="top" title="Réduire" id="collapse-header"><i class="ti ti-chevron-up"></i></a>
 							</li>
 						</ul>
 						<div class="page-btn">
-							<a href="add-product.html" class="btn btn-primary"><i class="ti ti-circle-plus me-1"></i>Add Product</a>
+							<a href="create-article" class="btn btn-primary"><i class="ti ti-circle-plus me-1"></i>Ajouter un article</a>
 						</div>	
-						<div class="page-btn import">
-							<a href="#" class="btn btn-secondary color" data-bs-toggle="modal" data-bs-target="#view-notes"><i
-								data-feather="download" class="me-1"></i>Import Product</a>
-						</div>
+
 					</div>
 					
-					<!-- /product list -->
+					<!-- /article list -->
 					<div class="card">
 						<div class="card-header d-flex align-items-center justify-content-between flex-wrap row-gap-3">
 							<div class="search-set">
           <div class="search-input">
-            <input type="text" class="form-control" style="    padding: 0.45rem 2rem;" placeholder="Rechercher..." [(ngModel)]="searchTerm">
+            <input type="text" class="form-control" style="padding: 0.45rem 2rem;" placeholder="Rechercher par titre..." [(ngModel)]="searchTerm" (input)="applyFilters()">
             <span class="btn-searchset"><i class="ti ti-search fs-14 feather-search"></i></span>
           </div>
 							</div>
 							<div class="d-flex table-dropdown my-xl-auto right-content align-items-center flex-wrap row-gap-3">
-								<div class="dropdown me-2">
-									<a href="javascript:void(0);" class="dropdown-toggle btn btn-white btn-md d-inline-flex align-items-center" data-bs-toggle="dropdown">
-										Category
-									</a>
-									<ul class="dropdown-menu  dropdown-menu-end p-3">
-										<li>
-											<a href="javascript:void(0);" class="dropdown-item rounded-1">Computers</a>
-										</li>
-										<li>
-											<a href="javascript:void(0);" class="dropdown-item rounded-1">Electronics</a>
-										</li>
-										<li>
-											<a href="javascript:void(0);" class="dropdown-item rounded-1">Shoe</a>
-										</li>
-										<li>
-											<a href="javascript:void(0);" class="dropdown-item rounded-1">Electronics</a>
-										</li>
-									</ul>
-								</div>
-								<div class="dropdown">
-									<a href="javascript:void(0);" class="dropdown-toggle btn btn-white btn-md d-inline-flex align-items-center" data-bs-toggle="dropdown">
-										Brand
-									</a>
-									<ul class="dropdown-menu  dropdown-menu-end p-3">
-										<li>
-											<a href="javascript:void(0);" class="dropdown-item rounded-1">Lenovo</a>
-										</li>
-										<li>
-											<a href="javascript:void(0);" class="dropdown-item rounded-1">Beats</a>
-										</li>
-										<li>
-											<a href="javascript:void(0);" class="dropdown-item rounded-1">Nike</a>
-										</li>
-										<li>
-											<a href="javascript:void(0);" class="dropdown-item rounded-1">Apple</a>
-										</li>
-									</ul>
-								</div>
-							</div>
+    <!-- Filtre Catégorie -->
+    <div class="dropdown me-2">
+        <a href="javascript:void(0);" class="dropdown-toggle btn btn-white btn-md d-inline-flex align-items-center" data-bs-toggle="dropdown">
+            Catégorie
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end p-3">
+            <li>
+                <a href="javascript:void(0);" class="dropdown-item rounded-1"
+                   (click)="selectedCategoryFilter = ''; applyFilters()">Toutes les catégories</a>
+            </li>
+            <li *ngFor="let cat of allCategories">
+                <a href="javascript:void(0);" class="dropdown-item rounded-1"
+                   [class.active]="selectedCategoryFilter === cat"
+                   (click)="selectedCategoryFilter = cat; applyFilters()">{{cat}}</a>
+            </li>
+        </ul>
+    </div>
+    <!-- Filtre Tag -->
+    <div class="dropdown">
+        <a href="javascript:void(0);" class="dropdown-toggle btn btn-white btn-md d-inline-flex align-items-center" data-bs-toggle="dropdown">
+            Tag
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end p-3">
+            <li>
+                <a href="javascript:void(0);" class="dropdown-item rounded-1"
+                   (click)="selectedTagFilter = ''; applyFilters()">Tous les tags</a>
+            </li>
+            <li *ngFor="let tag of allTags">
+                <a href="javascript:void(0);" class="dropdown-item rounded-1"
+                   [class.active]="selectedTagFilter === tag"
+                   (click)="selectedTagFilter = tag; applyFilters()">{{tag}}</a>
+            </li>
+        </ul>
+    </div>
+</div>
 						</div>
 						<div class="card-body p-0">
-							<!-- Pagination length selector -->
-							<div class="dataTables_length mb-2" id="artisanTable_length">
-    <label>
-      Lignes par page
-      <select name="artisanTable_length"
-              aria-controls="artisanTable"
-              class="form-select form-select-sm d-inline-block w-auto ms-2 me-2"
-              [(ngModel)]="pageSize"
-              (change)="onPageSizeChange($event)">
-        <option *ngFor="let size of [10,25,50,100]" [value]="size">{{size}}</option>
-      </select>
-      entrées
-    </label>
-  </div>
-  <!-- Pagination controls -->
-  <div class="dataTables_paginate paging_simple_numbers " id="artisanTable_paginate">
-    <ul class="pagination mb-0" style="margin: 2px 0 !important; white-space: nowrap !important; justify-content: flex-end !important;">
-      <li class="paginate_button page-item previous"
-          [class.disabled]="currentPage === 1"
-          style="border: none; color: #646B72 !important; background-color: transparent !important; width: 24px; height: 24px; border: 1px solid #E6EAED; border-radius: 50px; display: inline-flex; align-items: center; justify-content: center; margin: 0 5px;"
-          id="artisanTable_previous">
-        <a class="page-link"
-           href="javascript:void(0);"
-           (click)="goToPage(currentPage - 1)"
-           [attr.aria-disabled]="currentPage === 1"
-           tabindex="-1">
-          <i class="fa fa-angle-left"></i>
-        </a>
-      </li>
-      <li *ngFor="let page of totalPagesArray; let i = index"
-          class="paginate_button page-item"
-          [class.active]="currentPage === (i+1)">
-        <a class="page-link"
-           href="javascript:void(0);"
-           (click)="goToPage(i+1)">
-          {{i+1}}
-        </a>
-      </li>
-      <li class="paginate_button page-item next"
-          [class.disabled]="currentPage === totalPages"
-          style="border: none; color: #646B72 !important; background-color: transparent !important; width: 24px; height: 24px; border: 1px solid #E6EAED; border-radius: 50px; display: inline-flex; align-items: center; justify-content: center; margin: 0 5px;"
-          id="artisanTable_next">
-        <a class="page-link"
-           href="javascript:void(0);"
-           (click)="goToPage(currentPage + 1)"
-           [attr.aria-disabled]="currentPage === totalPages">
-          <i class="fa fa-angle-right"></i>
-        </a>
-      </li>
-    </ul>
-  </div>
+
 							<div class="table-responsive">
 								<table class="table datatable">
 									<thead class="thead-light">
@@ -212,28 +155,37 @@
 			</span>
 		</td>
 		<td class="tags-td">
-<!--       <ng-container *ngIf="article.tags && article.tags.length > 0; else noTags">
-        <ng-container *ngFor="let tag of article.tags | slice:0:1">
-		  <span class="badge tag-custom" style="margin-right: 6px;">{{ tag?.name }}</span>
-        </ng-container>
-        <span *ngIf="article.tags.length > 1" class="badge tag-custom" style="margin-right: 6px;">
-          +{{ article.tags.length - 1 }}
-        </span>
-      </ng-container> -->
-			<ng-template #noTags>
-				<span class="text-muted">-</span>
-			</ng-template>
-		</td>
+  <ng-container *ngIf="article.tags && article.tags.length > 0; else noTags">
+    <span class="badge tag-custom" style="margin-right: 6px;">{{ article.tags[0].name }}</span>
+    <span *ngIf="article.tags.length > 1" class="badge tag-custom" style="margin-right: 6px;">
+      +{{ article.tags.length - 1 }}
+    </span>
+  </ng-container>
+  <ng-template #noTags>
+    <span class="text-muted">-</span>
+  </ng-template>
+</td>
 	<td class="text-center">{{ (article.views_count ?? 0) < 10 ? '0' + (article.views_count ?? 0) : (article.views_count ?? 0) }}</td>
 	<td class="text-center">{{ (article.likes_count ?? 0) < 10 ? '0' + (article.likes_count ?? 0) : (article.likes_count ?? 0) }}</td>
 		<td>
-			<span *ngIf="article.author_id; else noAuthor">{{ article.author_id }}</span>
-			<ng-template #noAuthor>N/A</ng-template>
-		</td>
+  <div class="d-flex align-items-center">
+    <span class="avatar avatar-sm me-2 author-avatar-custom" *ngIf="article.author && article.author.first_name && article.author.last_name">
+      {{ article.author.first_name.charAt(0) }}{{ article.author.last_name.charAt(0) }}
+    </span>
+    <a href="javascript:void(0);">
+      <span *ngIf="article.author && article.author.first_name && article.author.last_name">
+        {{ article.author.first_name }} {{ article.author.last_name }}
+      </span>
+      <span *ngIf="!article.author || !article.author.first_name || !article.author.last_name">
+		Auteur inconnu
+      </span>
+    </a>
+  </div>
+</td>
 		<td class="action-table-data">
 			<div class="edit-delete-action">
 
-				<a class="me-2 p-2" href="edit-article.html" >
+				<a class="me-2 p-2" [href]="'/edit-article/' + article.id + '/' + article.title">
 					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-edit"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
 				</a>
 				<a data-bs-toggle="modal" data-bs-target="#delete-modal" class="p-2" href="javascript:void(0);">
@@ -245,9 +197,61 @@
 									</tbody>
 								</table>
 							</div>
+
+														<!-- Pagination length selector -->
+							<div class="dataTables_length mb-2" id="artisanTable_length">
+    <label>
+      Lignes par page
+      <select name="artisanTable_length"
+              aria-controls="artisanTable"
+              class="form-select form-select-sm d-inline-block w-auto ms-2 me-2"
+              [(ngModel)]="pageSize"
+              (change)="onPageSizeChange($event)">
+        <option *ngFor="let size of [10,25,50,100]" [value]="size">{{size}}</option>
+      </select>
+      entrées
+    </label>
+  </div>
+  <!-- Pagination controls -->
+  <div class="dataTables_paginate paging_simple_numbers " id="artisanTable_paginate">
+    <ul class="pagination mb-0" style="margin: 2px 0 !important; white-space: nowrap !important; justify-content: flex-end !important;">
+      <li class="paginate_button page-item previous"
+          [class.disabled]="currentPage === 1"
+          style="border: none; color: #646B72 !important; background-color: transparent !important; width: 24px; height: 24px; border: 1px solid #E6EAED; border-radius: 50px; display: inline-flex; align-items: center; justify-content: center; margin: 0 5px;"
+          id="artisanTable_previous">
+        <a class="page-link"
+           href="javascript:void(0);"
+           (click)="goToPage(currentPage - 1)"
+           [attr.aria-disabled]="currentPage === 1"
+           tabindex="-1">
+          <i class="fa fa-angle-left"></i>
+        </a>
+      </li>
+      <li *ngFor="let page of totalPagesArray; let i = index"
+          class="paginate_button page-item"
+          [class.active]="currentPage === (i+1)">
+        <a class="page-link"
+           href="javascript:void(0);"
+           (click)="goToPage(i+1)">
+          {{i+1}}
+        </a>
+      </li>
+      <li class="paginate_button page-item next"
+          [class.disabled]="currentPage === totalPages"
+          style="border: none; color: #646B72 !important; background-color: transparent !important; width: 24px; height: 24px; border: 1px solid #E6EAED; border-radius: 50px; display: inline-flex; align-items: center; justify-content: center; margin: 0 5px;"
+          id="artisanTable_next">
+        <a class="page-link"
+           href="javascript:void(0);"
+           (click)="goToPage(currentPage + 1)"
+           [attr.aria-disabled]="currentPage === totalPages">
+          <i class="fa fa-angle-right"></i>
+        </a>
+      </li>
+    </ul>
+  </div>
 						</div>
 					</div>
-					<!-- /product list -->
+					<!-- /article list -->
 				</div>
   <app-footer></app-footer>
 </div>
@@ -261,11 +265,11 @@
 					<div class="page-wrapper-new p-0">
 						<div class="content p-5 px-3 text-center">
 								<span class="rounded-circle d-inline-flex p-2 bg-danger-transparent mb-2"><i class="ti ti-trash fs-24 text-danger"></i></span>
-								<h4 class="fs-20 text-gray-9 fw-bold mb-2 mt-1">Delete Product</h4>
-								<p class="text-gray-6 mb-0 fs-16">Are you sure you want to delete product?</p>
+								<h4 class="fs-20 text-gray-9 fw-bold mb-2 mt-1">Supprimer l'article</h4>
+								<p class="text-gray-6 mb-0 fs-16">Êtes-vous sûr de vouloir supprimer cet article ?</p>
 								<div class="modal-footer-btn mt-3 d-flex justify-content-center">
-									<button type="button" class="btn me-2 btn-secondary fs-13 fw-medium p-2 px-3 shadow-none" data-bs-dismiss="modal">Cancel</button>
-									<button type="submit" class="btn btn-primary fs-13 fw-medium p-2 px-3">Yes Delete</button>
+									<button type="button" class="btn me-2 btn-secondary fs-13 fw-medium p-2 px-3 shadow-none" data-bs-dismiss="modal">Annuler</button>
+									<button type="submit" class="btn btn-primary fs-13 fw-medium p-2 px-3">Oui, supprimer</button>
 								</div>						
 						</div>
 					</div>
@@ -273,11 +277,10 @@
 			</div>
 		</div>
 <style>
-.badge.tag-custom {
-	background-color: #092C4C !important;
-	color: #fff !important;
-	margin-right: 6px;
-}
+
+</style>
+<style>
+
 </style>
 
 

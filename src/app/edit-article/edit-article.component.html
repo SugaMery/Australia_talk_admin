@@ -1,0 +1,240 @@
+<app-header></app-header>
+<app-sidebar></app-sidebar>
+<p-toast></p-toast>
+
+<div class="page-wrapper">
+  <div class="content">
+    <div class="page-header">
+      <div class="add-item d-flex">
+        <div class="page-title">
+          <h4 class="fw-bold">Modifier un produit</h4>
+          <h6>Mettre à jour le produit existant</h6>
+        </div>
+      </div>
+      <ul class="table-top-head">
+        <li>
+          <a data-bs-toggle="tooltip" data-bs-placement="top" title="Réduire" id="collapse-header"><i class="ti ti-chevron-up"></i></a>
+        </li>
+      </ul>
+      <div class="page-btn mt-0">
+        <a href="articles" class="btn btn-secondary"><i data-feather="arrow-left" class="me-2"></i>Retour à la liste</a>
+      </div>
+    </div>
+    <form action="update-product.html" class="add-product-form">
+      <div class="add-product">
+        <div class="accordions-items-seperate" id="accordionSpacingExample">
+          <!-- Article Info Section -->
+          <div class="accordion-item border mb-4">
+            <h2 class="accordion-header" id="headingArticleInfo">
+              <div class="accordion-button collapsed bg-white" data-bs-toggle="collapse" data-bs-target="#ArticleInfo" aria-expanded="true" aria-controls="ArticleInfo">
+                <div class="d-flex align-items-center justify-content-between flex-fill">
+                  <h5 class="d-flex align-items-center">
+                    <i data-feather="info" class="text-primary me-2"></i>
+                    <span>Informations sur l'article</span>
+                  </h5>
+                </div>
+              </div>
+            </h2>
+            <div id="ArticleInfo" class="accordion-collapse collapse show" aria-labelledby="headingArticleInfo">
+              <div class="accordion-body border-top">
+                <div class="row">
+                  <div class="col-sm-6 col-12">
+                    <div class="mb-3 list position-relative">
+                      <label class="form-label">Titre<span class="text-danger ms-1">*</span></label>
+                      <input type="text" class="form-control list" [(ngModel)]="articleTitle" name="articleTitle">
+                      <button type="button" class="btn btn-primaryadd" (click)="generateTitleFromContent()" [disabled]="!text || !text.trim()">Générer</button>
+                    </div>
+                  </div>
+                  <div class="col-sm-6 col-12">
+                    <div class="mb-3">
+                      <div class="add-newplus">
+                        <label class="form-label">Catégorie<span class="text-danger ms-1">*</span></label>
+                        <a href="categories"><i data-feather="plus-circle" class="plus-down-add"></i><span>Ajouter une nouvelle</span></a>
+                      </div>
+                    <p-dropdown 
+                        [options]="categories" 
+                        [(ngModel)]="selectedCategory"
+                        [ngModelOptions]="{standalone: true}"
+                        optionLabel="name" 
+                        optionValue="id"
+                        [showClear]="true"
+                        placeholder="Veuillez sélectionner une catégorie"
+                        name="category"
+                        appendTo="body"
+                        [virtualScroll]="true"
+                        [filter]="true"
+                        [dropdownIcon]="'pi pi-chevron-down'"
+                        [autoDisplayFirst]="false"
+                    >
+              
+               
+                    </p-dropdown>
+                    <ng-template #categoryTemplate let-category>
+                      <span *ngIf="category">{{ category.name }}</span>
+                    </ng-template>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-lg-12">
+				<div class="summer-description-box">
+					<label class="form-label">Description<span class="text-danger ms-1">*</span></label>
+					<textarea class="form-control editor pages-editor"
+										[(ngModel)]="text"
+										name="articleDescription"
+										rows="6"
+										maxlength="2000"></textarea>
+					<p class="fs-14 mt-1">Maximum 200 mots</p>
+				</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Product Details Section -->
+          <div class="accordion-item border mb-4">
+            <h2 class="accordion-header" id="headingSpacingTwo">
+              <div class="accordion-button collapsed bg-white" data-bs-toggle="collapse" data-bs-target="#SpacingTwo" aria-expanded="true" aria-controls="SpacingTwo">
+                <div class="d-flex align-items-center justify-content-between flex-fill">
+                  <h5 class="d-flex align-items-center">
+                    <i data-feather="life-buoy" class="text-primary me-2"></i>
+                    <span>Détails du produit</span>
+                  </h5>
+                </div>
+              </div>
+            </h2>
+            <div id="SpacingTwo" class="accordion-collapse collapse show" aria-labelledby="headingSpacingTwo">
+              <div class="accordion-body border-top">
+                <div class="p-3 bg-light rounded d-flex align-items-center border mb-3">
+                  <div class="d-flex align-items-center">
+                    <div class="form-check form-check-inline" *ngFor="let type of articleTypes; trackBy: trackById">
+                      <input class="form-check-input" type="checkbox" 
+                        [id]="'type-' + type.id" 
+                        [(ngModel)]="type.model" 
+                        [name]="'type-' + type.id" 
+                        (change)="onCheckboxChange(type)">
+                      <label class="form-check-label" [for]="'type-' + type.id">{{ type.type }}</label>
+                    </div>
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Accès au produit<span class="text-danger ms-1">*</span></label>
+				<div class="d-flex align-items-center">
+					<div class="form-check me-4">
+						<input class="form-check-input" type="radio" name="accessType" id="gratuitAccess" [(ngModel)]="accessType" value="gratuit" [checked]="accessType === 'gratuit' || !accessType">
+						<label class="form-check-label" for="gratuitAccess">Gratuit</label>
+					</div>
+					<div class="form-check">
+						<input class="form-check-input" type="radio" name="accessType" id="payantAccess" [(ngModel)]="accessType" value="payant">
+						<label class="form-check-label" for="payantAccess">Payant</label>
+					</div>
+				</div>
+                </div>
+                <div class="mb-3">
+                  <div class="add-newplus">
+                    <label class="form-label">Tags<span class="text-danger ms-1">*</span></label>
+                    <a href="tags"><i data-feather="plus-circle" class="plus-down-add"></i><span>Ajouter des tags</span></a>
+                  </div>
+                  <p-multiSelect
+                    [options]="availableTags"
+                    [(ngModel)]="articleTags"
+                    [ngModelOptions]="{standalone: true}"
+                    optionLabel="name"
+                    optionValue="id"
+                    [showClear]="true"
+                    placeholder="Sélectionnez des tags"
+                    name="articleTags"
+                    (onChange)="onTagsChange()"
+                    display="chip"
+                    appendTo="body"
+                    [virtualScroll]="true"
+                    [filter]="true"
+                    [selectedItemsLabel]="'Tags sélectionnés'"
+                    [panelStyle]="{ 'max-height': '300px', 'overflow': 'auto' }"
+                    [scrollHeight]="'300px'"
+                  ></p-multiSelect>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Images Section -->
+          <div class="accordion-item border mb-4">
+            <h2 class="accordion-header" id="headingSpacingThree">
+              <div class="accordion-button collapsed bg-white" data-bs-toggle="collapse" data-bs-target="#SpacingThree" aria-expanded="true" aria-controls="SpacingThree">
+                <div class="d-flex align-items-center justify-content-between flex-fill">
+                  <h5 class="d-flex align-items-center"><i data-feather="image" class="text-primary me-2"></i><span>Images</span></h5>
+                </div>
+              </div>
+            </h2>
+            <div id="SpacingThree" class="accordion-collapse collapse show" aria-labelledby="headingSpacingThree">
+              <div class="accordion-body border-top">
+                <div class="text-editor add-list add">
+                  <div class="col-lg-12">
+                    <div class="add-choosen">
+                      <div class="mb-3">
+                        <div class="image-upload image-upload-two">
+                          <input type="file" multiple accept="image/*,video/*" (change)="onMediaSelected($event)">
+                          <div class="image-uploads">
+                            <i data-feather="plus-circle" class="plus-down-add me-0"></i>
+                            <h4>Ajouter des images ou vidéos</h4>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="phone-img" *ngFor="let media of mediaPreviews; let i = index">
+                        <ng-container [ngSwitch]="media.type">
+                          <img *ngSwitchCase="'image'" style="width: 100px !important; height: 100px !important; object-fit: cover !important;" [src]="media.url" alt="image" (click)="viewMedia(media)" />
+                          <video *ngSwitchCase="'video'" [src]="media.url" controls style="max-width:100px; max-height:100px; object-fit: cover; width: 150px; height: 150px;" (click)="viewMedia(media)"></video>
+                        </ng-container>
+                        <a href="javascript:void(0);" (click)="removeMedia(i)">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-x x-square-add remove-product"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Summary Section -->
+        <div class="col-lg-12">
+
+          <div class="d-flex align-items-center justify-content-end mb-4">
+            <button type="button" (click)="annulerArticle()"   class="btn btn-secondary me-2">Annuler</button>
+            <button type="submit" (click)="addArticle()" class="btn btn-primary">Mettre à jour le produit</button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+  <app-footer></app-footer>
+</div>
+
+<!-- View Media Modal -->
+<div class="modal fade" id="add-product-category">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="page-title">
+          <h4>Voir le média</h4>
+        </div>
+        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Fermer">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body text-center">
+        <ng-container *ngIf="selectedMediaToView">
+          <img *ngIf="selectedMediaToView.type === 'image'" [src]="selectedMediaToView.url" alt="image" style="max-width:100%; max-height:400px;">
+          <video *ngIf="selectedMediaToView.type === 'video'" [src]="selectedMediaToView.url" controls style="max-width:100%; max-height:400px;"></video>
+        </ng-container>
+      </div>
+      <div class="modal-footer">
+        <a href="javascript:void(0);" class="btn me-2 btn-secondary fs-13 fw-medium p-2 px-3 shadow-none" data-bs-dismiss="modal">Annuler</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add this script at the end of your template, before </div> or </body> -->
+<!-- Add this script at the end of your template, before </div> or </body> -->
