@@ -355,14 +355,7 @@ export class EditArticleComponent  implements OnInit {
     });
 
 
-    const selectedTags = this.getSelectedItemsPureWithIds();
-    const selectedCategoryObj = this.getSelectedCategoryFromSelect2();
-    const selectedCategory = selectedCategoryObj
-      ? selectedCategoryObj.id
-      : (this.selectedCategory && this.selectedCategory.id
-        ? this.selectedCategory.id
-        : this.selectedCategory);
-
+  
     // Validation: all fields required, at least one image
     if (!this.articleTitle.trim()) {
       this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Le titre est obligatoire.' });
@@ -372,11 +365,11 @@ export class EditArticleComponent  implements OnInit {
       this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'La description est obligatoire.' });
       return;
     }
-    if (!selectedCategory) {
+    if (!this.selectedCategory) {
       this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'La catégorie est obligatoire.' });
       return;
     }
-    if (!selectedTags || selectedTags.length === 0) {
+    if (!this.articleTags || this.articleTags.length === 0) {
       this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Au moins un tag est obligatoire.' });
       return;
     }
@@ -437,12 +430,12 @@ export class EditArticleComponent  implements OnInit {
       await this.articleCategoryService.create({
         
         article_id: articleId,
-        category_id: selectedCategory
+        category_id: this.selectedCategory
       }).toPromise();
 
       // 4. Link article to tags
       await Promise.all(
-        selectedTags.map(tag =>
+        this.articleTags.map(tag =>
           this.articleTagService.create({
             article_id: articleId,
             tag_id: Number(tag.id)
