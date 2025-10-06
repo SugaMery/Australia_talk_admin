@@ -44,9 +44,13 @@ export class EditArticleComponent  implements OnInit {
   text: string = '';
 
   // Media properties
-  mediaPreviews: { url: string; type: 'image' | 'video' }[] = [];
+  mediaPreviews: { url: string; type: 'image' | 'video'; id?: number }[] = [];
   selectedMedia: File[] = [];
-  selectedMediaToView: { url: string; type: 'image' | 'video' } | null = null;
+  selectedMediaToView: { url: string; type: 'image' | 'video' , id? : number} | null = null;
+
+  // Nouveaux tableaux pour la logique de mise à jour
+  addedMedia: { file: File, previewUrl: string }[] = []; // Fichiers ajoutés à POST avec previewUrl
+  removedMedia: any[] = []; // Médias supprimés à ANNULER (id ou url)
 
   // Article types for checkboxes
   articleTypes: ArticleType[] = [
@@ -98,6 +102,7 @@ export class EditArticleComponent  implements OnInit {
         if (data.media && data.media.length > 0) {
           this.mediaPreviews = data.media.map((m: any) => ({
             url: m.path,
+            id : m.id,
             type: m.extension && m.extension.match(/mp4|webm|ogg/i) ? 'video' : 'image'
           }));
         }
@@ -293,7 +298,7 @@ export class EditArticleComponent  implements OnInit {
   }
 
   // View media in modal
-  viewMedia(media: { url: string; type: 'image' | 'video' }) {
+  viewMedia(media: { url: string; type: 'image' | 'video' , id? : number}) {
     this.selectedMediaToView = media;
     const modal = document.getElementById('add-product-category');
     if (modal) {
@@ -304,9 +309,38 @@ export class EditArticleComponent  implements OnInit {
 
   // Remove media from previews and selected files
   removeMedia(index: number): void {
+    const media = this.mediaPreviews[index];
+    console.log('Removing media:', media); // AFFICHER IN LOGS
+
+    if (media.id) {
+      this.removedMedia.push(media.id);
+      console.log('Media ID added to removedMedia:', media.id); // AFFICHER IN LOGS
+    } else {
+      const previewUrl = media.url;
+      // Remove from removedMedia if present (avoid duplicates)
+      this.removedMedia = this.removedMedia.filter(idOrUrl => idOrUrl !== previewUrl);
+      // Find and remove from selectedMedia
+      const fileIndex = this.selectedMedia.findIndex((file, idx) => {
+        const added = this.addedMedia.find(am => am.previewUrl === previewUrl && am.file === file);
+        return !!added;
+      });
+      if (fileIndex !== -1) {
+        this.selectedMedia.splice(fileIndex, 1);
+      }
+      this.addedMedia = this.addedMedia.filter(item => item.previewUrl !== previewUrl);
+      // Add previewUrl to removedMedia so backend can ignore it if needed
+      this.removedMedia.push(previewUrl);
+      console.log('Media removed from addedMedia:', previewUrl); // AFFICHER IN LOGS
+    }
     this.mediaPreviews.splice(index, 1);
-    this.selectedMedia.splice(index, 1);
+
+    // Log after update
+    console.log('Current mediaPreviews:', this.mediaPreviews); // AFFICHER IN LOGS
+    console.log('Current selectedMedia:', this.selectedMedia); // AFFICHER IN LOGS
+    console.log('Current addedMedia:', this.addedMedia); // AFFICHER IN LOGS
+    console.log('Current removedMedia:', this.removedMedia); // AFFICHER IN LOGS
   }
+
 
   // Handle media file selection
   onMediaSelected(event: any): void {
@@ -319,17 +353,23 @@ export class EditArticleComponent  implements OnInit {
         const isImage = file.type.startsWith('image/');
         const isVideo = file.type.startsWith('video/');
         reader.onload = (e: any) => {
+          const previewUrl = e.target.result;
+          // Remove any previous previewUrl from mediaPreviews and addedMedia
+          this.mediaPreviews = this.mediaPreviews.filter(m => m.url !== previewUrl);
+          this.addedMedia = this.addedMedia.filter(item => item.previewUrl !== previewUrl);
+          // Remove from removedMedia if present (if user re-uploads a previously removed image)
+          this.removedMedia = this.removedMedia.filter(idOrUrl => idOrUrl !== previewUrl);
+          // Add new preview and media
           this.mediaPreviews.push({
-            url: e.target.result,
+            url: previewUrl,
             type: isImage ? 'image' : isVideo ? 'video' : 'image'
           });
+          this.addedMedia.push({ file, previewUrl });
         };
         reader.readAsDataURL(file);
       }
     }
   }
-
-  // Remove a tag from selected tags (by index)
   removeTag(index: number): void {
     this.articleTags.splice(index, 1);
   }
@@ -382,7 +422,11 @@ export class EditArticleComponent  implements OnInit {
       return;
     }
 
-    try {
+    // Log added and removed media before validation and API calls
+    console.log('Médias ajoutés (files):', this.addedMedia);
+    console.log('Médias supprimés (ids):', this.removedMedia);
+
+/*     try {
       // 1. Create article (get article ID)
       const articlePayload = {
         title: this.articleTitle,
@@ -449,7 +493,7 @@ export class EditArticleComponent  implements OnInit {
     } catch (error) {
       this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Erreur lors de l\'ajout de l\'article.' });
       console.error('Erreur lors du workflow de création d\'article:', error);
-    }
+    } */
   }
 
   annulerArticle() {
@@ -621,3 +665,4 @@ export class EditArticleComponent  implements OnInit {
     document.body.appendChild(script);
   }
 }
+
