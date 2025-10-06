@@ -187,3 +187,8 @@ background: #37773a24;
         font-family: "Nunito", sans-serif !important;
     font-size: 0.875rem !important;
 }
+
+
+
+@import "../../../node_modules/quill/dist/quill.core.css";
+@import "../../../node_modules/quill/dist/quill.snow.css";

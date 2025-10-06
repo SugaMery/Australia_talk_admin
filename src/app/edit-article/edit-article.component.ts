@@ -41,10 +41,10 @@ export class EditArticleComponent  implements OnInit {
   selectedCategory: any = null;
   isFree: boolean = false;
   isGratuite: boolean = false;
-  text: string = '';
+  text: string = 'TEST';
 
   // Media properties
-  mediaPreviews: { url: string; type: 'image' | 'video'; id?: number }[] = [];
+  mediaPreviews: { url: string; type: 'image' | 'video'; id?: number ; medias_article_id? : number }[] = [];
   selectedMedia: File[] = [];
   selectedMediaToView: { url: string; type: 'image' | 'video' , id? : number} | null = null;
 
@@ -76,15 +76,24 @@ export class EditArticleComponent  implements OnInit {
     private route: ActivatedRoute // <-- Inject ActivatedRoute
   ) {}
 
+  article: any = {}; // Store fetched article data
+  articleData: any = {}; // Store fetched article data
+
   // Fetch article by ID using ArticleService
   getArticleById(id: number): void {
     this.articleService.getRelated(id).subscribe(
       (data: any) => {
+        console.log("Fetching article with ID:", id);
+        console.log('Received article data:', data);
         // Fill form fields with fetched data
-        const article = data.article;
-        this.articleTitle = article.title || '';
-        this.text = article.content || '';
-        this.accessType = article.isfree === 1 ? 'gratuit' : 'payant';
+        this.article = data.article;
+        this.articleData = data; // Store full data for categories/tags
+        this.articleTitle = this.article.title || '';
+        this.text = this.article.content || '';
+            const el = document.createElement('textarea');
+    el.innerHTML = this.text;
+    this.text = el.value;
+        //this.accessType = this.article.isfree === 1 ? 'gratuit' : 'payant';
         
         // Set selected category for PrimeNG dropdown
         if (data.categories && data.categories.length > 0) {
@@ -102,14 +111,15 @@ export class EditArticleComponent  implements OnInit {
         if (data.media && data.media.length > 0) {
           this.mediaPreviews = data.media.map((m: any) => ({
             url: m.path,
-            id : m.id,
-            type: m.extension && m.extension.match(/mp4|webm|ogg/i) ? 'video' : 'image'
+            id: m.id,
+            type: m.extension && m.extension.match(/mp4|webm|ogg/i) ? 'video' : 'image',
+            medias_article_id: m.medias_article_id // add this property if present in backend
           }));
         }
 
         // Set article types (checkboxes)
-        if (article.type) {
-          const typesArr = article.type.split(',').map((t: string) => t.trim());
+        if (this.article.type) {
+          const typesArr = this.article.type.split(',').map((t: string) => t.trim());
           this.articleTypes.forEach(typeObj => {
             typeObj.model = typesArr.includes(typeObj.type);
           });
@@ -294,7 +304,9 @@ export class EditArticleComponent  implements OnInit {
 
   // Handle checkbox changes for article types
   onCheckboxChange(type: ArticleType) {
-    console.log(`${type.type} checkbox changed to: ${type.model}`);
+    // Get all selected article types
+    const selectedTypes = this.articleTypes.filter(t => t.model).map(t => t.type);
+    console.log('Types sélectionnés:', selectedTypes);
   }
 
   // View media in modal
@@ -308,37 +320,35 @@ export class EditArticleComponent  implements OnInit {
   }
 
   // Remove media from previews and selected files
-  removeMedia(index: number): void {
+  removeMedia(index: any): void {
     const media = this.mediaPreviews[index];
-    console.log('Removing media:', media); // AFFICHER IN LOGS
+    console.log('Removing media:', media);
 
     if (media.id) {
-      this.removedMedia.push(media.id);
-      console.log('Media ID added to removedMedia:', media.id); // AFFICHER IN LOGS
-    } else {
-      const previewUrl = media.url;
-      // Remove from removedMedia if present (avoid duplicates)
-      this.removedMedia = this.removedMedia.filter(idOrUrl => idOrUrl !== previewUrl);
-      // Find and remove from selectedMedia
-      const fileIndex = this.selectedMedia.findIndex((file, idx) => {
-        const added = this.addedMedia.find(am => am.previewUrl === previewUrl && am.file === file);
-        return !!added;
-      });
-      if (fileIndex !== -1) {
-        this.selectedMedia.splice(fileIndex, 1);
+      // Only add numeric IDs to removedMedia
+      if (!this.removedMedia.includes(media.id)) {
+        this.removedMedia.push(media.medias_article_id);
+        console.log('Media ID added to removedMedia:', media.id);
       }
+    } else {
+      // If it's a file (data URL), do NOT add to removedMedia
+      // Remove from selectedMedia and addedMedia
+      const previewUrl = media.url;
+      this.selectedMedia = this.selectedMedia.filter((file, idx) => {
+        const added = this.addedMedia.find(am => am.previewUrl === previewUrl && am.file === file);
+        return !added;
+      });
       this.addedMedia = this.addedMedia.filter(item => item.previewUrl !== previewUrl);
-      // Add previewUrl to removedMedia so backend can ignore it if needed
-      this.removedMedia.push(previewUrl);
-      console.log('Media removed from addedMedia:', previewUrl); // AFFICHER IN LOGS
+      // Do NOT add previewUrl to removedMedia
+      console.log('Media removed from addedMedia:', previewUrl);
     }
     this.mediaPreviews.splice(index, 1);
 
     // Log after update
-    console.log('Current mediaPreviews:', this.mediaPreviews); // AFFICHER IN LOGS
-    console.log('Current selectedMedia:', this.selectedMedia); // AFFICHER IN LOGS
-    console.log('Current addedMedia:', this.addedMedia); // AFFICHER IN LOGS
-    console.log('Current removedMedia:', this.removedMedia); // AFFICHER IN LOGS
+    console.log('Current mediaPreviews:', this.mediaPreviews);
+    console.log('Current selectedMedia:', this.selectedMedia);
+    console.log('Current addedMedia:', this.addedMedia);
+    console.log('Current removedMedia:', this.removedMedia);
   }
 
 
@@ -379,24 +389,43 @@ export class EditArticleComponent  implements OnInit {
     console.log('Selected tag IDs:', this.articleTags);
   }
 
+
+  refreshArticles() {
+        this.articleId = this.getArticleIdFromRoute();
+    if (this.articleId) {
+      this.getArticleById(this.articleId);
+    }
+  }
+  rawHtml = '&lt;h2&gt;Voici&nbsp;une...&lt;/h2&gt;';
+
   // Submit article form
   async addArticle() {
-    // Log all form values before validation
+    // 1. Log all form values before validation
     console.log('Form values before submit:', {
       articleTitle: this.articleTitle,
       text: this.text,
       accessType: this.accessType,
       selectedCategory: this.selectedCategory,
-      selectedCategoryFromSelect2: this.getSelectedCategoryFromSelect2(),
       articleTags: this.articleTags,
-      selectedTags: this.getSelectedItemsPureWithIds(),
       selectedMedia: this.selectedMedia,
-      articleTypes: this.articleTypes.filter(t => t.model).map(t => t.type)
+      articleTypes: this.articleTypes.filter(t => t.model).map(t => t.type),
+      addedMedia: this.addedMedia,
+      removedMedia: this.removedMedia,
+      categories: this.categories,
+      availableTags: this.availableTags,
+      mediaPreviews: this.mediaPreviews,
+      selectedMediaToView: this.selectedMediaToView,
+      article: this.article,
+      articleId: this.articleId
     });
 
 
-  
-    // Validation: all fields required, at least one image
+    console.log('isfree :', this.accessType == 'gratuit' ? 1 : 0);
+      const previousTags = this.articleTypes.filter(t => t.model).map(t => t.type);;
+    console.log("Fetching previousTags:", previousTags);
+    console.log("Fetching articleTags:", this.articleTags );
+
+    // 2. Validation: all fields required, at least one image
     if (!this.articleTitle.trim()) {
       this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Le titre est obligatoire.' });
       return;
@@ -413,87 +442,123 @@ export class EditArticleComponent  implements OnInit {
       this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Au moins un tag est obligatoire.' });
       return;
     }
-    if (!this.selectedMedia || this.selectedMedia.length === 0) {
-      this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Au moins une image/vidéo est obligatoire.' });
-      return;
-    }
     if (!this.articleTypes.some(t => t.model)) {
       this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Au moins un type de produit est obligatoire.' });
       return;
     }
 
-    // Log added and removed media before validation and API calls
-    console.log('Médias ajoutés (files):', this.addedMedia);
-    console.log('Médias supprimés (ids):', this.removedMedia);
 
-/*     try {
-      // 1. Create article (get article ID)
+     try {
+      // 3. Update article
       const articlePayload = {
         title: this.articleTitle,
         content: this.text,
         isfree: this.accessType == 'gratuit' ? 1 : 0,
         type: this.articleTypes.filter(t => t.model).map(t => t.type).join(','),
       };
-
-      console.log('Article payload:', articlePayload);
-
       if (this.articleId === null) {
         this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'ID de l\'article manquant.' });
         throw new Error('Article ID is null');
       }
-      const articleResp = await this.articleService.update(this.articleId, articlePayload).toPromise();
-      const articleId = articleResp && articleResp.id ? articleResp.id : null;
-      if (!articleId) {
-        this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Erreur lors de la création de l\'article.' });
-        throw new Error('Article ID not returned from API');
+      console.log('Article payload:', articlePayload);
+      await this.articleService.update(this.articleId, articlePayload).toPromise();
+      console.log('Updating article category to:', this.selectedCategory , this.articleData);
+      // 4. Update category
+      if (this.articleData.categories && this.articleData.categories.length > 0 && this.articleData.categories[0].articles_categories_id) {
+        try {
+          console.log('Updating article category to:', this.selectedCategory);
+          await this.articleCategoryService.update(
+        this.articleData.categories[0].articles_categories_id,
+        {
+          article_id: this.articleId,
+          category_id: this.selectedCategory
+        }
+          ).toPromise();
+        } catch (err) {
+          // If 409 conflict, ignore (already exists)
+          if (err && typeof err === 'object' && 'status' in err && (err as any).status === 409) {
+        console.warn('Category already linked (ignored):', this.selectedCategory);
+          } else {
+        throw err;
+          }
+        }
       }
 
-      // 2. Upload medias using MediaService.upload and link to article
-      let mediaIds: number[] = [];
-      const uploadedMediaResults = await Promise.all(
-        this.selectedMedia.map(file => {
+      // 5. Handle removed media
+      if (this.removedMedia.length > 0) {
+        for (const mediaId of this.removedMedia) {
+          if (typeof mediaId === 'number') {
+            console.log('Deleting media:', mediaId);
+            await this.mediaArticleService.delete(mediaId).toPromise();
+            console.log('Removed media:', mediaId);
+          }
+        }
+      }
+
+      // 6. Handle added media
+      if (this.addedMedia.length > 0) {
+        for (const item of this.addedMedia) {
           const formData = new FormData();
-          formData.append('file', file);
-          return this.mediaService.upload(formData).toPromise();
-        })
-      );
-      mediaIds = uploadedMediaResults
-        .map(res => res && res.id)
-        .filter((id): id is number => typeof id === 'number');
-      if (mediaIds.length === 0) {
-        this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Erreur lors du téléversement des médias.' });
-        throw new Error('Aucun média téléversé');
+          formData.append('file', item.file);
+          console.log('Uploading media file:', item.file);
+          const uploadResp = await this.mediaService.upload(formData).toPromise();
+          console.log('Upload response:', uploadResp);
+          if (uploadResp && uploadResp.id) {
+            await this.mediaArticleService.create({ media_id: uploadResp.id, article_id: this.articleId }).toPromise();
+            console.log('Added media:', uploadResp.id);
+          }
+        }
       }
-      await Promise.all(
-        mediaIds.map(mediaId =>
-          this.mediaArticleService.create({ media_id: mediaId, article_id: articleId }).toPromise()
-        )
-      );
 
-      // 3. Link article to category
-      await this.articleCategoryService.create({
-        
-        article_id: articleId,
-        category_id: this.selectedCategory
-      }).toPromise();
+      // 7. Handle tags (remove and add)
+      const previousTags: number[] = Array.isArray(this.articleData.tags)
+        ? this.articleData.tags.map((t: any) => t.id)
+        : [];
 
-      // 4. Link article to tags
-      await Promise.all(
-        this.articleTags.map(tag =>
-          this.articleTagService.create({
-            article_id: articleId,
-            tag_id: Number(tag.id)
-          }).toPromise()
-        )
-      );
+      for (const tagId of previousTags) {
+        if (!this.articleTags.includes(tagId)) {
+          try {
+            const tagRelation = Array.isArray(this.articleData.tags)
+              ? this.articleData.tags.find((t: any) => t.id === tagId)
+              : null;
+            if (tagRelation && tagRelation.articles_tags_id) {
+              await this.articleTagService.delete(tagRelation.articles_tags_id).toPromise();
+              console.log('Removed tag from article:', tagId);
+            } else {
+              console.warn('Could not find articles_tags_id for tag:', tagId);
+            }
+          } catch (err) {
+            console.warn('Error removing tag (can be ignored if not found):', tagId, err);
+          }
+        }
+      }
 
-      // Succès final unique
-      this.messageService.add({ severity: 'success', summary: 'Succès', detail: 'Article ajouté avec succès !' });
-      setTimeout(() => window.location.href = '/articles', 1200);
+      for (const tagId of this.articleTags) {
+        if (!previousTags.includes(tagId)) {
+          try {
+            await this.articleTagService.create({
+              article_id: this.articleId,
+              tag_id: tagId
+            }).toPromise();
+            console.log('Added tag to article:', tagId);
+          } catch (err) {
+            if (err && (err as any).status === 409) {
+              console.warn('Tag already linked (ignored):', tagId);
+            } else {
+              throw err;
+            }
+          }
+        }
+      }
+
+      // 8. Success message and redirect
+      this.messageService.add({ severity: 'success', summary: 'Succès', detail: 'Article mis à jour avec succès !' });
+      //setTimeout(() => window.location.href = '/articles', 1200);
     } catch (error) {
-      this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Erreur lors de l\'ajout de l\'article.' });
-      console.error('Erreur lors du workflow de création d\'article:', error);
-    } */
+      // 9. Error handling
+      this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Erreur lors de la mise à jour de l\'article.' });
+      console.error('Erreur lors du workflow de mise à jour d\'article:', error);
+    }  
   }
 
   annulerArticle() {

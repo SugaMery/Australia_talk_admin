@@ -367,6 +367,20 @@ export class ArticlesComponent implements OnInit {
     });
   }
 
+  openDeleteModal(article: any) {
+  this.articleToDelete = article;
+  // Ouvrir la modale si besoin via JS
+}
+
+deleteSelectedArticle() {
+  if (!this.articleToDelete) return;
+  this.articleService.delete(this.articleToDelete.id).subscribe(() => {
+    // Rafraîchir la liste ou retirer l'article du tableau
+    this.refreshArticles();
+    this.articleToDelete = null;
+    this.messageService.add({ severity: 'success', summary: 'Succès', detail: 'Article supprimé.' });
+  });
+}
   refreshArticles() {
     // Recharge la liste des articles depuis l'API ou le service
     this.fetchArticles();

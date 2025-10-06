@@ -26,6 +26,7 @@ import { EditorModule } from 'primeng/editor';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { EditArticleComponent } from './edit-article/edit-article.component';
 import { DropdownModule } from 'primeng/dropdown';
+import { UsersComponent } from './users/users.component';
 @NgModule({
   declarations: [
     AppComponent,
@@ -43,7 +44,8 @@ import { DropdownModule } from 'primeng/dropdown';
     TagsComponent,
     ArticlesComponent,
     AddArticleComponent,
-    EditArticleComponent
+    EditArticleComponent,
+    UsersComponent
   ],
   imports: [
     BrowserModule,

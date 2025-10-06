@@ -15,6 +15,9 @@
         <li>
           <a data-bs-toggle="tooltip" data-bs-placement="top" title="Réduire" id="collapse-header"><i class="ti ti-chevron-up"></i></a>
         </li>
+        							<li>
+								<a data-bs-toggle="tooltip" data-bs-placement="top" title="Rafraîchir" (click)="refreshArticles()"><i class="ti ti-refresh"></i></a>
+							</li>
       </ul>
       <div class="page-btn mt-0">
         <a href="articles" class="btn btn-secondary"><i data-feather="arrow-left" class="me-2"></i>Retour à la liste</a>
@@ -78,12 +81,26 @@
                 <div class="col-lg-12">
 				<div class="summer-description-box">
 					<label class="form-label">Description<span class="text-danger ms-1">*</span></label>
-					<textarea class="form-control editor pages-editor"
-										[(ngModel)]="text"
-										name="articleDescription"
-										rows="6"
-										maxlength="2000"></textarea>
-					<p class="fs-14 mt-1">Maximum 200 mots</p>
+          <p-editor
+      [(ngModel)]="text"
+      name="articleDescription"
+      [style]="{height:'200px'}"
+
+      [modules]="{
+        toolbar: [
+          [{ 'header': [1, 2, 3, false] }],
+          ['bold', 'italic', 'underline', 'strike'],
+          [{ 'color': [] }, { 'background': [] }],
+          ['blockquote', 'code-block'],
+          [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+          ['link'],
+          ['clean']
+        ]
+      }"
+      placeholder="Saisissez la description ici..."
+      [ngModelOptions]="{standalone: true}"
+    ></p-editor>
+    <p class="fs-14 mt-1">Maximum 200 mots</p>
 				</div>
                 </div>
               </div>
@@ -188,6 +205,8 @@
                         <a (click)="removeMedia(i)">
                           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-x x-square-add remove-product"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                         </a>
+                        <!-- Optionally show the medias_article_id for debug -->
+                        <!-- <span *ngIf="media.medias_article_id">ID: {{media.medias_article_id}}</span> -->
                       </div>
                     </div>
                   </div>

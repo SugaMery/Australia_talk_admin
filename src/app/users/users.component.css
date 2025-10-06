@@ -1,0 +1,10 @@
+::ng-deep .dropdown-item:not(.active):hover, ::ng-deep .dropdown-item:not(.active):focus,::ng-deep  .dropdown-item:not(.active):active {
+    color: #37773a;
+    background-color: #37773a0d;
+}
+
+
+::ng-deep .form-control {
+    width: 200%;
+
+}
