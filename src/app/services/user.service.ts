@@ -15,6 +15,10 @@ export interface User {
   created_at?: string;
   updated_at?: string;
   deleted_at?: string | null;
+  telephone?: string;
+  city?: string;
+  codepostal?: string;
+  device_type?: string;
 }
 
 export interface RegisterRequest {
@@ -24,6 +28,10 @@ export interface RegisterRequest {
   first_name: string;
   user_name?: string;
   role_id?: number;
+  telephone?: string;
+  city?: string;
+  codepostal?: string;
+  device_type?: string;
 }
 
 export interface UserResponse {
@@ -99,6 +107,7 @@ export class UserService {
   }
 
   update(id: number, user: Partial<RegisterRequest>): Observable<User> {
+    // Now supports telephone, city, codepostal, device_type, password
     return this.http.put<User>(`${this.apiUrl}/${id}`, user, { headers: this.getHeaders() }).pipe(
       catchError(this.handleError)
     );

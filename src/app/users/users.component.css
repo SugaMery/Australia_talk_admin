@@ -4,7 +4,232 @@
 }
 
 
-::ng-deep .form-control {
+/* ::ng-deep .form-control {
     width: 200%;
 
+} */
+
+
+::ng-deep .ql-toolbar.ql-snow {
+    border: 1px solid #e6eaed !important;
+    box-sizing: border-box;
+    font-family: 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+    padding: 8px;
+    border-top-right-radius: 0.5rem !important;
+    border-top-left-radius: 0.5rem !important;
 }
+
+::ng-deep .ql-toolbar.ql-snow + .ql-container.ql-snow
+
+ {
+    border-top: 0px ;
+    height: 350px !important;
+    border: 1px solid #e6eaed !important;
+    border-bottom-right-radius: 0.5rem !important;
+    border-bottom-left-radius: 0.5rem !important;
+}
+
+::ng-deep .select2-container--default .select2-selection--multiple .select2-selection__choice {
+    background-color: #37773a  !important;
+    border-color: #37773a  !important;
+    color: #ffffff;
+}
+
+
+ ::ng-deep .select2-container--default .select2-selection--multiple .select2-selection__choice__remove  {
+    background-color: #37773a  !important;
+    border-color: #37773a  !important;
+    color: #ffffff;
+ }
+
+
+ ::ng-deep .select2-container--default .select2-results__option--highlighted {
+    background: #37773a85 !important;
+ }
+
+
+
+ ::ng-deep .select2-container--default.select2-container--focus .select2-selection--multiple {
+    border: 1px solid #e6eaed !important;
+ }
+
+ ::ng-deep .btn-primaryadd {
+    top: 37px;
+    right: 10px;
+    padding: 4px 8px;
+    background-color: #37773a;
+    font-size: 10px;
+    color: #ffffff;
+}
+
+
+
+
+.badge {
+  font-size: 14px;
+  padding: 5px 10px;
+  margin-right: 5px;
+}
+
+.select2-container {
+  width: 100% !important;
+}
+
+
+
+.mb-3 {
+  margin-bottom: 1rem !important;
+}
+
+.list-inline {
+  padding-left: 0;
+  list-style: none;
+
+  .list-inline-item {
+    display: inline-block;
+    margin-right: 5px;
+  }
+}
+
+
+::ng-deep .select2-container--default .select2-selection--multiple .select2-selection__choice__display {
+    cursor: default;
+    /* padding-left: 2px; */
+    font-size: smaller;
+    padding-right: 5px !important;
+}
+
+
+::ng-deep .select2-dropdown {
+border: 1px solid #e6eaed !important;
+
+}
+
+
+::ng-deep div#pn_id_2 {
+        width: 100% !important;
+          border-color: #E6EAED;
+}
+
+::ng-deep span.p-element.p-dropdown-label.p-inputtext.p-placeholder {
+    border-color: #E6EAED;
+    color: #212B36;
+    background-color: #ffffff;
+    font-size: 0.875rem !important;
+    font-weight: 400;
+    line-height: 1.6;
+    border-radius: 0.35rem;
+    padding: 0.45rem 0.85rem;
+    
+    font-size: 0.875rem !important;
+    font-family: "Nunito", sans-serif  !important;
+}
+
+
+
+::ng-deep li#pn_id_2_0 {
+    font-family: "Nunito", sans-serif !important;
+    font-size: 0.875rem !important;
+}
+
+
+::ng-deep span.p-element.p-dropdown-label.p-inputtext {
+    font-size: 0.875rem !important; 
+        font-family: "Nunito", sans-serif !important;
+
+}
+
+
+::ng-deep p-multiselect.p-element.p-inputwrapper {
+            width: 100% !important;
+          border-color: #E6EAED;
+              width: 100% !important;
+    border-color: #E6EAED;
+    display: grid !important
+;
+}
+
+
+::ng-deep .p-multiselect-token {
+        font-family: "Nunito", sans-serif !important;
+    font-size: 0.875rem !important;
+}
+
+::ng-deep p-dropdown{
+    width: 100% !important; 
+    display: grid !important;
+}
+
+::ng-deep span {
+        font-family: "Nunito", sans-serif !important;
+    font-size: 0.875rem !important;
+}
+
+
+::ng-deep li.p-multiselect-empty-message {
+        font-family: "Nunito", sans-serif !important;
+    font-size: 0.875rem !important;
+
+}
+
+::ng-deep input.p-multiselect-filter.p-inputtext.p-component {
+        line-height: normal !important;
+}
+
+
+::ng-deep .p-checkbox .p-checkbox-box.p-highlight {
+    border-color: #37773a;
+    background: #37773a;
+}
+
+::ng-deep .p-multiselect-label.p-placeholder {
+    font-family: "Nunito", sans-serif !important;
+    font-size: 0.875rem !important;
+}
+
+
+::ng-deep .p-multiselect.p-multiselect-chip .p-multiselect-token {
+background: #37773a24;
+
+
+}
+
+
+::ng-deep .ql-toolbar.ql-snow + .ql-container.ql-snow  {
+        font-family: "Nunito", sans-serif !important;
+    font-size: 0.875rem !important;
+}
+
+::ng-deep .p-dropdown {
+    background: #ffffff;
+    border: 1px solid #e6eaed;
+
+}
+
+::ng-deep .p-autocomplete.p-component.p-inputwrapper {
+    width: 100% !important;
+    display: grid !important
+;
+}
+
+::ng-deep  input.p-element.p-autocomplete-input.p-inputtext {
+        border-color: #E6EAED;
+    color: #212B36;
+    background-color: #ffffff;
+    font-size: 0.875rem !important;
+    font-weight: 400;
+    line-height: 1.6;
+    border-radius: 0.35rem;
+    padding: 0.45rem 0.85rem;
+    font-size: 0.875rem !important;
+    font-family: "Nunito", sans-serif !important;
+}
+
+
+::ng-deep li.p-autocomplete-empty-message{
+font-size: 0.875rem !important;
+    font-family: "Nunito", sans-serif !important;
+}
+
+@import "../../../node_modules/quill/dist/quill.core.css";
+@import "../../../node_modules/quill/dist/quill.snow.css";

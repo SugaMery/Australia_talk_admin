@@ -27,6 +27,8 @@ import { MultiSelectModule } from 'primeng/multiselect';
 import { EditArticleComponent } from './edit-article/edit-article.component';
 import { DropdownModule } from 'primeng/dropdown';
 import { UsersComponent } from './users/users.component';
+import { PasswordModule } from 'primeng/password';
+import { AutoCompleteModule } from 'primeng/autocomplete';
 @NgModule({
   declarations: [
     AppComponent,
@@ -55,7 +57,9 @@ import { UsersComponent } from './users/users.component';
     ToastModule,
     EditorModule,
     MultiSelectModule,
-    DropdownModule
+    DropdownModule,
+    PasswordModule,
+    AutoCompleteModule
   ],
   providers: [
     provideClientHydration(),

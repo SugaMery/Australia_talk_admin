@@ -2,3 +2,44 @@
 .p-toast-message-text {
         font-family: 'Nunito';
 }
+
+/* 🎨 Couleurs personnalisées pour la scrollbar */
+:root {
+  --scrollbar-color-track: #fcfcfc;
+  --scrollbar-color-thumb: #37773b;
+}
+
+
+
+
+/* ✅ Webkit Scrollbar Styling */
+body::-webkit-scrollbar {
+  width: 10px;
+}
+
+body::-webkit-scrollbar-track {
+  background: var(--scrollbar-color-track);
+}
+
+body::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-color-thumb);
+  border-radius: 10px;
+  border: 2px solid var(--scrollbar-color-track);
+}
+
+
+
+/* ✅ Webkit Scrollbar Styling pour tous les éléments */
+*::-webkit-scrollbar {
+  width: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--scrollbar-color-track);
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-color-thumb);
+  border-radius: 10px;
+  border: 2px solid var(--scrollbar-color-track);
+}
