@@ -17,7 +17,7 @@ export interface User {
   deleted_at?: string | null;
   telephone?: string;
   city?: string;
-  codepostal?: string;
+  code_postal?: string;
   device_type?: string;
 }
 
@@ -30,7 +30,7 @@ export interface RegisterRequest {
   role_id?: number;
   telephone?: string;
   city?: string;
-  codepostal?: string;
+  code_postal?: string; // <-- corrected field name
   device_type?: string;
 }
 
@@ -85,11 +85,44 @@ export class UserService {
     );
   }
 
-  create(user: RegisterRequest): Observable<User> {
-    return this.http.post<UserResponse>(this.apiUrl, user, { headers: this.getHeaders() }).pipe(
+
+  create(user: Partial<RegisterRequest>): Observable<User> {
+    // Ensure code_postal is used instead of codepostal
+    const payload = {
+      ...user,
+      code_postal: (user as any).code_postal ?? (user as any).codepostal ?? null
+    };
+    delete (payload as any).codepostal;
+    return this.http.post<User>(`${this.apiUrl}`, payload, { headers: this.getHeaders() }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+
+
+
+/*   create(user: RegisterRequest): Observable<User> {
+    // Ensure code_postal is used instead of codepostal
+    const payload = {
+      ...user,
+      code_postal: (user as any).code_postal ?? (user as any).codepostal ?? null
+    };
+    delete (payload as any).codepostal;
+    return this.http.post<UserResponse>(this.apiUrl, payload, { headers: this.getHeaders() }).pipe(
       map(response => {
         if (response.user) return response.user;
         throw new Error(response.error || 'Failed to create user');
+      }),
+      catchError(this.handleError)
+    );
+  } */
+
+
+  restore(id: number): Observable<User> {
+    return this.http.post<UserResponse>(`${this.apiUrl}/${id}/restore`, {}, { headers: this.getHeaders() }).pipe(
+      map(response => {
+        if (response.user) return response.user;
+        throw new Error(response.error || 'Failed to restore user');
       }),
       catchError(this.handleError)
     );
@@ -107,8 +140,13 @@ export class UserService {
   }
 
   update(id: number, user: Partial<RegisterRequest>): Observable<User> {
-    // Now supports telephone, city, codepostal, device_type, password
-    return this.http.put<User>(`${this.apiUrl}/${id}`, user, { headers: this.getHeaders() }).pipe(
+    // Ensure code_postal is used instead of codepostal
+    const payload = {
+      ...user,
+      code_postal: (user as any).code_postal ?? (user as any).codepostal ?? null
+    };
+    delete (payload as any).codepostal;
+    return this.http.put<User>(`${this.apiUrl}/${id}`, payload, { headers: this.getHeaders() }).pipe(
       catchError(this.handleError)
     );
   }

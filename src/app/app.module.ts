@@ -29,6 +29,8 @@ import { DropdownModule } from 'primeng/dropdown';
 import { UsersComponent } from './users/users.component';
 import { PasswordModule } from 'primeng/password';
 import { AutoCompleteModule } from 'primeng/autocomplete';
+import { BadgeModule } from 'primeng/badge';
+import { TagModule } from 'primeng/tag';
 @NgModule({
   declarations: [
     AppComponent,
@@ -59,7 +61,9 @@ import { AutoCompleteModule } from 'primeng/autocomplete';
     MultiSelectModule,
     DropdownModule,
     PasswordModule,
-    AutoCompleteModule
+    AutoCompleteModule,
+    BadgeModule,
+    TagModule
   ],
   providers: [
     provideClientHydration(),

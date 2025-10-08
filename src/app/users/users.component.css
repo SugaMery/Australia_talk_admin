@@ -231,5 +231,18 @@ font-size: 0.875rem !important;
     font-family: "Nunito", sans-serif !important;
 }
 
+
+::ng-deep span.p-tag-value {
+        font-size: 0.70rem !important;
+}
+
+::ng-deep .form-check {
+padding-left: 0.5em !important; 
+}
+
+::ng-deep input.p-inputtext {
+    font-family: "Nunito", sans-serif !important;
+}
+
 @import "../../../node_modules/quill/dist/quill.core.css";
 @import "../../../node_modules/quill/dist/quill.snow.css";

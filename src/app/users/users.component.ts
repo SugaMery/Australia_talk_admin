@@ -1,6 +1,19 @@
 import { Component, OnInit } from '@angular/core';
 import { UserService } from '../services/user.service';
 import { RoleService } from '../services/role.service';
+import { MessageService } from 'primeng/api';
+
+export interface RegisterRequest {
+  first_name: string;
+  last_name: string;
+  email: string;
+  telephone?: string;
+  city?: string;
+  code_postal?: string;
+  device_type?: string;
+  role_id?: number;
+  password: string;
+}
 
 export interface EditUser {
   email: string;
@@ -19,7 +32,8 @@ export interface EditUser {
 @Component({
   selector: 'app-users',
   templateUrl: './users.component.html',
-  styleUrls: ['./users.component.css']
+  styleUrls: ['./users.component.css'],
+  providers: [MessageService]
 })
 export class UsersComponent implements OnInit {
   users: any[] = [];
@@ -77,6 +91,7 @@ export class UsersComponent implements OnInit {
   searchTerm: string = '';
   showEditModal: boolean = false;
   showDeleteModal: boolean = false;
+  showReactivateModal: boolean = false;
   selectedUser: any = {};
   selectedDate: any;
   editUser: EditUser = {
@@ -104,21 +119,26 @@ export class UsersComponent implements OnInit {
     { label: 'Mac', value: 'Mac' }
   ];
 
+  statusFilter: string | null = null;
+  roleFilter: number | null = null;
+
   constructor(
     private userService: UserService,
-    private roleService: RoleService
+    private roleService: RoleService,
+    private messageService: MessageService
   ) {}
 
   ngOnInit(): void {
     this.getAllUsers();
     this.getRoles();
+    this.filterUsers();
   }
 
   getAllUsers() {
     this.userService.getAll().subscribe({
       next: (users: any[]) => {
         this.users = users;
-        this.filteredUsers = users;
+        this.filterUsers();
         console.log('Utilisateurs chargés:', this.users);
       },
       error: (error) => {
@@ -161,18 +181,30 @@ export class UsersComponent implements OnInit {
   }
 
   filterUsers() {
-    if (!this.searchTerm || !Array.isArray(this.users)) {
-      this.filteredUsers = this.users;
-      return;
+    let filtered = this.users;
+
+    if (this.statusFilter === 'active') {
+      filtered = filtered.filter(u => !u.deleted_at);
+    } else if (this.statusFilter === 'inactive') {
+      filtered = filtered.filter(u => !!u.deleted_at);
     }
-    const term = this.searchTerm.toLowerCase();
-    this.filteredUsers = this.users.filter(u =>
-      (u.full_name && u.full_name.toLowerCase().includes(term)) ||
-      (u.first_name && u.first_name.toLowerCase().includes(term)) ||
-      (u.last_name && u.last_name.toLowerCase().includes(term)) ||
-      (u.email && u.email.toLowerCase().includes(term)) ||
-      (u.telephone && u.telephone.toLowerCase().includes(term))
-    );
+
+    if (this.roleFilter) {
+      filtered = filtered.filter(u => u.role_id === this.roleFilter);
+    }
+
+    if (this.searchTerm) {
+      const term = this.searchTerm.toLowerCase();
+      filtered = filtered.filter(u =>
+        (u.full_name && u.full_name.toLowerCase().includes(term)) ||
+        (u.first_name && u.first_name.toLowerCase().includes(term)) ||
+        (u.last_name && u.last_name.toLowerCase().includes(term)) ||
+        (u.email && u.email.toLowerCase().includes(term)) ||
+        (u.telephone && u.telephone.toLowerCase().includes(term))
+      );
+    }
+
+    this.filteredUsers = filtered;
   }
 
   filterCities(event: any) {
@@ -182,9 +214,25 @@ export class UsersComponent implements OnInit {
     );
   }
 
-  onCitySelected(city: any) {
-    if (city && city.code_postal) {
-      this.selectedUser.code_postal = city.code_postal;
+  onCitySelected(event: any) {
+    console.log('Selected city event:', event);
+    const selectedCity = event.value;
+    console.log('Selected city object:', selectedCity);
+    if (selectedCity && selectedCity.nom && selectedCity.code_postal) {
+      this.selectedUser.city = selectedCity.nom;
+      this.selectedUser.code_postal = selectedCity.code_postal;
+      console.log('Updated selectedUser:', this.selectedUser);
+    } else {
+      this.selectedUser.city = '';
+      this.selectedUser.code_postal = '';
+      console.log('Reset city and postal code');
+    }
+  }
+
+  onCityChange() {
+    const selectedCity = this.cities.find(city => city.nom === this.selectedUser.city);
+    if (selectedCity) {
+      this.selectedUser.code_postal = selectedCity.code_postal;
     } else {
       this.selectedUser.code_postal = '';
     }
@@ -197,13 +245,13 @@ export class UsersComponent implements OnInit {
       first_name: user.first_name || '',
       last_name: user.last_name || '',
       email: user.email || '',
-      telephoneुसार: user.telephone || '',
+      telephone: user.telephone || '',
       city: user.city || '',
       code_postal: user.code_postal || '',
       device_type: user.device_type || '',
       role_id: user.role_id || undefined,
-      password: '', // Initialize as empty to avoid pre-filling
-      confirmPassword: '' // Initialize as empty to avoid pre-filling
+      password: '',
+      confirmPassword: ''
     };
     this.showEditModal = true;
   }
@@ -214,39 +262,113 @@ export class UsersComponent implements OnInit {
   }
 
   saveUserChanges() {
-    // Validate password and confirmPassword match if provided
     if (this.selectedUser.password && this.selectedUser.password !== this.selectedUser.confirmPassword) {
-      console.error('Les mots de passe ne correspondent pas');
-      // Optionally, add a toast notification here
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Erreur',
+        detail: 'Les mots de passe ne correspondent pas'
+      });
       return;
     }
 
-    const updatedUser: Partial<EditUser> = {
-      first_name: this.selectedUser.first_name,
-      last_name: this.selectedUser.last_name,
-      email: this.selectedUser.email,
-      telephone: this.selectedUser.telephone,
-      city: this.selectedUser.city,
-      code_postal: this.selectedUser.code_postal,
-      device_type: this.selectedUser.device_type,
-      role_id: this.selectedUser.role_id,
-      password: this.selectedUser.password || undefined // Only include password if provided
+    const isBreached = this.checkPasswordBreach(this.selectedUser.password);
+    if (isBreached) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Erreur',
+        detail: 'Ce mot de passe a été compromis. Veuillez en choisir un autre.'
+      });
+      return;
+    }
+
+    const userPayload: RegisterRequest = {
+      first_name: this.selectedUser.first_name || '',
+      last_name: this.selectedUser.last_name || '',
+      email: this.selectedUser.email || '',
+      telephone: this.selectedUser.telephone || '',
+      city: this.selectedUser.city || '',
+      code_postal: this.selectedUser.code_postal || '',
+      device_type: this.selectedUser.device_type || '',
+      role_id: this.selectedUser.role_id !== undefined ? this.selectedUser.role_id : 0,
+      password: this.selectedUser.password || ''
     };
 
-    this.userService.update(this.selectedUser.id, updatedUser).subscribe({
-      next: (updatedUser) => {
-        const index = this.users.findIndex(u => u.id === updatedUser.id);
-        if (index !== -1) {
-          this.users[index] = { ...this.users[index], ...updatedUser };
-          this.filteredUsers = [...this.users];
+    // Log payload for debugging
+    console.log('User payload for create/update:', userPayload);
+
+    if (this.selectedUser.id) {
+      this.userService.update(this.selectedUser.id, userPayload).subscribe({
+        next: (updatedUser) => {
+          const index = this.users.findIndex(u => u.id === updatedUser.id);
+          if (index !== -1) {
+            this.users[index] = { ...this.users[index], ...updatedUser };
+          }
+          this.filterUsers();
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Succès',
+            detail: 'Utilisateur mis à jour avec succès'
+          });
+          const modal = document.getElementById('edit-customer');
+          if (modal && (window as any).bootstrap) {
+            const bsModal = (window as any).bootstrap.Modal.getInstance(modal) || new (window as any).bootstrap.Modal(modal);
+            bsModal.hide();
+          }
+        },
+        error: (error) => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erreur',
+            detail: 'Erreur lors de la mise à jour de l\'utilisateur'
+          });
+          console.error('Erreur lors de la mise à jour de l\'utilisateur:', error);
         }
-        this.closeEditUserModal();
-        console.log('Utilisateur mis à jour:', updatedUser);
-      },
-      error: (error) => {
-        console.error('Erreur lors de la mise à jour de l\'utilisateur:', error);
-      }
-    });
+      });
+    } else {
+      // Add user
+      this.userService.create(userPayload).subscribe({
+        next: (newUser) => {
+          // Add created_at and role_name to the new user object
+          const roleObj = this.roles.find(r => r.id === newUser.role_id);
+          const userWithMeta = {
+            ...newUser,
+            created_at: new Date().toISOString(),
+            role_name: roleObj ? roleObj.name : ''
+          };
+          this.users.push(userWithMeta);
+          this.filterUsers();
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Succès',
+            detail: 'Utilisateur ajouté avec succès'
+          });
+          const modal = document.getElementById('edit-customer');
+          if (modal && (window as any).bootstrap) {
+            const bsModal = (window as any).bootstrap.Modal.getInstance(modal) || new (window as any).bootstrap.Modal(modal);
+            bsModal.hide();
+          }
+        },
+        error: (error) => {
+          // Show backend error message if available
+          const detail = error?.error?.message || error?.message || 'Erreur lors de l\'ajout de l\'utilisateur';
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erreur',
+            detail
+          });
+          // Improved error logging for debugging
+          if (error?.stack) {
+            console.error('Erreur lors de l\'ajout de l\'utilisateur:', error.stack, userPayload);
+          } else {
+            console.error('Erreur lors de l\'ajout de l\'utilisateur:', error, userPayload);
+          }
+        }
+      });
+    }
+  }
+
+  private checkPasswordBreach(password: string): boolean {
+    return false;
   }
 
   openDeleteUserModal(user: any) {
@@ -262,19 +384,39 @@ export class UsersComponent implements OnInit {
   deleteUser() {
     this.userService.delete(this.selectedUser.id).subscribe({
       next: () => {
-        this.users = this.users.filter(u => u.id !== this.selectedUser.id);
-        this.filteredUsers = [...this.users];
+        const index = this.users.findIndex(u => u.id === this.selectedUser.id);
+        if (index !== -1) {
+          this.users[index] = {
+            ...this.users[index],
+            deleted_at: new Date().toISOString()
+          };
+          this.filteredUsers = [...this.users];
+        }
         this.closeDeleteUserModal();
-        console.log('Utilisateur supprimé');
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Succès',
+          detail: 'Utilisateur supprimé avec succès'
+        });
+
+        const modal = document.getElementById('delete-modal');
+        if (modal && (window as any).bootstrap) {
+          const bsModal = (window as any).bootstrap.Modal.getInstance(modal) || new (window as any).bootstrap.Modal(modal);
+          bsModal.hide();
+        }
       },
       error: (error) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Erreur lors de la suppression de l\'utilisateur'
+        });
         console.error('Erreur lors de la suppression de l\'utilisateur:', error);
       }
     });
   }
 
   openAddUserModal() {
-    // Implement add user modal logic if needed
     this.selectedUser = {
       first_name: '',
       last_name: '',
@@ -288,5 +430,51 @@ export class UsersComponent implements OnInit {
       confirmPassword: ''
     };
     this.showEditModal = true;
+  }
+
+  openReactivateUserModal(user: any) {
+    this.selectedUser = { ...user };
+    this.showReactivateModal = true;
+    const modal = document.getElementById('reactivate-modal');
+    if (modal && (window as any).bootstrap) {
+      const bsModal = (window as any).bootstrap.Modal.getInstance(modal) || new (window as any).bootstrap.Modal(modal);
+      bsModal.show();
+    }
+  }
+
+  closeReactivateUserModal() {
+    this.showReactivateModal = false;
+    this.selectedUser = {};
+    const modal = document.getElementById('reactivate-modal');
+    if (modal && (window as any).bootstrap) {
+      const bsModal = (window as any).bootstrap.Modal.getInstance(modal);
+      if (bsModal) bsModal.hide();
+    }
+  }
+
+  reactivateUser() {
+    this.userService.restore(this.selectedUser.id).subscribe({
+      next: () => {
+        const index = this.users.findIndex(u => u.id === this.selectedUser.id);
+        if (index !== -1) {
+          this.users[index] = { ...this.users[index], deleted_at: null };
+          this.filteredUsers = [...this.users];
+        }
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Succès',
+          detail: 'Utilisateur réactivé avec succès'
+        });
+        this.closeReactivateUserModal();
+      },
+      error: (error) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Erreur lors de la réactivation de l\'utilisateur'
+        });
+        console.error('Erreur lors de la réactivation de l\'utilisateur:', error);
+      }
+    });
   }
 }
