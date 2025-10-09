@@ -17,13 +17,13 @@
                     </div>
                 </li>
                 <li class="me-2">
-                    <a data-bs-toggle="tooltip" data-bs-placement="top" title="Pdf"><img src="assets/img/icons/pdf.svg" alt="img"></a>
+                    <a data-bs-toggle="tooltip" data-bs-placement="top" title="Pdf"  (click)="exportPdf()"><img src="assets/img/icons/pdf.svg" alt="img" ></a>
                 </li>
                 <li class="me-2">
-                    <a data-bs-toggle="tooltip" data-bs-placement="top" title="Excel"><img src="assets/img/icons/excel.svg" alt="img"></a>
+                    <a data-bs-toggle="tooltip" data-bs-placement="top" title="Excel" (click)="exportExcel()"><img src="assets/img/icons/excel.svg" alt="img"></a>
                 </li>
                 <li class="me-2">
-                    <a data-bs-toggle="tooltip" data-bs-placement="top" title="Rafraîchir"><i class="ti ti-refresh"></i></a>
+                    <a data-bs-toggle="tooltip" data-bs-placement="top" title="Rafraîchir" (click)="fetchUsers()"><i class="ti ti-refresh"></i></a>
                 </li>
                 <li class="me-2">
                     <a data-bs-toggle="tooltip" data-bs-placement="top" title="Réduire" id="collapse-header"><i class="ti ti-chevron-up"></i></a>
@@ -255,13 +255,22 @@
                                     <label class="form-label">Nom<span class="text-danger ms-1">*</span></label>
                                     <input type="text" class="form-control" [(ngModel)]="selectedUser.last_name" name="last_name" required>
                                 </div>
+
                                 <div class="col-lg-6 mb-3">
-                                    <label class="form-label">Téléphone</label>
-                                    <input type="tel" class="form-control" [(ngModel)]="selectedUser.telephone" name="telephone">
+                                    <label class="form-label">Téléphone<span class="text-danger ms-1">*</span></label>
+                                    <input type="tel" class="form-control" [(ngModel)]="selectedUser.telephone" name="telephone" required>
                                 </div>
                                 <div class="col-lg-6 mb-3">
-                                    <label class="form-label">Rôle</label>
-                                    <p-dropdown [options]="roles" [(ngModel)]="selectedUser.role_id" optionLabel="name" optionValue="id" name="role_id" placeholder="Sélectionner un rôle"></p-dropdown>
+                                    <label class="form-label">Rôle<span class="text-danger ms-1">*</span></label>
+                                    <p-dropdown 
+                                        [options]="roles" 
+                                        [(ngModel)]="selectedUser.role_id" 
+                                        optionLabel="name" 
+                                        optionValue="id" 
+                                        name="role_id" 
+                                        placeholder="Sélectionner un rôle" 
+                                        [required]="true">
+                                    </p-dropdown>
                                 </div>
                                 <div class="col-12 mb-3">
                                     <label class="form-label">Email<span class="text-danger ms-1">*</span></label>
@@ -274,7 +283,8 @@
                                         name="password" 
                                         [toggleMask]="true" 
                                         [style.display]="'grid'"
-                                        inputStyleClass="form-control w-100">
+                                        inputStyleClass="form-control w-100"
+                                        [required]="true">
                                     </p-password>
                                 </div>
                                 <div class="col-lg-6 mb-3">
@@ -284,11 +294,12 @@
                                         name="confirmPassword" 
                                         [toggleMask]="true" 
                                         [style.display]="'grid'"
-                                        inputStyleClass="form-control w-100">
+                                        inputStyleClass="form-control w-100"
+                                        [required]="true">
                                     </p-password>
                                 </div>
                                 <div class="col-lg-6 mb-3">
-                                    <label class="form-label">Ville</label>
+                                    <label class="form-label">Ville<span class="text-danger ms-1">*</span></label>
                                     <p-autoComplete 
                                         [(ngModel)]="selectedUser.city" 
                                         name="city"
@@ -299,22 +310,24 @@
                                         optionLabel="nom"
                                         (onSelect)="onCitySelected($event)"
                                         (onChange)="onCityChange()"
-                                        placeholder="Rechercher une ville...">
+                                        placeholder="Rechercher une ville..."
+                                        [required]="true">
                                     </p-autoComplete>
                                 </div>
                                 <div class="col-lg-6 mb-3">
-                                    <label class="form-label">Code postal</label>
-                                    <input type="text" class="form-control" [(ngModel)]="selectedUser.code_postal" name="code_postal" readonly>
+                                    <label class="form-label">Code postal<span class="text-danger ms-1">*</span></label>
+                                    <input type="text" class="form-control" [(ngModel)]="selectedUser.code_postal" name="code_postal" readonly required>
                                 </div>
                                 <div class="col-lg-12 mb-3">
-                                    <label class="form-label">Type d'appareil</label>
+                                    <label class="form-label">Type d'appareil<span class="text-danger ms-1">*</span></label>
                                     <p-dropdown 
                                         [options]="deviceTypes" 
                                         [(ngModel)]="selectedUser.device_type" 
                                         name="device_type" 
                                         optionLabel="label" 
                                         optionValue="value" 
-                                        placeholder="Sélectionner un appareil">
+                                        placeholder="Sélectionner un appareil"
+                                        [required]="true">
                                     </p-dropdown>
                                 </div>
                             </div>

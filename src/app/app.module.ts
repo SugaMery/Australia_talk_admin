@@ -31,6 +31,8 @@ import { PasswordModule } from 'primeng/password';
 import { AutoCompleteModule } from 'primeng/autocomplete';
 import { BadgeModule } from 'primeng/badge';
 import { TagModule } from 'primeng/tag';
+import { ClientsComponent } from './clients/clients.component';
+import { RolesPermissionsComponent } from './roles-permissions/roles-permissions.component';
 @NgModule({
   declarations: [
     AppComponent,
@@ -49,7 +51,9 @@ import { TagModule } from 'primeng/tag';
     ArticlesComponent,
     AddArticleComponent,
     EditArticleComponent,
-    UsersComponent
+    UsersComponent,
+    ClientsComponent,
+    RolesPermissionsComponent
   ],
   imports: [
     BrowserModule,

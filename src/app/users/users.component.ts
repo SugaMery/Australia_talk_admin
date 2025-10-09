@@ -2,31 +2,33 @@ import { Component, OnInit } from '@angular/core';
 import { UserService } from '../services/user.service';
 import { RoleService } from '../services/role.service';
 import { MessageService } from 'primeng/api';
+import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 export interface RegisterRequest {
   first_name: string;
   last_name: string;
   email: string;
-  telephone?: string;
-  city?: string;
-  code_postal?: string;
-  device_type?: string;
-  role_id?: number;
+  telephone: string;
+  city: string;
+  code_postal: string;
+  device_type: string;
+  role_id: number;
   password: string;
 }
 
 export interface EditUser {
   email: string;
   password: string;
-  confirmPassword?: string;
+  confirmPassword: string;
   last_name: string;
   first_name: string;
-  user_name?: string;
-  role_id?: number;
-  telephone?: string;
-  city?: string;
-  code_postal?: string;
-  device_type?: string;
+  role_id: number;
+  telephone: string;
+  city: string;
+  code_postal: string;
+  device_type: string;
 }
 
 @Component({
@@ -100,8 +102,7 @@ export class UsersComponent implements OnInit {
     confirmPassword: '',
     last_name: '',
     first_name: '',
-    user_name: '',
-    role_id: undefined,
+    role_id: 0,
     telephone: '',
     city: '',
     code_postal: '',
@@ -215,17 +216,13 @@ export class UsersComponent implements OnInit {
   }
 
   onCitySelected(event: any) {
-    console.log('Selected city event:', event);
     const selectedCity = event.value;
-    console.log('Selected city object:', selectedCity);
     if (selectedCity && selectedCity.nom && selectedCity.code_postal) {
       this.selectedUser.city = selectedCity.nom;
       this.selectedUser.code_postal = selectedCity.code_postal;
-      console.log('Updated selectedUser:', this.selectedUser);
     } else {
       this.selectedUser.city = '';
       this.selectedUser.code_postal = '';
-      console.log('Reset city and postal code');
     }
   }
 
@@ -249,7 +246,7 @@ export class UsersComponent implements OnInit {
       city: user.city || '',
       code_postal: user.code_postal || '',
       device_type: user.device_type || '',
-      role_id: user.role_id || undefined,
+      role_id: user.role_id || 0,
       password: '',
       confirmPassword: ''
     };
@@ -262,11 +259,44 @@ export class UsersComponent implements OnInit {
   }
 
   saveUserChanges() {
-    if (this.selectedUser.password && this.selectedUser.password !== this.selectedUser.confirmPassword) {
+    // Validate required fields
+    const requiredFields = [
+      { field: 'first_name', value: this.selectedUser.first_name, label: 'Prénom' },
+      { field: 'last_name', value: this.selectedUser.last_name, label: 'Nom' },
+      { field: 'email', value: this.selectedUser.email, label: 'Email' },
+      { field: 'telephone', value: this.selectedUser.telephone, label: 'Téléphone' },
+      { field: 'city', value: this.selectedUser.city, label: 'Ville' },
+      { field: 'code_postal', value: this.selectedUser.code_postal, label: 'Code postal' },
+      { field: 'device_type', value: this.selectedUser.device_type, label: 'Type d\'appareil' },
+      { field: 'role_id', value: this.selectedUser.role_id, label: 'Rôle' }
+    ];
+
+    for (const field of requiredFields) {
+      if (!field.value || (typeof field.value === 'string' && field.value.trim() === '') || (field.field === 'role_id' && field.value === 0)) {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: `Le champ ${field.label} est requis.`
+        });
+        return;
+      }
+    }
+
+    // Validate password and confirmPassword
+    if (!this.selectedUser.password || !this.selectedUser.confirmPassword) {
       this.messageService.add({
         severity: 'error',
         summary: 'Erreur',
-        detail: 'Les mots de passe ne correspondent pas'
+        detail: 'Le mot de passe et la confirmation du mot de passe sont requis.'
+      });
+      return;
+    }
+
+    if (this.selectedUser.password !== this.selectedUser.confirmPassword) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Erreur',
+        detail: 'Les mots de passe ne correspondent pas.'
       });
       return;
     }
@@ -282,18 +312,17 @@ export class UsersComponent implements OnInit {
     }
 
     const userPayload: RegisterRequest = {
-      first_name: this.selectedUser.first_name || '',
-      last_name: this.selectedUser.last_name || '',
-      email: this.selectedUser.email || '',
-      telephone: this.selectedUser.telephone || '',
-      city: this.selectedUser.city || '',
-      code_postal: this.selectedUser.code_postal || '',
-      device_type: this.selectedUser.device_type || '',
-      role_id: this.selectedUser.role_id !== undefined ? this.selectedUser.role_id : 0,
-      password: this.selectedUser.password || ''
+      first_name: this.selectedUser.first_name,
+      last_name: this.selectedUser.last_name,
+      email: this.selectedUser.email,
+      telephone: this.selectedUser.telephone,
+      city: this.selectedUser.city,
+      code_postal: this.selectedUser.code_postal,
+      device_type: this.selectedUser.device_type,
+      role_id: this.selectedUser.role_id,
+      password: this.selectedUser.password    
     };
 
-    // Log payload for debugging
     console.log('User payload for create/update:', userPayload);
 
     if (this.selectedUser.id) {
@@ -325,10 +354,8 @@ export class UsersComponent implements OnInit {
         }
       });
     } else {
-      // Add user
       this.userService.create(userPayload).subscribe({
         next: (newUser) => {
-          // Add created_at and role_name to the new user object
           const roleObj = this.roles.find(r => r.id === newUser.role_id);
           const userWithMeta = {
             ...newUser,
@@ -349,19 +376,13 @@ export class UsersComponent implements OnInit {
           }
         },
         error: (error) => {
-          // Show backend error message if available
           const detail = error?.error?.message || error?.message || 'Erreur lors de l\'ajout de l\'utilisateur';
           this.messageService.add({
             severity: 'error',
             summary: 'Erreur',
             detail
           });
-          // Improved error logging for debugging
-          if (error?.stack) {
-            console.error('Erreur lors de l\'ajout de l\'utilisateur:', error.stack, userPayload);
-          } else {
-            console.error('Erreur lors de l\'ajout de l\'utilisateur:', error, userPayload);
-          }
+          console.error('Erreur lors de l\'ajout de l\'utilisateur:', error, userPayload);
         }
       });
     }
@@ -392,18 +413,16 @@ export class UsersComponent implements OnInit {
           };
           this.filteredUsers = [...this.users];
         }
-        this.closeDeleteUserModal();
+           const modal = document.getElementById('delete-modal');
+          if (modal && (window as any).bootstrap) {
+            const bsModal = (window as any).bootstrap.Modal.getInstance(modal) || new (window as any).bootstrap.Modal(modal);
+            bsModal.hide();
+          }
         this.messageService.add({
           severity: 'success',
           summary: 'Succès',
           detail: 'Utilisateur supprimé avec succès'
         });
-
-        const modal = document.getElementById('delete-modal');
-        if (modal && (window as any).bootstrap) {
-          const bsModal = (window as any).bootstrap.Modal.getInstance(modal) || new (window as any).bootstrap.Modal(modal);
-          bsModal.hide();
-        }
       },
       error: (error) => {
         this.messageService.add({
@@ -425,9 +444,9 @@ export class UsersComponent implements OnInit {
       city: '',
       code_postal: '',
       device_type: '',
-      role_id: undefined,
+      role_id: 0,
       password: '',
-      confirmPassword: ''
+      confirmPassword: '',
     };
     this.showEditModal = true;
   }
@@ -435,21 +454,11 @@ export class UsersComponent implements OnInit {
   openReactivateUserModal(user: any) {
     this.selectedUser = { ...user };
     this.showReactivateModal = true;
-    const modal = document.getElementById('reactivate-modal');
-    if (modal && (window as any).bootstrap) {
-      const bsModal = (window as any).bootstrap.Modal.getInstance(modal) || new (window as any).bootstrap.Modal(modal);
-      bsModal.show();
-    }
   }
 
   closeReactivateUserModal() {
     this.showReactivateModal = false;
     this.selectedUser = {};
-    const modal = document.getElementById('reactivate-modal');
-    if (modal && (window as any).bootstrap) {
-      const bsModal = (window as any).bootstrap.Modal.getInstance(modal);
-      if (bsModal) bsModal.hide();
-    }
   }
 
   reactivateUser() {
@@ -465,7 +474,11 @@ export class UsersComponent implements OnInit {
           summary: 'Succès',
           detail: 'Utilisateur réactivé avec succès'
         });
-        this.closeReactivateUserModal();
+          const modal = document.getElementById('reactivate-modal');
+          if (modal && (window as any).bootstrap) {
+            const bsModal = (window as any).bootstrap.Modal.getInstance(modal) || new (window as any).bootstrap.Modal(modal);
+            bsModal.hide();
+          }
       },
       error: (error) => {
         this.messageService.add({
@@ -475,6 +488,58 @@ export class UsersComponent implements OnInit {
         });
         console.error('Erreur lors de la réactivation de l\'utilisateur:', error);
       }
+    });
+  }
+
+  // Add exportExcel method
+  exportExcel() {
+    const data = this.filteredUsers.map(user => ({
+      'Prénom': user.first_name,
+      'Nom': user.last_name,
+      'Email': user.email,
+      'Téléphone': user.telephone,
+      'Ville': user.city,
+      'Code postal': user.code_postal,
+      'Type d\'appareil': user.device_type,
+      'Rôle': user.role_name || user.role_id,
+      'Statut': user.deleted_at ? 'Inactive' : 'Active',
+      'Créé le': user.created_at
+    }));
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Utilisateurs');
+    XLSX.writeFile(workbook, 'utilisateurs.xlsx');
+  }
+
+  // Add exportPdf method
+  exportPdf() {
+    const doc = new jsPDF();
+    const columns = [
+      'Prénom', 'Nom', 'Email', 'Téléphone',  'Rôle', 'Statut'
+    ];
+    const rows = this.filteredUsers.map(user => [
+      user.first_name,
+      user.last_name,
+      user.email,
+      user.telephone,
+      user.role_name || user.role_id,
+      user.deleted_at ? 'Inactive' : 'Active'
+    ]);
+    autoTable(doc, {
+      head: [columns],
+      body: rows,
+      styles: { fontSize: 9 }
+    });
+    doc.save('utilisateurs.pdf');
+  }
+
+  // Add fetchUsers method
+  fetchUsers() {
+    this.getAllUsers();
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Rafraîchir',
+      detail: 'Liste des utilisateurs rafraîchie'
     });
   }
 }
