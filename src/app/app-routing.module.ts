@@ -15,6 +15,8 @@ import { EditArticleComponent } from './edit-article/edit-article.component';
 import { UsersComponent } from './users/users.component';
 import { ClientsComponent } from './clients/clients.component';
 import { RolesPermissionsComponent } from './roles-permissions/roles-permissions.component';
+import { LogUsersComponent } from './log-users/log-users.component';
+import { ParametresGenerauxComponent } from './parametres-generaux/parametres-generaux.component';
 
 // AuthGuard implementation
 @Injectable({ providedIn: 'root' })
@@ -49,6 +51,10 @@ const routes: Routes = [
   { path: 'utilisateurs', component: UsersComponent },
   { path: 'clients', component: ClientsComponent },
   { path: 'roles-permissions', component: RolesPermissionsComponent },
+  { path: 'journaux-utilisateur', component: LogUsersComponent },
+  { path: 'parametres-generaux', component: ParametresGenerauxComponent },
+
+
 ];
 
 @NgModule({

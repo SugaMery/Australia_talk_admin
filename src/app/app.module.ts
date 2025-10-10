@@ -33,6 +33,8 @@ import { BadgeModule } from 'primeng/badge';
 import { TagModule } from 'primeng/tag';
 import { ClientsComponent } from './clients/clients.component';
 import { RolesPermissionsComponent } from './roles-permissions/roles-permissions.component';
+import { LogUsersComponent } from './log-users/log-users.component';
+import { ParametresGenerauxComponent } from './parametres-generaux/parametres-generaux.component';
 @NgModule({
   declarations: [
     AppComponent,
@@ -53,7 +55,9 @@ import { RolesPermissionsComponent } from './roles-permissions/roles-permissions
     EditArticleComponent,
     UsersComponent,
     ClientsComponent,
-    RolesPermissionsComponent
+    RolesPermissionsComponent,
+    LogUsersComponent,
+    ParametresGenerauxComponent
   ],
   imports: [
     BrowserModule,
