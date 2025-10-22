@@ -44,28 +44,28 @@
                 </div>
                 <div class="d-flex align-items-center justify-content-between menu-item mb-3">
                     <div>
-                        <a href="index.html" class="btn btn-sm btn-icon bg-light">
+                        <a href="index.html" class="btn btn-sm btn-icon bg-light" (click)="selectedMenu = 'dashboard'; $event.preventDefault()">
 							<i class="ti ti-layout-grid-remove"></i>
 						</a>
                     </div>
                     <div>
-                        <a href="chat.html" class="btn btn-sm btn-icon bg-light">
+                        <a href="chat.html" class="btn btn-sm btn-icon bg-light" (click)="selectedMenu = 'chat'; $event.preventDefault()">
 							<i class="ti ti-brand-hipchat"></i>
 						</a>
                     </div>
                     <div>
-                        <a href="email.html" class="btn btn-sm btn-icon bg-light position-relative">
+                        <a href="email.html" class="btn btn-sm btn-icon bg-light position-relative" (click)="selectedMenu = 'email'; $event.preventDefault()">
 							<i class="ti ti-message"></i>
 						</a>
                     </div>
                     <div class="notification-item">
-                        <a href="activities.html" class="btn btn-sm btn-icon bg-light position-relative">
+                        <a href="activities.html" class="btn btn-sm btn-icon bg-light position-relative" (click)="selectedMenu = 'activities'; $event.preventDefault()">
 							<i class="ti ti-bell"></i>
 							<span class="notification-status-dot"></span>
 						</a>
                     </div>
                     <div class="me-0">
-                        <a href="general-settings.html" class="btn btn-sm btn-icon bg-light">
+                        <a href="general-settings.html" class="btn btn-sm btn-icon bg-light" (click)="selectedMenu = 'general-settings'; $event.preventDefault()">
 							<i class="ti ti-settings"></i>
 						</a>
                     </div>
