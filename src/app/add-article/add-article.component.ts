@@ -49,13 +49,14 @@ export class AddArticleComponent implements OnInit {
 
   // Article types for checkboxes
   articleTypes: ArticleType[] = [
-    { id: 1, type: 'Mise à jour logicielle', description: 'Guides pour installer les dernières mises à jour sur Android et iOS', urgent: true, model: false },
-    { id: 2, type: 'Dépannage', description: 'Solutions pour les problèmes courants après une mise à jour', urgent: true, model: false },
-    { id: 4, type: 'Sécurité', description: 'Conseils pour sécuriser votre téléphone après une mise à jour', urgent: true, model: false },
-    { id: 7, type: 'Sauvegarde et restauration', description: 'Comment sauvegarder et restaurer les données', urgent: true, model: false },
-    { id: 9, type: 'Connectivité', description: 'Résolution des problèmes de Wi-Fi, Bluetooth et données mobiles', urgent: true, model: false },
-    { id: 13, type: 'Stockage', description: 'Comment gérer et libérer de l’espace de stockage', urgent: true, model: false },
-    { id: 20, type: 'Mises à jour de sécurité', description: 'Importance des patchs de sécurité et comment les appliquer', urgent: true, model: false }
+
+    // Ajouts demandés — types d'articles supplémentaires
+    { id: 21, type: 'Actualités', description: 'Annonces et nouvelles importantes du secteur', urgent: true, model: false },
+    { id: 22, type: 'Tutoriels', description: 'Guides pas à pas pour réaliser des tâches et configurations', urgent: false, model: false },
+    { id: 23, type: 'Annonces', description: 'Communiqués officiels et déclarations produits', urgent: true, model: false },
+    { id: 24, type: 'Critiques', description: 'Avis et tests détaillés de produits et services', urgent: false, model: false },
+    { id: 25, type: 'Comparatifs', description: 'Comparaison entre appareils, versions ou solutions', urgent: false, model: false },
+    { id: 26, type: 'Articles', description: 'Contenu éditorial général et analyses', urgent: false, model: false }
   ];
 
   constructor(
