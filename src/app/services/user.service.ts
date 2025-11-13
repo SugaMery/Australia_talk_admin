@@ -84,7 +84,19 @@ export class UserService {
       catchError(this.handleError)
     );
   }
+  private apiUrlclient = `${environment.apiUrl}/clients`;
+  getAllClients(): Observable<User[]> {
+    return this.http.get<User[]>(this.apiUrlclient, { headers: this.getHeaders() }).pipe(
+      catchError(this.handleError)
+    );
+  }
 
+  private apiUrlutilisateur = `${environment.apiUrl}/utilisateurs`;
+  getAllUtilisateurs(): Observable<User[]> {
+    return this.http.get<User[]>(this.apiUrlutilisateur, { headers: this.getHeaders() }).pipe(
+      catchError(this.handleError)
+    );
+  }
 
   create(user: Partial<RegisterRequest>): Observable<User> {
     // Ensure code_postal is used instead of codepostal

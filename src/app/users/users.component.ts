@@ -39,7 +39,6 @@ export interface EditUser {
 })
 export class UsersComponent implements OnInit {
   users: any[] = [];
-  filteredUsers: any[] = [];
   roles: any[] = [];
   cities = [
     { nom: 'Paris', code_postal: '75000' },
@@ -122,6 +121,10 @@ export class UsersComponent implements OnInit {
 
   statusFilter: string | null = null;
   roleFilter: number | null = null;
+  currentPage: number = 1;
+  itemsPerPage: number = 10;
+  totalPages: number = 1;
+  filteredUsers: any[] = [];
 
   constructor(
     private userService: UserService,
@@ -136,7 +139,7 @@ export class UsersComponent implements OnInit {
   }
 
   getAllUsers() {
-    this.userService.getAll().subscribe({
+    this.userService.getAllUtilisateurs().subscribe({
       next: (users: any[]) => {
         this.users = users;
         this.filterUsers();
@@ -205,7 +208,37 @@ export class UsersComponent implements OnInit {
       );
     }
 
-    this.filteredUsers = filtered;
+    this.totalPages = Math.ceil(filtered.length / this.itemsPerPage);
+    this.currentPage = 1;
+    this.applyPagination(filtered);
+  }
+
+  applyPagination(data: any[]): void {
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    this.filteredUsers = data.slice(startIndex, endIndex);
+  }
+
+  goToPage(page: number): void {
+    if (page < 1 || page > this.totalPages) {
+      return;
+    }
+    this.currentPage = page;
+    let filtered = this.users.filter(user => {
+      const matchesSearch = !this.searchTerm || 
+        user.first_name?.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+        user.last_name?.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+        user.email?.toLowerCase().includes(this.searchTerm.toLowerCase());
+
+      const matchesRole = !this.roleFilter || user.role_id === this.roleFilter;
+
+      const matchesStatus = !this.statusFilter ||
+        (this.statusFilter === 'active' && !user.deleted_at) ||
+        (this.statusFilter === 'inactive' && user.deleted_at);
+
+      return matchesSearch && matchesRole && matchesStatus;
+    });
+    this.applyPagination(filtered);
   }
 
   filterCities(event: any) {

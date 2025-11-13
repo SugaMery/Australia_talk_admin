@@ -79,6 +79,7 @@
                     <input class="form-check-input" type="checkbox" id="select-all">
                   </div>
                 </th>
+                <th>ID</th>
                 <th>Nom</th>
                 <th>Statut</th>
                 <th>Niveau</th>
@@ -95,6 +96,7 @@
                     <input class="form-check-input" type="checkbox">
                   </div>
                 </td>
+                <td>{{ role.id }}</td>
                 <td>{{ role.name }}</td>
    <td>{{ role.slug }}</td>
                 <td>{{ role.level < 10 ? ('0' + role.level) : role.level }}</td>

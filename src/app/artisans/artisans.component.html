@@ -66,6 +66,7 @@
           <table class="table datatable">
             <thead class="thead-light">
               <tr>
+                <th>ID</th>
                 <th>Nom</th>
                 <th>Email</th>
                 <th>Téléphone</th>
@@ -76,6 +77,7 @@
             <tbody>
               <tr *ngFor="let person of filteredList">
                 <ng-container *ngIf="person.type === 'artisan'">
+                  <td>ART{{ person.id }}</td>
                   <td>{{ person.name || (person.first_name + ' ' + person.last_name) }}</td>
                   <td>{{ person.email }}</td>
                   <td>{{ person.phone }}</td>
