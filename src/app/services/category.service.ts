@@ -1,12 +1,20 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 import { environment } from '../environments/environment';
+
+export interface CategoryTranslation {
+  id?: number;
+  category_id: number;
+  language_id: number;
+  name: string;
+  created_at?: string;
+  updated_at?: string;
+}
 
 export interface Category {
   id: number;
-  name: string;
   slug: string;
   icon_id?: number;
   parent_id?: number;
@@ -17,6 +25,12 @@ export interface Category {
   created_at?: string;
   updated_at?: string;
   deleted_at?: string | null;
+  language_id?: number;
+  translation?: CategoryTranslation;
+}
+
+export interface CategoryWithContent extends Category {
+  name: string;
 }
 
 @Injectable({
@@ -25,6 +39,7 @@ export interface Category {
 export class CategoryService {
   private apiUrl = `${environment.apiUrl}/categories`;
   private token: string | null = localStorage.getItem('token');
+  private defaultLanguageId = 1; // French is the default language
 
   constructor(private http: HttpClient) {}
 
@@ -48,26 +63,74 @@ export class CategoryService {
     return headers;
   }
 
-  getAll(): Observable<Category[]> {
-    return this.http.get<Category[]>(this.apiUrl, { headers: this.getHeaders() }).pipe(
+  /**
+   * Get the current language ID (default to French if not set)
+   */
+  private getLanguageId(): number {
+    const storedLangId = localStorage.getItem('language_id');
+    return storedLangId ? Number(storedLangId) : this.defaultLanguageId;
+  }
+
+  /**
+   * Set the language ID for translations
+   */
+  setLanguageId(languageId: number): void {
+    localStorage.setItem('language_id', languageId.toString());
+  }
+
+  /**
+   * Extract name from translation object
+   * Falls back to French (language_id = 1) if translation not found
+   */
+  private extractTranslationContent(category: Category): CategoryWithContent {
+    let name = '';
+
+    if (category.translation) {
+      name = category.translation.name || '';
+    }
+
+    return {
+      ...category,
+      name,
+    };
+  }
+
+  getAll(languageId?: number): Observable<CategoryWithContent[]> {
+    const lang = languageId || this.getLanguageId();
+    return this.http.get<Category[]>(this.apiUrl, { 
+      headers: this.getHeaders(),
+      params: { language_id: lang.toString() }
+    }).pipe(
+      map(categories => categories.map(category => this.extractTranslationContent(category))),
       catchError(this.handleError)
     );
   }
 
-  getById(id: number): Observable<Category> {
-    return this.http.get<Category>(`${this.apiUrl}/${id}`, { headers: this.getHeaders() }).pipe(
+  getById(id: number, languageId?: number): Observable<CategoryWithContent> {
+    const lang = languageId || this.getLanguageId();
+    return this.http.get<Category>(`${this.apiUrl}/${id}`, { 
+      headers: this.getHeaders(),
+      params: { language_id: lang.toString() }
+    }).pipe(
+      map(category => this.extractTranslationContent(category)),
       catchError(this.handleError)
     );
   }
 
-  create(category: { name: string;  icon_id?: number; parent_id?: number; type: 'Free' | 'Paid'; active?: boolean; }): Observable<Category> {
-    return this.http.post<Category>(this.apiUrl, category, { headers: this.getHeaders() }).pipe(
+  create(category: { name: string; icon_id?: number; parent_id?: number; type: 'Free' | 'Paid'; active?: boolean; language_id?: number }): Observable<CategoryWithContent> {
+    const languageId = category.language_id || this.getLanguageId();
+    const payload = { ...category, language_id: languageId };
+    return this.http.post<Category>(this.apiUrl, payload, { headers: this.getHeaders() }).pipe(
+      map(response => this.extractTranslationContent(response)),
       catchError(this.handleError)
     );
   }
 
-  update(id: number, category: { name: string; icon_id?: number; parent_id?: number; type: 'Free' | 'Paid'; active?: boolean; }): Observable<Category> {
-    return this.http.put<Category>(`${this.apiUrl}/${id}`, category, { headers: this.getHeaders() }).pipe(
+  update(id: number, category: { name: string; icon_id?: number; parent_id?: number; type: 'Free' | 'Paid'; active?: boolean; language_id?: number }): Observable<CategoryWithContent> {
+    const languageId = category.language_id || this.getLanguageId();
+    const payload = { ...category, language_id: languageId };
+    return this.http.put<Category>(`${this.apiUrl}/${id}`, payload, { headers: this.getHeaders() }).pipe(
+      map(response => this.extractTranslationContent(response)),
       catchError(this.handleError)
     );
   }

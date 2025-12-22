@@ -47,7 +47,7 @@ const routes: Routes = [
   { path: 'tags', component: TagsComponent },
   { path: 'create-article', component: AddArticleComponent },
   { path: 'articles', component: ArticlesComponent },
-  { path: 'edit-article/:id/:title', component: EditArticleComponent },
+  { path: 'edit-article/:id', component: EditArticleComponent },
   { path: 'utilisateurs', component: UsersComponent },
   { path: 'clients', component: ClientsComponent },
   { path: 'roles-permissions', component: RolesPermissionsComponent },

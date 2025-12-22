@@ -40,10 +40,34 @@
             </h2>
             <div id="ArticleInfo" class="accordion-collapse collapse show" aria-labelledby="headingArticleInfo">
               <div class="accordion-body border-top">
+                
+                <!-- Language Tabs -->
+                <div class="mb-4">
+                  <ul class="nav nav-tabs" id="languageTabs" role="tablist">
+                    <li class="nav-item" role="presentation" *ngFor="let lang of languages">
+                      <button 
+                        class="nav-link" 
+                        [class.active]="currentLanguageId === lang.id"
+                        id="lang-{{ lang.code }}-tab" 
+                        (click)="onLanguageTabClick(lang.id)"
+                        type="button" 
+                        role="tab"
+                        [attr.aria-controls]="'lang-' + lang.code"
+                        [attr.aria-selected]="currentLanguageId === lang.id"
+                        style="display: flex; align-items: center; gap: 8px; font-weight: 500;">
+                        <img *ngIf="lang.id === 1" src="assets/img/flags/fr.png" alt="France" class="flag-img" style="width: 24px; height: 16px;" />
+                        <img *ngIf="lang.id === 2" src="assets/img/flags/us.png" alt="England" class="flag-img" style="width: 24px; height: 16px;" />
+                        <img *ngIf="lang.id === 3" src="assets/img/flags/es.png" alt="Spain" class="flag-img" style="width: 24px; height: 16px;" />
+                        {{ lang.name }}
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+
                 <div class="row">
                   <div class="col-sm-6 col-12">
                     <div class="mb-3 list position-relative">
-                      <label class="form-label">Titre<span class="text-danger ms-1">*</span></label>
+                      <label class="form-label">Titre ({{ getLanguageName(currentLanguageId) }})<span class="text-danger ms-1">*</span></label>
                       <input type="text" class="form-control list" [(ngModel)]="articleTitle" name="articleTitle">
                       <button type="button" class="btn btn-primaryadd" (click)="generateTitleFromContent()" [disabled]="!text || !text.trim()">Générer</button>
                     </div>
@@ -80,7 +104,7 @@
                 </div>
                 <div class="col-lg-12">
 				<div class="summer-description-box">
-					<label class="form-label">Description<span class="text-danger ms-1">*</span></label>
+					<label class="form-label">Description ({{ getLanguageName(currentLanguageId) }})<span class="text-danger ms-1">*</span></label>
           <p-editor
       [(ngModel)]="text"
       name="articleDescription"
@@ -163,11 +187,9 @@
                     (onChange)="onTagsChange()"
                     display="chip"
                     appendTo="body"
-                    [virtualScroll]="true"
                     [filter]="true"
                     [selectedItemsLabel]="'Tags sélectionnés'"
-                    [panelStyle]="{ 'max-height': '300px', 'overflow': 'auto' }"
-                    [scrollHeight]="'300px'"
+                    [panelStyle]="{ 'max-height': '400px', 'width': '100%', 'z-index': 10000 }"
                   ></p-multiSelect>
                 </div>
               </div>

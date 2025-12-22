@@ -30,6 +30,7 @@ export interface Artisan {
 export class ArtisanService {
   private apiUrl = `${environment.apiUrl}/artisans`;
   private token: string | null = localStorage.getItem('token');
+  private defaultLanguageId = 1; // French is the default language
 
   constructor(private http: HttpClient) {}
 
@@ -41,6 +42,21 @@ export class ArtisanService {
   clearToken(): void {
     this.token = null;
     localStorage.removeItem('token');
+  }
+
+  /**
+   * Get the current language ID (default to French if not set)
+   */
+  private getLanguageId(): number {
+    const storedLangId = localStorage.getItem('language_id');
+    return storedLangId ? Number(storedLangId) : this.defaultLanguageId;
+  }
+
+  /**
+   * Set the language ID for translations
+   */
+  setLanguageId(languageId: number): void {
+    localStorage.setItem('language_id', languageId.toString());
   }
 
   private getHeaders(): HttpHeaders {

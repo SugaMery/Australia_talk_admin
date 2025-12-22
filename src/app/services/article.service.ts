@@ -1,16 +1,24 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 import { environment } from '../environments/environment';
 import { Tag } from './tag.service';
 import { Category } from './category.service';
 import { Media } from './media.service';
 
-export interface Article {
-  id: number;
+export interface ArticleTranslation {
+  id?: number;
+  article_id: number;
+  language_id: number;
   title: string;
   content?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface Article {
+  id: number;
   type: string;
   author_id?: number;
   isfree?: boolean;
@@ -21,6 +29,13 @@ export interface Article {
   created_at?: string;
   updated_at?: string;
   deleted_at?: string | null;
+  language_id?: number;
+  translation?: ArticleTranslation;
+}
+
+export interface ArticleWithContent extends Article {
+  title: string;
+  content?: string;
 }
 
 export interface ArticleRelated {
@@ -30,7 +45,7 @@ export interface ArticleRelated {
   media: Media[];
 }
 
-export interface ArticleWithRelated extends Article {
+export interface ArticleWithRelated extends ArticleWithContent {
   tags: Tag[];
   categories: Category[];
   media: Media[];
@@ -42,6 +57,7 @@ export interface ArticleWithRelated extends Article {
 export class ArticleService {
   private apiUrl = `${environment.apiUrl}/articles`;
   private token: string | null = localStorage.getItem('token');
+  private defaultLanguageId = 1; // French is the default language
 
   constructor(private http: HttpClient) {}
 
@@ -65,56 +81,128 @@ export class ArticleService {
     return headers;
   }
 
-  getAll(): Observable<Article[]> {
-    return this.http.get<Article[]>(this.apiUrl, { headers: this.getHeaders() }).pipe(
+  /**
+   * Get the current language ID (default to French if not set)
+   */
+  private getLanguageId(): number {
+    const storedLangId = localStorage.getItem('language_id');
+    return storedLangId ? Number(storedLangId) : this.defaultLanguageId;
+  }
+
+  /**
+   * Set the language ID for translations
+   */
+  setLanguageId(languageId: number): void {
+    localStorage.setItem('language_id', languageId.toString());
+  }
+
+  /**
+   * Extract title and content from translation object
+   * Falls back to French (language_id = 1) if translation not found
+   */
+  private extractTranslationContent(article: Article): ArticleWithContent {
+    let title = '';
+    let content = '';
+
+    if (article.translation) {
+      title = article.translation.title || '';
+      content = article.translation.content || '';
+    }
+
+    return {
+      ...article,
+      title,
+      content,
+    };
+  }
+
+  getAll(languageId?: number): Observable<ArticleWithContent[]> {
+    const lang = languageId || this.getLanguageId();
+    return this.http.get<Article[]>(this.apiUrl, { 
+      headers: this.getHeaders(),
+      params: { language_id: lang.toString() }
+    }).pipe(
+      map(articles => articles.map(article => this.extractTranslationContent(article))),
       catchError(this.handleError)
     );
   }
 
-  getById(id: number): Observable<Article> {
-    return this.http.get<Article>(`${this.apiUrl}/${id}`, { headers: this.getHeaders() }).pipe(
+  getById(id: number, languageId?: number): Observable<ArticleWithContent> {
+    const lang = languageId || this.getLanguageId();
+    return this.http.get<Article>(`${this.apiUrl}/${id}`, { 
+      headers: this.getHeaders(),
+      params: { language_id: lang.toString() }
+    }).pipe(
+      map(article => this.extractTranslationContent(article)),
       catchError(this.handleError)
     );
   }
 
-  create(article: { title: string; content?: string; type: string; author_id?: number; isfree?: number }): Observable<Article> {
+  create(article: { 
+    title: string; 
+    content?: string; 
+    type: string; 
+    author_id?: number; 
+    isfree?: number;
+    language_id?: number;
+  }): Observable<ArticleWithContent> {
     // Get author_id from localStorage if not provided
     let userId = localStorage.getItem('user_id');
     let author_id = article.author_id;
     if (!author_id && userId) {
       author_id = Number(userId);
     }
-    const payload = { ...article, author_id };
+    
+    const languageId = article.language_id || this.getLanguageId();
+    
+    const payload = { 
+      ...article, 
+      author_id,
+      language_id: languageId,
+    };
+    
     return this.http.post<Article>(this.apiUrl, payload, { headers: this.getHeaders() }).pipe(
+      map(response => this.extractTranslationContent(response)),
       catchError(this.handleError)
     );
   }
 
 
-    update(
-      id: number,
-      article: { title: string; content?: string; type: string; author_id?: number; isfree?: number }
-    ): Observable<Article> {
-      // Get author_id from localStorage if not provided
-      let userId = localStorage.getItem('user_id');
-      let author_id = article.author_id;
-      if (!author_id && userId) {
-        author_id = Number(userId);
-      }
-
-      const payload = {
-        ...article,
-        author_id,
-        validation_status: 'pending',
-        status: 'pending',
-        views_count: 0,
-        likes_count: 0,
-      };
-      console.log('Update payload:', payload);
-      return this.http.put<Article>(`${this.apiUrl}/${id}`, payload, { headers: this.getHeaders() }).pipe(
-        catchError(this.handleError)
-      );
+  update(
+    id: number,
+    article: { 
+      title: string; 
+      content?: string; 
+      type: string; 
+      author_id?: number; 
+      isfree?: number;
+      language_id?: number;
     }
+  ): Observable<ArticleWithContent> {
+    // Get author_id from localStorage if not provided
+    let userId = localStorage.getItem('user_id');
+    let author_id = article.author_id;
+    if (!author_id && userId) {
+      author_id = Number(userId);
+    }
+
+    const languageId = article.language_id || this.getLanguageId();
+
+    const payload = {
+      ...article,
+      author_id,
+      language_id: languageId,
+      validation_status: 'pending',
+      status: 'pending',
+      views_count: 0,
+      likes_count: 0,
+    };
+    console.log('Update payload:', payload);
+    return this.http.put<Article>(`${this.apiUrl}/${id}`, payload, { headers: this.getHeaders() }).pipe(
+      map(response => this.extractTranslationContent(response)),
+      catchError(this.handleError)
+    );
+  }
 
 
 
@@ -129,14 +217,27 @@ export class ArticleService {
    * Get article with related tags, categories, and media.
    * Matches backend route: GET /articles/:id/related
    */
-  getRelated(id: number): Observable<ArticleRelated> {
-    return this.http.get<ArticleRelated>(`${this.apiUrl}/${id}/related`, { headers: this.getHeaders() }).pipe(
+  getRelated(id: number, languageId?: number): Observable<ArticleRelated> {
+    const lang = languageId || this.getLanguageId();
+    return this.http.get<ArticleRelated>(`${this.apiUrl}/${id}/related`, { 
+      headers: this.getHeaders(),
+      params: { language_id: lang.toString() }
+    }).pipe(
+      map(response => ({
+        ...response,
+        article: this.extractTranslationContent(response.article)
+      })),
       catchError(this.handleError)
     );
   }
 
-  getAllWithRelated(): Observable<ArticleWithRelated[]> {
-    return this.http.get<ArticleWithRelated[]>(`${this.apiUrl}/with-related`, { headers: this.getHeaders() }).pipe(
+  getAllWithRelated(languageId?: number): Observable<ArticleWithRelated[]> {
+    const lang = languageId || this.getLanguageId();
+    return this.http.get<ArticleWithRelated[]>(`${this.apiUrl}/with-related`, { 
+      headers: this.getHeaders(),
+      params: { language_id: lang.toString() }
+    }).pipe(
+      map(articles => articles.map(article => this.extractTranslationContent(article) as ArticleWithRelated)),
       catchError(this.handleError)
     );
   }

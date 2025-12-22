@@ -38,10 +38,34 @@
             </h2>
             <div id="ArticleInfo" class="accordion-collapse collapse show" aria-labelledby="headingArticleInfo">
               <div class="accordion-body border-top">
+                
+                <!-- Language Tabs -->
+                <div class="mb-4">
+                  <ul class="nav nav-tabs" id="languageTabs" role="tablist">
+                    <li class="nav-item" role="presentation" *ngFor="let lang of languages">
+                      <button 
+                        class="nav-link" 
+                        [class.active]="currentLanguageId === lang.id"
+                        id="lang-{{ lang.code }}-tab" 
+                        (click)="onLanguageTabClick(lang.id)"
+                        type="button" 
+                        role="tab"
+                        [attr.aria-controls]="'lang-' + lang.code"
+                        [attr.aria-selected]="currentLanguageId === lang.id"
+                        style="display: flex; align-items: center; gap: 8px; font-weight: 500;">
+                        <img *ngIf="lang.id === 1" src="assets/img/flags/fr.png" alt="France" class="flag-img" style="width: 24px; height: 16px;" />
+                        <img *ngIf="lang.id === 2" src="assets/img/flags/us.png" alt="England" class="flag-img" style="width: 24px; height: 16px;" />
+                        <img *ngIf="lang.id === 3" src="assets/img/flags/es.png" alt="Spain" class="flag-img" style="width: 24px; height: 16px;" />
+                        {{ lang.name }}
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+
                 <div class="row">
                   <div class="col-sm-6 col-12">
                     <div class="mb-3 list position-relative">
-                      <label class="form-label">Titre<span class="text-danger ms-1">*</span></label>
+                      <label class="form-label">Titre ({{ getLanguageName(currentLanguageId) }})<span class="text-danger ms-1">*</span></label>
                       <input type="text" class="form-control list" [(ngModel)]="articleTitle" name="articleTitle">
                       <button type="button" class="btn btn-primaryadd" (click)="generateTitleFromContent()" [disabled]="!text || !text.trim()">Générer</button>
                     </div>
@@ -52,16 +76,26 @@
                         <label class="form-label">Catégorie<span class="text-danger ms-1">*</span></label>
                         <a href="categories"><i data-feather="plus-circle" class="plus-down-add"></i><span>Ajouter une nouvelle</span></a>
                       </div>
-					  <select class="select" [(ngModel)]="selectedCategory" name="category">
-						<option [ngValue]="null" disabled selected hidden>Veuillez sélectionner une catégorie</option>
-						<option *ngFor="let category of categories" [ngValue]="category">{{ category.name }}</option>
-					  </select>
+                    <p-dropdown 
+                        [options]="categories" 
+                        [(ngModel)]="selectedCategory"
+                        [ngModelOptions]="{standalone: true}"
+                        optionLabel="name" 
+                        optionValue="id"
+                        [showClear]="true"
+                        placeholder="Veuillez sélectionner une catégorie"
+                        name="category"
+                        appendTo="body"
+                        [filter]="true"
+                        [dropdownIcon]="'pi pi-chevron-down'"
+                        [autoDisplayFirst]="false"
+                    ></p-dropdown>
                     </div>
                   </div>
                 </div>
                 <div class="col-lg-12">
 				<div class="summer-description-box">
-					<label class="form-label">Description<span class="text-danger ms-1">*</span></label>
+					<label class="form-label">Description ({{ getLanguageName(currentLanguageId) }})<span class="text-danger ms-1">*</span></label>
 					<textarea class="form-control editor pages-editor"
 										[(ngModel)]="text"
 										name="articleDescription"
@@ -118,9 +152,22 @@
                     <label class="form-label">Tags<span class="text-danger ms-1">*</span></label>
                     <a href="tags"><i data-feather="plus-circle" class="plus-down-add"></i><span>Ajouter des tags</span></a>
                   </div>
-				<select #tagSelect class="select" multiple [(ngModel)]="articleTags" name="articleTags" (change)="onTagsChange()">
-					<option *ngFor="let tag of availableTags" [ngValue]="tag">{{ tag.name }}</option>
-				</select>
+                  <p-multiSelect
+                    [options]="availableTags"
+                    [(ngModel)]="articleTags"
+                    [ngModelOptions]="{standalone: true}"
+                    optionLabel="name"
+                    optionValue="id"
+                    [showClear]="true"
+                    placeholder="Sélectionnez des tags"
+                    name="articleTags"
+                    (onChange)="onTagsChange()"
+                    display="chip"
+                    appendTo="body"
+                    [filter]="true"
+                    [selectedItemsLabel]="'Tags sélectionnés'"
+                    [panelStyle]="{ 'max-height': '400px', 'width': '100%', 'z-index': 10000 }"
+                  ></p-multiSelect>
                 </div>
               </div>
             </div>

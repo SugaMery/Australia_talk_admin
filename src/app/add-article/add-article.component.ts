@@ -19,6 +19,13 @@ export interface ArticleType {
   model: boolean;
 }
 
+export interface ArticleTranslation {
+  language_id: number;
+  language_code: string;
+  title: string;
+  content: string;
+}
+
 @Component({
   selector: 'app-add-article',
   templateUrl: './add-article.component.html',
@@ -41,6 +48,19 @@ export class AddArticleComponent implements OnInit {
   isFree: boolean = false;
   isGratuite: boolean = false;
   text: string = '';
+
+  // Multi-language properties
+  currentLanguageId: number = 1; // 1 = French, 2 = English, 3 = Spanish
+  languages: { id: number; code: string; name: string }[] = [
+    { id: 1, code: 'fr', name: 'Français' },
+    { id: 2, code: 'en', name: 'English' },
+    { id: 3, code: 'es', name: 'Español' }
+  ];
+  translations: ArticleTranslation[] = [
+    { language_id: 1, language_code: 'fr', title: '', content: '' },
+    { language_id: 2, language_code: 'en', title: '', content: '' },
+    { language_id: 3, language_code: 'es', title: '', content: '' }
+  ];
 
   // Media properties
   mediaPreviews: { url: string; type: 'image' | 'video' }[] = [];
@@ -72,34 +92,81 @@ export class AddArticleComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // Load categories from service
-    this.categoryService.getAll().subscribe((categories: any[]) => {
+    // Load categories and tags for current language
+    this.loadCategoriesAndTags();
+  }
+
+  /**
+   * Load categories and tags for the current language
+   */
+  loadCategoriesAndTags(): void {
+    // Load categories from service with current language
+    this.categoryService.getAll(this.currentLanguageId).subscribe((categories: any[]) => {
       this.categories = categories;
-      console.log('Categories loaded:', this.categories);
+      console.log('Categories loaded for language', this.currentLanguageId, ':', this.categories);
     });
 
-    // Load tags from service
-    this.tagsService.getAll().subscribe((tags: any[]) => {
-      this.availableTags = tags;
-      console.log('Tags loaded:', this.availableTags);
+    // Load all tags for dropdown with current language
+    this.tagsService.getAll(this.currentLanguageId).subscribe((tags: any[]) => {
+      this.availableTags = Array.isArray(tags) ? tags : [];
+      console.log('Tags loaded for language', this.currentLanguageId, ':', this.availableTags);
     });
+  }
 
-    // Log first phrase on page for debugging
-    setTimeout(() => {
-      const firstPhrase = document.body.innerText.trim().split('\n')[0];
-      console.log('First phrase in page:', firstPhrase);
-    }, 0);
+  /**
+   * Handle language tab click - save then switch
+   */
+  onLanguageTabClick(languageId: number): void {
+    if (this.currentLanguageId === languageId) {
+      return; // Same language, no action needed
+    }
 
-    // Load Quill CSS
-    const quillLink = document.createElement('link');
-    quillLink.rel = 'stylesheet';
-    quillLink.href = 'assets/plugins/quill/quill.snow.css';
-    document.head.appendChild(quillLink);
+    // Step 1: Save current language translation
+    this.saveCurrentLanguageTranslation();
 
-    // Load Quill JS
-    const quillScript = document.createElement('script');
-    quillScript.src = 'assets/plugins/quill/quill.min.js';
-    document.body.appendChild(quillScript);
+    // Step 2: Switch to new language
+    this.currentLanguageId = languageId;
+
+    // Step 3: Display new language content
+    this.updateCurrentLanguageDisplay();
+
+    console.log('Switched to language:', languageId, 'Translations:', this.translations);
+  }
+
+  /**
+   * Update the displayed title and content for the current language
+   */
+  updateCurrentLanguageDisplay(): void {
+    const currentTrans = this.translations.find(t => t.language_id === this.currentLanguageId);
+    if (currentTrans) {
+      this.articleTitle = currentTrans.title || '';
+      this.text = currentTrans.content || '';
+      console.log('Updated display for language', this.currentLanguageId, '- Title:', this.articleTitle, 'Content length:', this.text.length);
+    } else {
+      console.warn('No translation found for language', this.currentLanguageId);
+    }
+  }
+
+  /**
+   * Save current language translations before switching
+   */
+  saveCurrentLanguageTranslation(): void {
+    const currentTrans = this.translations.find(t => t.language_id === this.currentLanguageId);
+    if (currentTrans) {
+      currentTrans.title = this.articleTitle || '';
+      currentTrans.content = this.text || '';
+      console.log('Saved translation for language', this.currentLanguageId, '- Title:', currentTrans.title, 'Content length:', currentTrans.content.length);
+    } else {
+      console.warn('Translation object not found for language', this.currentLanguageId);
+    }
+  }
+
+  /**
+   * Get the language name by ID
+   */
+  getLanguageName(languageId: number): string {
+    const lang = this.languages.find(l => l.id === languageId);
+    return lang ? lang.name : 'Unknown';
   }
 
   // Generate title using compromise NLP
@@ -263,32 +330,24 @@ export class AddArticleComponent implements OnInit {
 
   // Submit article form
   async addArticle() {
-    // Check and get tags and category from UI
-    this.checkTags();
-    this.checkCategory();
+    // Save current language translation before validation
+    this.saveCurrentLanguageTranslation();
 
-    const selectedTags = this.getSelectedItemsPureWithIds();
-    const selectedCategoryObj = this.getSelectedCategoryFromSelect2();
-    const selectedCategory = selectedCategoryObj
-      ? selectedCategoryObj.id
-      : (this.selectedCategory && this.selectedCategory.id
-        ? this.selectedCategory.id
-        : this.selectedCategory);
+    console.log('All translations before submit:', this.translations);
+    console.log('Selected Tags (articleTags):', this.articleTags);
 
-    // Validation: all fields required, at least one image
-    if (!this.articleTitle.trim()) {
-      this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Le titre est obligatoire.' });
+    // Validation: all fields required for all languages
+    const validationError = this.validateAllLanguages();
+    if (validationError) {
+      this.messageService.add({ severity: 'error', summary: 'Erreur', detail: validationError });
       return;
     }
-    if (!this.text.trim()) {
-      this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'La description est obligatoire.' });
-      return;
-    }
-    if (!selectedCategory) {
+
+    if (!this.selectedCategory) {
       this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'La catégorie est obligatoire.' });
       return;
     }
-    if (!selectedTags || selectedTags.length === 0) {
+    if (!this.articleTags || this.articleTags.length === 0) {
       this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Au moins un tag est obligatoire.' });
       return;
     }
@@ -302,16 +361,27 @@ export class AddArticleComponent implements OnInit {
     }
 
     try {
-      // 1. Create article (get article ID)
-      const articlePayload = {
-        title: this.articleTitle,
-        content: this.text,
-        isfree: this.accessType == 'gratuit' ? 1 : 0,
-        type: this.articleTypes.filter(t => t.model).map(t => t.type).join(','),
-      };
+      // 1. Create article with all translations (using French first)
+      let articleId: number | null = null;
 
-      const articleResp = await this.articleService.create(articlePayload).toPromise();
-      const articleId = articleResp && articleResp.id ? articleResp.id : null;
+      for (const trans of this.translations) {
+        const articlePayload = {
+          title: trans.title,
+          content: trans.content,
+          isfree: this.accessType == 'gratuit' ? 1 : 0,
+          type: this.articleTypes.filter(t => t.model).map(t => t.type).join(','),
+          language_id: trans.language_id
+        };
+
+        console.log('Creating article with language', trans.language_id, ':', articlePayload);
+        const articleResp = await this.articleService.create(articlePayload).toPromise();
+        if (articleResp && articleResp.id) {
+          if (!articleId) {
+            articleId = articleResp.id; // Store ID from first language
+          }
+        }
+      }
+
       if (!articleId) {
         this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Erreur lors de la création de l\'article.' });
         throw new Error('Article ID not returned from API');
@@ -342,15 +412,15 @@ export class AddArticleComponent implements OnInit {
       // 3. Link article to category
       await this.articleCategoryService.create({
         article_id: articleId,
-        category_id: selectedCategory
+        category_id: this.selectedCategory
       }).toPromise();
 
       // 4. Link article to tags
       await Promise.all(
-        selectedTags.map(tag =>
+        this.articleTags.map(tagId =>
           this.articleTagService.create({
             article_id: articleId,
-            tag_id: Number(tag.id)
+            tag_id: Number(tagId)
           }).toPromise()
         )
       );
@@ -362,6 +432,21 @@ export class AddArticleComponent implements OnInit {
       this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Erreur lors de l\'ajout de l\'article.' });
       console.error('Erreur lors du workflow de création d\'article:', error);
     }
+  }
+
+  /**
+   * Validate that all required fields are filled for all languages
+   */
+  validateAllLanguages(): string | null {
+    for (const trans of this.translations) {
+      if (!trans.title.trim()) {
+        return `Le titre est obligatoire en ${this.getLanguageName(trans.language_id)}.`;
+      }
+      if (!trans.content.trim()) {
+        return `La description est obligatoire en ${this.getLanguageName(trans.language_id)}.`;
+      }
+    }
+    return null;
   }
 
   annulerArticle() {
