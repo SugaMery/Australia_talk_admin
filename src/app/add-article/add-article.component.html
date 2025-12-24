@@ -107,6 +107,11 @@
                                         rows="6"
                                         maxlength="2000"></textarea>
 					<p class="fs-14 mt-1">Maximum 200 mots</p>
+                    <div style="display:flex; gap:8px; margin-top:8px;">
+                      <button type="button" class="btn btn-success" (click)="generateArticle()" [disabled]="!articleTitle || !articleTitle.trim()">
+                        <i data-feather="zap" class="me-2"></i>Générer l'article
+                      </button>
+                    </div>
 				</div>
                 </div>
               </div>

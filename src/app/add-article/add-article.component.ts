@@ -5,10 +5,12 @@ import { MediaArticleService } from '../services/media-article.service';
 import { ArticleCategoryService } from '../services/article-category.service';
 import { ArticleTagService } from '../services/article-tag.service';
 import { ArticleService } from '../services/article.service';
+import { ArticleGenerationService } from '../services/article-generation.service';
+import { TranslationService } from '../services/translation.service';
 import { MediaService } from '../services/media.service';
 import $ from 'jquery';
 import nlp from 'compromise'; // Import compromise for NLP
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { MessageService } from 'primeng/api';
 
 export interface ArticleType {
@@ -87,6 +89,8 @@ export class AddArticleComponent implements OnInit {
     private articleCategoryService: ArticleCategoryService,
     private articleTagService: ArticleTagService,
     private articleService: ArticleService,
+    private articleGenerationService: ArticleGenerationService,
+    private translationService: TranslationService,
     private mediaService: MediaService,
     private messageService: MessageService
   ) {}
@@ -226,54 +230,86 @@ export class AddArticleComponent implements OnInit {
   }
 
   /**
-   * Translate text using the server proxy. Implements client-side retries.
+   * Generate article content using the Article Generation Service
+   */
+  async generateArticle(): Promise<void> {
+    try {
+      // Ensure title is saved
+      this.saveCurrentLanguageTranslation();
+      const currentTrans = this.translations.find(t => t.language_id === this.currentLanguageId);
+      
+      if (!currentTrans || !currentTrans.title) {
+        this.messageService.add({ 
+          severity: 'warn', 
+          summary: 'Titre requis', 
+          detail: 'Veuillez d\'abord saisir un titre pour générer le contenu.'
+        });
+        return;
+      }
+
+      this.messageService.add({ 
+        severity: 'info', 
+        summary: 'Génération', 
+        detail: 'Génération de l\'article en cours... Cela peut prendre quelques secondes.',
+        sticky: false
+      });
+
+      const response: any = await this.articleGenerationService.generateArticle(currentTrans.title).toPromise();
+
+      console.log('Full API Response:', response);
+
+      if (!response || !response.success) {
+        throw new Error(response?.error || 'Échec de la génération');
+      }
+
+      // Try multiple possible field names for the content
+      const generatedContent = response.content || 
+                              response.generated_content || 
+                              response.article || 
+                              response.body || 
+                              response.text ||
+                              (response.data && response.data.content);
+
+      if (generatedContent && generatedContent.trim()) {
+        this.text = generatedContent;
+        currentTrans.content = generatedContent;
+        
+        this.messageService.add({ 
+          severity: 'success', 
+          summary: 'Succès', 
+          detail: 'Article généré avec succès.',
+          sticky: false
+        });
+      } else {
+        console.warn('No content found in API response:', response);
+        throw new Error(`Contenu vide retourné par l'API. Réponse reçue: ${JSON.stringify(response)}`);
+      }
+    } catch (err) {
+      const errorDetail = err instanceof Error ? err.message : 'Erreur inconnue';
+      
+      let userMessage = errorDetail;
+      if (errorDetail.includes('Token d\'authentification')) {
+        userMessage = 'Vous devez être connecté pour générer un article.';
+      } else if (errorDetail.includes('Titre requis')) {
+        userMessage = 'Veuillez d\'abord saisir un titre.';
+      }
+      
+      this.messageService.add({ 
+        severity: 'error', 
+        summary: 'Erreur de génération', 
+        detail: userMessage,
+        sticky: true
+      });
+      
+      console.error('generateArticle error:', err);
+    }
+  }
+
+  /**
+   * Translate text using the Translation Service
    */
   async translateText(text: string, source: string, target: string): Promise<string> {
-    if (!text || !text.trim()) return '';
-
-    const payload = {
-      q: text,
-      source: source,
-      target: target,
-      format: 'text'
-    };
-
-    const maxAttempts = 3;
-    let lastErr: any = null;
-
-    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-      try {
-        const resp: any = await this.http.post('/api/translate', payload).toPromise();
-
-        if (!resp) {
-          lastErr = new Error('Empty response from translation proxy');
-          throw lastErr;
-        }
-
-        if (resp.error) {
-          lastErr = new Error(`Proxy error: ${resp.error} ${resp.details || ''}`);
-          throw lastErr;
-        }
-
-        // Accept several key names depending on backend
-        const translated = resp.translatedText || resp.translated_text || resp.translated || (resp.data && resp.data.translatedText);
-        if (!translated) {
-          // If the API returns another structure (LibreTranslate sometimes returns { translatedText }) we already covered it
-          lastErr = new Error('Translation returned empty');
-          throw lastErr;
-        }
-
-        return translated;
-      } catch (err) {
-        lastErr = err;
-        console.warn(`translateText attempt ${attempt} failed:`, err);
-        // small backoff
-        await new Promise(r => setTimeout(r, 300 * attempt));
-      }
-    }
-
-    // After retries, rethrow the last error so callers can handle
-    throw lastErr || new Error('Translation failed');
+    return this.translationService.translateWithRetry(text, target, 3);
   }
 
   /**
@@ -283,12 +319,20 @@ export class AddArticleComponent implements OnInit {
     // Ensure current edits are saved
     this.saveCurrentLanguageTranslation();
     const currentTrans = this.translations.find(t => t.language_id === this.currentLanguageId);
-    if (!currentTrans) return;
+    if (!currentTrans) {
+      throw new Error('Current translation not found');
+    }
 
     const sourceCode = currentTrans.language_code || this.languages.find(l => l.id === this.currentLanguageId)?.code || 'fr';
 
+    // Check if there's content to translate
+    if (!currentTrans.title && !currentTrans.content) {
+      throw new Error('No content to translate. Please enter title or content first.');
+    }
+
     const translatePromises: Promise<void>[] = [];
     const errors: string[] = [];
+    let successCount = 0;
     
     for (const trans of this.translations) {
       if (trans.language_id === this.currentLanguageId) continue; // skip source
@@ -297,14 +341,19 @@ export class AddArticleComponent implements OnInit {
 
       const p = (async () => {
         try {
-          const translatedTitle = await this.translateText(currentTrans.title || '', sourceCode, targetCode);
-          const translatedContent = await this.translateText(currentTrans.content || '', sourceCode, targetCode);
-          trans.title = translatedTitle || trans.title;
-          trans.content = translatedContent || trans.content;
+          // Only translate if source has content
+          if (currentTrans.title) {
+            trans.title = await this.translateText(currentTrans.title, sourceCode, targetCode);
+          }
+          if (currentTrans.content) {
+            trans.content = await this.translateText(currentTrans.content, sourceCode, targetCode);
+          }
+          successCount++;
         } catch (e) {
-          const errorMsg = `${sourceCode}->${targetCode}`;
-          console.error(`Erreur traduction ${errorMsg}:`, e);
-          errors.push(errorMsg);
+          const errorMsg = `${sourceCode.toUpperCase()}->${targetCode.toUpperCase()}`;
+          const details = e instanceof Error ? e.message : String(e);
+          console.error(`Erreur traduction ${errorMsg}:`, details);
+          errors.push(`${errorMsg}: ${details}`);
         }
       })();
 
@@ -313,9 +362,13 @@ export class AddArticleComponent implements OnInit {
 
     await Promise.all(translatePromises);
 
-    if (errors.length > 0) {
-      this.messageService.add({ severity: 'warn', summary: 'Traduction partielle', detail: `Erreurs pour: ${errors.join(', ')}`, sticky: false });
-      console.warn(`Translation completed with errors for: ${errors.join(', ')}`);
+    // Report results
+    if (errors.length > 0 && successCount === 0) {
+      // All translations failed
+      throw new Error(`Translation failed: ${errors.join('; ')}`);
+    } else if (errors.length > 0) {
+      // Partial success
+      console.warn(`Translation completed with partial errors:`, errors);
     }
 
     // If current view is not source, keep display consistent
@@ -325,17 +378,40 @@ export class AddArticleComponent implements OnInit {
   // UI handler to trigger translation and notify user
   async autoTranslateFromCurrent(): Promise<void> {
     try {
-      this.messageService.add({ severity: 'info', summary: 'Info', detail: 'Traduction en cours...' });
+      this.messageService.add({ 
+        severity: 'info', 
+        summary: 'Traduction', 
+        detail: 'Traduction en cours... Cela peut prendre quelques secondes.',
+        sticky: false
+      });
+
       await this.translateCurrentToOthers();
-      this.messageService.add({ severity: 'success', summary: 'Succès', detail: 'Traductions mises à jour.' });
+
+      this.messageService.add({ 
+        severity: 'success', 
+        summary: 'Succès', 
+        detail: 'Traductions mises à jour avec succès.',
+        sticky: false
+      });
     } catch (err) {
       const errorDetail = err instanceof Error ? err.message : 'Erreur inconnue';
+      
+      let userMessage = errorDetail;
+      if (errorDetail.includes('translation_service_unavailable')) {
+        userMessage = 'Les services de traduction sont actuellement indisponibles. Veuillez réessayer dans quelques instants.';
+      } else if (errorDetail.includes('No content to translate')) {
+        userMessage = 'Veuillez d\'abord saisir un titre ou du contenu à traduire.';
+      } else if (errorDetail.includes('503')) {
+        userMessage = 'Les services de traduction sont surchargés. Veuillez réessayer plus tard.';
+      }
+      
       this.messageService.add({ 
         severity: 'error', 
-        summary: 'Erreur', 
-        detail: `Erreur lors de la traduction automatique: ${errorDetail}`,
+        summary: 'Erreur de traduction', 
+        detail: userMessage,
         sticky: true
       });
+      
       console.error('autoTranslateFromCurrent error:', err);
     }
   }
@@ -511,11 +587,17 @@ export class AddArticleComponent implements OnInit {
         };
 
         console.log('Creating article with language', trans.language_id, ':', articlePayload);
-        const articleResp = await this.articleService.create(articlePayload).toPromise();
-        if (articleResp && articleResp.id) {
-          if (!articleId) {
-            articleId = articleResp.id; // Store ID from first language
+        try {
+          const articleResp = await this.articleService.create(articlePayload).toPromise();
+          console.log('Article created successfully for language', trans.language_id, 'with ID:', articleResp?.id);
+          if (articleResp && articleResp.id) {
+            if (!articleId) {
+              articleId = articleResp.id; // Store ID from first language
+            }
           }
+        } catch (error) {
+          console.error('Error creating article for language', trans.language_id, ':', error);
+          throw error;
         }
       }
 
@@ -533,18 +615,36 @@ export class AddArticleComponent implements OnInit {
           return this.mediaService.upload(formData).toPromise();
         })
       );
+      
+      console.log('Uploaded media results:', uploadedMediaResults);
+      
       mediaIds = uploadedMediaResults
-        .map(res => res && res.id)
+        .map(res => {
+          console.log('Processing media response:', res);
+          return res && (res.id || (res as any).media_id);
+        })
         .filter((id): id is number => typeof id === 'number');
+      
+      console.log('Extracted media IDs:', mediaIds);
+      
       if (mediaIds.length === 0) {
         this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Erreur lors du téléversement des médias.' });
         throw new Error('Aucun média téléversé');
       }
-      await Promise.all(
-        mediaIds.map(mediaId =>
-          this.mediaArticleService.create({ media_id: mediaId, article_id: articleId }).toPromise()
-        )
-      );
+      
+      // Link media to article
+      console.log('Linking media to article. Article ID:', articleId, 'Media IDs:', mediaIds);
+      
+      for (const mediaId of mediaIds) {
+        try {
+          console.log('Linking media:', { media_id: mediaId, article_id: articleId });
+          await this.mediaArticleService.create({ media_id: mediaId, article_id: articleId }).toPromise();
+          console.log('Successfully linked media ID', mediaId, 'to article ID', articleId);
+        } catch (error) {
+          console.error('Error linking media ID', mediaId, ':', error);
+          throw error;
+        }
+      }
 
       // 3. Link article to category
       await this.articleCategoryService.create({
@@ -564,7 +664,7 @@ export class AddArticleComponent implements OnInit {
 
       // Succès final unique
       this.messageService.add({ severity: 'success', summary: 'Succès', detail: 'Article ajouté avec succès !' });
-      setTimeout(() => window.location.href = '/articles', 1200);
+     // setTimeout(() => window.location.href = '/articles', 1200);
     } catch (error) {
       this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Erreur lors de l\'ajout de l\'article.' });
       console.error('Erreur lors du workflow de création d\'article:', error);

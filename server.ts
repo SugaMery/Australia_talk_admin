@@ -22,6 +22,14 @@ export function app(): express.Express {
     const body = req.body || {};
     console.log('Translation request:', { q: String(body.q || '').slice(0, 120), source: body.source, target: body.target });
 
+    // Validate request payload
+    if (!body.q || !body.source || !body.target) {
+      return res.status(400).json({ 
+        error: 'invalid_request', 
+        details: 'Missing required fields: q, source, target' 
+      });
+    }
+
     // Candidate endpoints to try (public instances). Order matters: prefer faster/reliable first.
     const endpoints = [
       'https://libretranslate.de/translate',
@@ -29,8 +37,13 @@ export function app(): express.Express {
       'https://translate.argosopentech.com/translate'
     ];
 
+    const errors: string[] = [];
+
     for (const endpoint of endpoints) {
       try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+
         const resp = await fetch(endpoint, {
           method: 'POST',
           headers: {
@@ -38,20 +51,26 @@ export function app(): express.Express {
             'Accept': 'application/json'
           },
           body: JSON.stringify(body),
-          redirect: 'follow'
+          redirect: 'follow',
+          signal: controller.signal
         });
 
+        clearTimeout(timeoutId);
         const contentType = resp.headers.get('content-type') || '';
 
         if (!resp.ok) {
           const text = await resp.text();
-          console.warn(`Endpoint ${endpoint} returned status ${resp.status}. Trying next. Body preview:`, text.substring(0, 200));
+          const msg = `Endpoint ${endpoint} returned status ${resp.status}`;
+          console.warn(msg);
+          errors.push(`${endpoint}: ${resp.status}`);
           continue; // try next endpoint
         }
 
         if (!contentType.includes('application/json')) {
           const text = await resp.text();
-          console.warn(`Endpoint ${endpoint} returned non-JSON response. Trying next. Preview:`, text.substring(0, 200));
+          const msg = `Endpoint ${endpoint} returned non-JSON response`;
+          console.warn(msg);
+          errors.push(`${endpoint}: non-JSON`);
           continue; // try next endpoint
         }
 
@@ -62,16 +81,23 @@ export function app(): express.Express {
         }
 
         // If payload is not what we expect, log and continue
-        console.warn(`Endpoint ${endpoint} returned JSON but missing expected keys. Trying next.`, Object.keys(data || {}).slice(0,10));
+        const msg = `Endpoint ${endpoint} returned JSON but missing expected keys`;
+        console.warn(msg, Object.keys(data || {}).slice(0,10));
+        errors.push(`${endpoint}: missing translation keys`);
       } catch (err) {
-        console.warn(`Error calling ${endpoint}:`, String(err).slice(0,200));
-        // try next endpoint
+        const errMsg = err instanceof Error ? err.message : String(err);
+        console.warn(`Error calling ${endpoint}:`, errMsg.slice(0, 200));
+        errors.push(`${endpoint}: ${errMsg.slice(0, 50)}`);
       }
     }
 
     // If we reached here, no endpoint provided a usable JSON translation
-    console.error('All translation endpoints failed or returned invalid data.');
-    return res.status(502).json({ error: 'translation_unavailable', details: 'All translation endpoints failed or returned invalid data' });
+    console.error('All translation endpoints failed. Errors:', errors);
+    return res.status(503).json({ 
+      error: 'translation_service_unavailable', 
+      details: 'All translation services failed or are unavailable',
+      tried_endpoints: errors
+    });
   });
 
   server.set('view engine', 'html');
