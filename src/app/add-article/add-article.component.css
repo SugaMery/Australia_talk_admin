@@ -1,10 +1,13 @@
+@import "../../../node_modules/quill/dist/quill.core.css";
+@import "../../../node_modules/quill/dist/quill.snow.css";
+
 ::ng-deep .ql-toolbar.ql-snow {
-    border: 1px solid #e6eaed !important;
-    box-sizing: border-box;
-    font-family: 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
-    padding: 8px;
-    border-top-right-radius: 0.5rem !important;
-    border-top-left-radius: 0.5rem !important;
+  border: 1px solid #e6eaed !important;
+  box-sizing: border-box;
+  font-family: 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+  padding: 8px;
+  border-top-right-radius: 0.5rem !important;
+  border-top-left-radius: 0.5rem !important;
 }
 
 ::ng-deep .ql-toolbar.ql-snow + .ql-container.ql-snow
@@ -312,5 +315,4 @@ background: #37773a24;
 
 
 
-@import "../../../node_modules/quill/dist/quill.core.css";
-@import "../../../node_modules/quill/dist/quill.snow.css";
+/* imports moved to top to satisfy compiler (@import must come first) */

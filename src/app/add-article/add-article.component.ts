@@ -94,6 +94,8 @@ export class AddArticleComponent implements OnInit {
   ngOnInit(): void {
     // Load categories and tags for current language
     this.loadCategoriesAndTags();
+    // Initialize display for the current language
+    this.updateCurrentLanguageDisplay();
   }
 
   /**
@@ -201,6 +203,141 @@ export class AddArticleComponent implements OnInit {
       .map(word => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
     this.articleTitle = title.length > 60 ? title.slice(0, 60) + '...' : title;
+    // Update translation for current language
+    this.onTitleChange(this.articleTitle);
+  }
+
+  // Update title for current language immediately when input changes
+  onTitleChange(value: string) {
+    this.articleTitle = value || '';
+    const currentTrans = this.translations.find(t => t.language_id === this.currentLanguageId);
+    if (currentTrans) {
+      currentTrans.title = this.articleTitle;
+    }
+  }
+
+  // Update content for current language immediately when textarea changes
+  onContentChange(value: string) {
+    this.text = value || '';
+    const currentTrans = this.translations.find(t => t.language_id === this.currentLanguageId);
+    if (currentTrans) {
+      currentTrans.content = this.text;
+    }
+  }
+
+  /**
+   * Translate text using the server proxy. Implements client-side retries.
+   */
+  async translateText(text: string, source: string, target: string): Promise<string> {
+    if (!text || !text.trim()) return '';
+
+    const payload = {
+      q: text,
+      source: source,
+      target: target,
+      format: 'text'
+    };
+
+    const maxAttempts = 3;
+    let lastErr: any = null;
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        const resp: any = await this.http.post('/api/translate', payload).toPromise();
+
+        if (!resp) {
+          lastErr = new Error('Empty response from translation proxy');
+          throw lastErr;
+        }
+
+        if (resp.error) {
+          lastErr = new Error(`Proxy error: ${resp.error} ${resp.details || ''}`);
+          throw lastErr;
+        }
+
+        // Accept several key names depending on backend
+        const translated = resp.translatedText || resp.translated_text || resp.translated || (resp.data && resp.data.translatedText);
+        if (!translated) {
+          // If the API returns another structure (LibreTranslate sometimes returns { translatedText }) we already covered it
+          lastErr = new Error('Translation returned empty');
+          throw lastErr;
+        }
+
+        return translated;
+      } catch (err) {
+        lastErr = err;
+        console.warn(`translateText attempt ${attempt} failed:`, err);
+        // small backoff
+        await new Promise(r => setTimeout(r, 300 * attempt));
+      }
+    }
+
+    // After retries, rethrow the last error so callers can handle
+    throw lastErr || new Error('Translation failed');
+  }
+
+  /**
+   * Translate current language title and content into the other languages and save them in `translations`.
+   */
+  async translateCurrentToOthers(): Promise<void> {
+    // Ensure current edits are saved
+    this.saveCurrentLanguageTranslation();
+    const currentTrans = this.translations.find(t => t.language_id === this.currentLanguageId);
+    if (!currentTrans) return;
+
+    const sourceCode = currentTrans.language_code || this.languages.find(l => l.id === this.currentLanguageId)?.code || 'fr';
+
+    const translatePromises: Promise<void>[] = [];
+    const errors: string[] = [];
+    
+    for (const trans of this.translations) {
+      if (trans.language_id === this.currentLanguageId) continue; // skip source
+      const targetCode = trans.language_code || this.languages.find(l => l.id === trans.language_id)?.code;
+      if (!targetCode) continue;
+
+      const p = (async () => {
+        try {
+          const translatedTitle = await this.translateText(currentTrans.title || '', sourceCode, targetCode);
+          const translatedContent = await this.translateText(currentTrans.content || '', sourceCode, targetCode);
+          trans.title = translatedTitle || trans.title;
+          trans.content = translatedContent || trans.content;
+        } catch (e) {
+          const errorMsg = `${sourceCode}->${targetCode}`;
+          console.error(`Erreur traduction ${errorMsg}:`, e);
+          errors.push(errorMsg);
+        }
+      })();
+
+      translatePromises.push(p);
+    }
+
+    await Promise.all(translatePromises);
+
+    if (errors.length > 0) {
+      this.messageService.add({ severity: 'warn', summary: 'Traduction partielle', detail: `Erreurs pour: ${errors.join(', ')}`, sticky: false });
+      console.warn(`Translation completed with errors for: ${errors.join(', ')}`);
+    }
+
+    // If current view is not source, keep display consistent
+    this.updateCurrentLanguageDisplay();
+  }
+
+  // UI handler to trigger translation and notify user
+  async autoTranslateFromCurrent(): Promise<void> {
+    try {
+      this.messageService.add({ severity: 'info', summary: 'Info', detail: 'Traduction en cours...' });
+      await this.translateCurrentToOthers();
+      this.messageService.add({ severity: 'success', summary: 'Succès', detail: 'Traductions mises à jour.' });
+    } catch (err) {
+      const errorDetail = err instanceof Error ? err.message : 'Erreur inconnue';
+      this.messageService.add({ 
+        severity: 'error', 
+        summary: 'Erreur', 
+        detail: `Erreur lors de la traduction automatique: ${errorDetail}`,
+        sticky: true
+      });
+      console.error('autoTranslateFromCurrent error:', err);
+    }
   }
 
   // Get tag name by ID

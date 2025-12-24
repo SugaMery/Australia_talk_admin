@@ -1,3 +1,6 @@
+@import "../../../node_modules/quill/dist/quill.core.css";
+@import "../../../node_modules/quill/dist/quill.snow.css";
+
 ::ng-deep .dropdown-item:not(.active):hover, ::ng-deep .dropdown-item:not(.active):focus,::ng-deep  .dropdown-item:not(.active):active {
     color: #37773a;
     background-color: #37773a0d;
@@ -244,5 +247,4 @@ padding-left: 0.5em !important;
     font-family: "Nunito", sans-serif !important;
 }
 
-@import "../../../node_modules/quill/dist/quill.core.css";
-@import "../../../node_modules/quill/dist/quill.snow.css";
+/* imports moved to top to satisfy compiler (@import must come first) */

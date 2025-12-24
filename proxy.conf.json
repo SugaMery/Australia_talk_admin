@@ -1,0 +1,9 @@
+{
+  "/api/translate": {
+    "target": "https://translate.argosopentech.com",
+    "secure": false,
+    "changeOrigin": true,
+    "pathRewrite": { "^/api/translate": "/translate" },
+    "logLevel": "warn"
+  }
+}

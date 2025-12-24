@@ -66,8 +66,12 @@
                   <div class="col-sm-6 col-12">
                     <div class="mb-3 list position-relative">
                       <label class="form-label">Titre ({{ getLanguageName(currentLanguageId) }})<span class="text-danger ms-1">*</span></label>
-                      <input type="text" class="form-control list" [(ngModel)]="articleTitle" name="articleTitle">
-                      <button type="button" class="btn btn-primaryadd" (click)="generateTitleFromContent()" [disabled]="!text || !text.trim()">Générer</button>
+                      <input type="text" class="form-control list" [(ngModel)]="articleTitle" (ngModelChange)="onTitleChange($event)" name="articleTitle">
+                      <div style="display:flex; gap:8px; margin-top:6px;">
+                        <button type="button" class="btn btn-primaryadd" (click)="generateTitleFromContent()" [disabled]="!text || !text.trim()">Générer</button>
+                        <button type="button" class="btn btn-outline-secondary" (click)="autoTranslateFromCurrent()" [disabled]="!text || !text.trim()" title="Translation service temporarily unavailable">Traduire</button>
+                      </div>
+                      <small class="text-muted" style="display:block; margin-top:4px;">Note: Veuillez entrer les traductions manuellement ou utiliser Google Translate</small>
                     </div>
                   </div>
                   <div class="col-sm-6 col-12">
@@ -96,11 +100,12 @@
                 <div class="col-lg-12">
 				<div class="summer-description-box">
 					<label class="form-label">Description ({{ getLanguageName(currentLanguageId) }})<span class="text-danger ms-1">*</span></label>
-					<textarea class="form-control editor pages-editor"
-										[(ngModel)]="text"
-										name="articleDescription"
-										rows="6"
-										maxlength="2000"></textarea>
+                    <textarea class="form-control editor pages-editor"
+                                        [(ngModel)]="text"
+                                        (ngModelChange)="onContentChange($event)"
+                                        name="articleDescription"
+                                        rows="6"
+                                        maxlength="2000"></textarea>
 					<p class="fs-14 mt-1">Maximum 200 mots</p>
 				</div>
                 </div>
