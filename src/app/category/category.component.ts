@@ -75,6 +75,7 @@ export class CategoryComponent implements OnInit {
     this.categoryService.getAll().subscribe({
       next: (cats) => {
         this.categories = cats;
+        console.log('Categories fetched:', this.categories);
         this.applyFilters();
       },
       error: (err) => {
@@ -92,6 +93,7 @@ export class CategoryComponent implements OnInit {
         (this._statusFilter === 'inactive' && !cat.active);
       return matchesSearch && matchesStatus;
     });
+    console.log('Filtered categories:', this.filteredCategories);
     this.currentPage = 1;
     this.updatePagination();
   }
@@ -214,9 +216,11 @@ export class CategoryComponent implements OnInit {
     this.selectedEditIconFile = null;
     this.selectedEditIconPreview = null;
     this.previousEditIconId = cat.icon_id || null;
-    if (cat.path) {
-      const filename = cat.filename || cat.path.split('\\').pop();
-      this.selectedEditIconPreview = `${environment.apiUrl}/uploads/${filename}`;
+    console.log('Editing category:', cat);
+    if (cat.icon?.path) {
+      this.selectedEditIconPreview = cat.icon.path;
+    } else if (cat.path) {
+      this.selectedEditIconPreview = cat.path;
     } else {
       this.selectedEditIconPreview = 'assets/default-category.png';
     }
@@ -327,6 +331,7 @@ export class CategoryComponent implements OnInit {
       'Créé le': cat.created_at,
       'Statut': cat.active ? 'Active' : 'Inactive'
     }));
+    console.log('Exporting to Excel - Categories:', data);
     const worksheet = XLSX.utils.json_to_sheet(data);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Catégories');
@@ -336,6 +341,7 @@ export class CategoryComponent implements OnInit {
   exportPdf() {
     const doc = new jsPDF();
     const columns = ['Nom', 'Slug', 'Type', 'Créé le', 'Statut'];
+    console.log('Exporting to PDF - Categories:', this.filteredCategories);
     const rows = this.filteredCategories.map(cat => [
       cat.name,
       cat.slug,

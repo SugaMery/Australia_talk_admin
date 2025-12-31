@@ -253,7 +253,7 @@
             </div>
             <div class="col-lg-6 mb-3">
               <label class="form-label">Ville</label>
-              <select class="form-select" [(ngModel)]="addModel.city" name="city">
+              <select class="form-select" [(ngModel)]="addModel.city" (change)="onCityChangeAdd()" name="city">
                 <option *ngFor="let city of franceCities" [value]="city">{{ city }}</option>
               </select>
             </div>
@@ -338,7 +338,7 @@
                 </div>
                 <div class="col-lg-6 mb-3">
                   <label class="form-label">Ville</label>
-                  <select class="form-select" [(ngModel)]="editModel.city" name="city">
+                  <select class="form-select" [(ngModel)]="editModel.city" (change)="onCityChangeEdit()" name="city">
                     <option *ngFor="let city of franceCities" [value]="city">{{ city }}</option>
                   </select>
                 </div>

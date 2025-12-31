@@ -188,6 +188,48 @@ export class MediasComponent implements OnInit {
     this.currentPage = page;
   }
 
+  onPageClick(page: number | string, event: Event) {
+    event.preventDefault();
+    if (typeof page === 'number') {
+      this.goToPage(page);
+    }
+  }
+
+  getDisplayPages(): (number | string)[] {
+    const pages: (number | string)[] = [];
+    const maxPagesToShow = 5; // Show max 5 page numbers at once
+    let startPage = Math.max(1, this.currentPage - Math.floor(maxPagesToShow / 2));
+    let endPage = Math.min(this.totalPages, startPage + maxPagesToShow - 1);
+
+    // Adjust start if we're near the end
+    if (endPage - startPage + 1 < maxPagesToShow) {
+      startPage = Math.max(1, endPage - maxPagesToShow + 1);
+    }
+
+    // Add first page if not visible
+    if (startPage > 1) {
+      pages.push(1);
+      if (startPage > 2) {
+        pages.push('...');
+      }
+    }
+
+    // Add page numbers
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+
+    // Add last page if not visible
+    if (endPage < this.totalPages) {
+      if (endPage < this.totalPages - 1) {
+        pages.push('...');
+      }
+      pages.push(this.totalPages);
+    }
+
+    return pages;
+  }
+
   exportPDF() {
 		const doc = new jsPDF();
 		let y = 10;

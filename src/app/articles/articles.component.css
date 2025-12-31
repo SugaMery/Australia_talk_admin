@@ -123,3 +123,9 @@ background-color: #37773a56 !important;
     font-size: 1rem;
     text-transform: uppercase;
 }
+
+
+.dataTables_paginate .pagination li span :hover {
+    background: #37773a;
+    color: #ffffff !important;
+}

@@ -104,7 +104,7 @@
       <td>
         <div class="d-flex align-items-center">
           <a href="javascript:void(0);" class="avatar avatar-md bg-light-900 p-1 me-2">
-            <img [src]="cat.path" alt="Fichier téléversé">
+            <img [src]="cat.icon?.path || 'assets/default-category.png'" alt="Fichier téléversé" (error)="onImageError($event)">
           </a>
           <a href="javascript:void(0);">{{ cat.name }}</a>
         </div>

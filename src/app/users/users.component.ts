@@ -322,8 +322,9 @@ export class UsersComponent implements OnInit {
   }
 
   openEditUserModal(user: any) {
+    console.log('Opening edit modal for user:', user);
     this.selectedUser = {
-      ...user,
+      id: user.id,
       status: user.deleted_at ? 'inactive' : 'active',
       first_name: user.first_name || '',
       last_name: user.last_name || '',
@@ -336,6 +337,7 @@ export class UsersComponent implements OnInit {
       password: '',
       confirmPassword: ''
     };
+    console.log('Selected user object:', this.selectedUser);
     this.showEditModal = true;
   }
 

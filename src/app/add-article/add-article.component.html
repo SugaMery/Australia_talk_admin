@@ -18,7 +18,8 @@
         </li>
       </ul>
       <div class="page-btn mt-0">
-        <a href="articles" class="btn btn-secondary"><i data-feather="arrow-left" class="me-2"></i>Retour à la liste</a>
+        <a href="articles" class="btn btn-secondary" style="margin-right: 1rem;"><i data-feather="arrow-left" class="me-2"></i>Retour à la liste</a>
+        <a class="btn btn-secondary" (click)="autoTranslateFromCurrent()"  title="Translation service temporarily unavailable" style="background-color: #37773a !important;border-color: #37773a !important;"> <i data-feather="zap" class="me-2"></i>Traduire l'article</a>
       </div>
     </div>
     <form action="add-product.html" class="add-product-form">
@@ -68,12 +69,14 @@
                       <label class="form-label">Titre ({{ getLanguageName(currentLanguageId) }})<span class="text-danger ms-1">*</span></label>
                       <input type="text" class="form-control list" [(ngModel)]="articleTitle" (ngModelChange)="onTitleChange($event)" name="articleTitle">
                       <div style="display:flex; gap:8px; margin-top:6px; flex-wrap:wrap;">
-                        <button type="button" class="btn btn-primaryadd" (click)="generateTitleFromContent()" [disabled]="!text || !text.trim()">Générer</button>
+                        <button type="button" class="btn btn-primaryadd" (click)="generateArticle()" [disabled]="!articleTitle || !articleTitle.trim()">Générer</button>
+<!--                         <button type="button" class="btn btn-primaryadd" (click)="generateArticle()" [disabled]="!articleTitle || !articleTitle.trim()">Traduire</button>
+
                         <button type="button" class="btn btn-outline-secondary" (click)="autoTranslateFromCurrent()" [disabled]="!text || !text.trim()" title="Translation service temporarily unavailable">Traduire</button>
                         <button type="button" class="btn btn-outline-info" (click)="showLanguageTranslations(2)" title="Voir traduction en anglais">Voir EN</button>
                         <button type="button" class="btn btn-outline-info" (click)="showLanguageTranslations(3)" title="Voir traduction en espagnol">Voir ES</button>
                         <button type="button" class="btn btn-outline-warning" (click)="forceRetranslateSpanish()" title="Retraduire l'espagnol depuis le français">Retraduire ES</button>
-                      </div>
+ -->                      </div>
                       <small class="text-muted" style="display:block; margin-top:4px;">Note: Veuillez entrer les traductions manuellement ou utiliser Google Translate</small>
                     </div>
                   </div>
@@ -110,11 +113,7 @@
                                         rows="6"
                                         maxlength="2000"></textarea>
 					<p class="fs-14 mt-1">Maximum 200 mots</p>
-                    <div style="display:flex; gap:8px; margin-top:8px;">
-                      <button type="button" class="btn btn-success" (click)="generateArticle()" [disabled]="!articleTitle || !articleTitle.trim()">
-                        <i data-feather="zap" class="me-2"></i>Générer l'article
-                      </button>
-                    </div>
+
 				</div>
                 </div>
               </div>

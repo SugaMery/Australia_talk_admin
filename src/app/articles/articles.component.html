@@ -112,28 +112,23 @@
 		<td>AUS{{ article.id }}</td>
     <td>
       <div class="d-flex align-items-center">
-        <a href="javascript:void(0);" class="avatar avatar-md me-2">
+        <a href="javascript:void(0);" class="avatar avatar-lg me-2" style="min-width: 80px; min-height: 80px;">
           <ng-container *ngIf="article.media && article.media.length > 0">
             <ng-container *ngIf="article.media[0].file_type === 'image/jpeg'; else videoThumb">
-              <img [src]="article.media[0].path" alt="media" style="object-fit:cover;">
+              <img [src]="article.media[0].path" alt="media" style="object-fit:cover; width:100%; height:100%;">
             </ng-container>
             <ng-template #videoThumb>
-              <video width="32" height="32" style="object-fit:cover;" muted>
+              <video style="object-fit:cover; width:100%; height:100%;" muted>
                 <source [src]="article.media[0].path" type="video/mp4">
               </video>
             </ng-template>
           </ng-container>
           <ng-container *ngIf="!article.media || article.media.length === 0">
-            <img src="assets/img/products/stock-img-01.png" alt="product" style="width:40px;height:40px;object-fit:cover;">
+            <img src="assets/img/products/stock-img-01.png" alt="product" style="width:100%;height:100%;object-fit:cover;">
           </ng-container>
         </a>
-        <a href="javascript:void(0);">
-          <span *ngIf="(article.title?.length ?? 0) > 30; else fullTitle">
-            {{ article.title | slice:0:30 }}...
-          </span>
-          <ng-template #fullTitle>
-            {{ article.title }}
-          </ng-template>
+        <a href="javascript:void(0);" style="word-wrap: break-word; white-space: normal; max-width: 250px; display: block;">
+          {{ article.title }}
         </a>
       </div>
     </td>
@@ -156,7 +151,7 @@
 		</td>
 		<td class="tags-td">
   <ng-container *ngIf="article.tags && article.tags.length > 0; else noTags">
-    <span class="badge tag-custom" style="margin-right: 6px;">{{ article.tags[0].name }}</span>
+    <span class="badge tag-custom" style="margin-right: 6px;">{{ article.tags[0].translation.name }}</span>
     <span *ngIf="article.tags.length > 1" class="badge tag-custom" style="margin-right: 6px;">
       +{{ article.tags.length - 1 }}
     </span>
@@ -227,14 +222,26 @@
           <i class="fa fa-angle-left"></i>
         </a>
       </li>
-      <li *ngFor="let page of totalPagesArray; let i = index"
+      <li *ngFor="let page of getDisplayPages()"
           class="paginate_button page-item"
-          [class.active]="currentPage === (i+1)">
-        <a class="page-link"
+          [class.active]="currentPage === page"
+          [class.disabled]="page === '...'">
+        <a *ngIf="page !== '...'" class="page-link"
            href="javascript:void(0);"
-           (click)="goToPage(i+1)">
-          {{i+1}}
+           (click)="onPageClick(page, $event)">
+          {{page}}
         </a>
+        <span style="
+    background: var(--Stroke, rgba(145, 158, 171, 0.3));
+    border-radius: 85px !important;
+    width: 25px;
+    height: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #5B6670;
+    font-size: 12px;
+" *ngIf="page === '...'" class="page-link">...</span>
       </li>
       <li class="paginate_button page-item next"
           [class.disabled]="currentPage === totalPages"

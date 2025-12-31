@@ -35,8 +35,110 @@ export class ArtisansComponent implements OnInit {
     'Béziers', 'Cannes', 'Mérignac', 'Drancy', 'Ajaccio', 'Noisy-le-Grand', 'Colmar', 'Issy-les-Moulineaux', 'Levallois-Perret',
     'Quimper', 'La Seyne-sur-Mer', 'Villeneuve-d\'Ascq', 'Valence', 'Antony', 'Troyes', 'Neuilly-sur-Seine', 'Cergy',
     'Pessac', 'Ivry-sur-Seine', 'Clichy', 'Le Blanc-Mesnil', 'Lorient', 'Niort', 'Sarcelles', 'Chambéry', 'Montauban',
-    'Pantin', 'Épinay-sur-Seine', 'Maisons-Alfort', 'Meaux', 'Narbonne', 'Cholet', 'Hyères', 'Évry-Courcouronnes'
+    'Pantin', 'Épinay-sur-Seine', 'Maisons-Alfort', 'Meaux', 'Narbonne', 'Cholet', 'Hyères', 'Évry-Courcouronnes',
+    'FOLSCHVILLER'
   ];
+
+  // Mapping between city and postal code
+  cityPostalMap: { [key: string]: string } = {
+    'Paris': '75000',
+    'Marseille': '13000',
+    'Lyon': '69000',
+    'Toulouse': '31000',
+    'Nice': '06000',
+    'Nantes': '44000',
+    'Strasbourg': '67000',
+    'Montpellier': '34000',
+    'Bordeaux': '33000',
+    'Lille': '59000',
+    'Rennes': '35000',
+    'Reims': '51000',
+    'Le Havre': '76600',
+    'Saint-Étienne': '42000',
+    'Toulon': '83000',
+    'Grenoble': '38000',
+    'Dijon': '21000',
+    'Angers': '49000',
+    'Nîmes': '30000',
+    'Villeurbanne': '69100',
+    'Saint-Denis': '93200',
+    'Aix-en-Provence': '13100',
+    'Le Mans': '72000',
+    'Clermont-Ferrand': '63000',
+    'Brest': '29200',
+    'Tours': '37000',
+    'Amiens': '80000',
+    'Limoges': '87000',
+    'Annecy': '74000',
+    'Perpignan': '66000',
+    'Boulogne-Billancourt': '92100',
+    'Metz': '57000',
+    'Besançon': '25000',
+    'Orléans': '45000',
+    'Argenteuil': '95100',
+    'Rouen': '76000',
+    'Montreuil': '93100',
+    'Mulhouse': '68100',
+    'Caen': '14000',
+    'Nancy': '54000',
+    'Saint-Paul': '97460',
+    'Roubaix': '59100',
+    'Tourcoing': '59200',
+    'Nanterre': '92000',
+    'Avignon': '84000',
+    'Vitry-sur-Seine': '94400',
+    'Créteil': '94000',
+    'Poitiers': '86000',
+    'Aubervilliers': '93300',
+    'Asnières-sur-Seine': '92600',
+    'Versailles': '78000',
+    'Colombes': '92700',
+    'Aulnay-sous-Bois': '93600',
+    'Saint-Pierre': '97410',
+    'Rueil-Malmaison': '92500',
+    'Pau': '64000',
+    'Courbevoie': '92400',
+    'La Rochelle': '17000',
+    'Antibes': '06600',
+    'Calais': '62100',
+    'Saint-Maur-des-Fossés': '94100',
+    'Champigny-sur-Marne': '94500',
+    'Béziers': '34500',
+    'Cannes': '06400',
+    'Mérignac': '33700',
+    'Drancy': '93700',
+    'Ajaccio': '20000',
+    'Noisy-le-Grand': '93160',
+    'Colmar': '68000',
+    'Issy-les-Moulineaux': '92130',
+    'Levallois-Perret': '92300',
+    'Quimper': '29000',
+    'La Seyne-sur-Mer': '83500',
+    'Villeneuve-d\'Ascq': '59650',
+    'Valence': '26000',
+    'Antony': '92160',
+    'Troyes': '10000',
+    'Neuilly-sur-Seine': '92200',
+    'Cergy': '95000',
+    'Pessac': '33600',
+    'Ivry-sur-Seine': '94200',
+    'Clichy': '92110',
+    'Le Blanc-Mesnil': '93150',
+    'Lorient': '56100',
+    'Niort': '79000',
+    'Sarcelles': '95200',
+    'Chambéry': '73000',
+    'Montauban': '82000',
+    'Pantin': '93500',
+    'Épinay-sur-Seine': '93800',
+    'Maisons-Alfort': '94700',
+    'Meaux': '77100',
+    'Narbonne': '11100',
+    'Cholet': '49300',
+    'Hyères': '83400',
+    'Évry-Courcouronnes': '91000',
+    'FOLSCHVILLER': '57730'
+  };
 
   pageSize: number = 10;
   currentPage: number = 1;
@@ -111,6 +213,22 @@ export class ArtisansComponent implements OnInit {
     // Deep copy to avoid two-way binding issues
     console.log('Edit', person);
     this.editModel = { ...person };
+  }
+
+  onCityChangeEdit() {
+    const selectedCity = this.editModel.city?.trim();
+    if (selectedCity && this.cityPostalMap[selectedCity]) {
+      this.editModel.postal_code = this.cityPostalMap[selectedCity];
+      console.log(`City changed to ${selectedCity}, postal code auto-filled: ${this.editModel.postal_code}`);
+    }
+  }
+
+  onCityChangeAdd() {
+    const selectedCity = this.addModel.city?.trim();
+    if (selectedCity && this.cityPostalMap[selectedCity]) {
+      this.addModel.postal_code = this.cityPostalMap[selectedCity];
+      console.log(`City changed to ${selectedCity}, postal code auto-filled: ${this.addModel.postal_code}`);
+    }
   }
 
   deletePerson(person: any) {
