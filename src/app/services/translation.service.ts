@@ -5,7 +5,8 @@ import { catchError } from 'rxjs/operators';
 
 export interface TranslateRequest {
   text: string;
-  target_language: string;
+  source?: string;
+  target: string;
 }
 
 export interface TranslateResponse {
@@ -51,7 +52,7 @@ export class TranslationService {
    * @param targetLanguage The target language code (e.g., 'en', 'es')
    * @returns Observable with translated text
    */
-  translate(text: string, targetLanguage: string): Observable<TranslateResponse> {
+  translate(text: string, targetLanguage: string, sourceLanguage?: string): Observable<TranslateResponse> {
     if (!text || !text.trim()) {
       return throwError(() => new Error('Text is required'));
     }
@@ -60,16 +61,12 @@ export class TranslationService {
       return throwError(() => new Error('Target language is required'));
     }
 
-    const payload: TranslateRequest = {
-      text: text,
-      target_language: targetLanguage
-    };
+    const payload: TranslateRequest = { text, target: targetLanguage };
+    if (sourceLanguage) payload.source = sourceLanguage;
 
-    return this.http.post<TranslateResponse>(
-      this.apiUrl,
-      payload,
-      { headers: this.getHeaders() }
-    ).pipe(
+    console.log('Translation API Request Payload:', payload);
+
+    return this.http.post<TranslateResponse>(this.apiUrl, payload, { headers: this.getHeaders() }).pipe(
       catchError((error) => {
         console.error('Raw Translation API Error:', error);
         return this.handleError(error);
@@ -87,6 +84,7 @@ export class TranslationService {
   async translateWithRetry(
     text: string,
     targetLanguage: string,
+    sourceLanguage?: string,
     maxAttempts: number = 3
   ): Promise<string> {
     if (!text || !text.trim()) return '';
@@ -95,7 +93,7 @@ export class TranslationService {
 
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
-        const resp = await this.translate(text, targetLanguage).toPromise();
+        const resp = await this.translate(text, targetLanguage, sourceLanguage).toPromise();
 
         if (!resp || !resp.success) {
           lastErr = new Error(`Translation failed: ${resp?.error || 'Unknown error'}`);

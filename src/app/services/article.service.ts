@@ -242,6 +242,30 @@ export class ArticleService {
     );
   }
 
+  /**
+   * Save translation for an article in a specific language
+   * @param articleId The article ID
+   * @param languageId The language ID (2 for English, 3 for Spanish, etc.)
+   * @param title The translated title
+   * @param content The translated content
+   */
+  saveTranslation(articleId: number, languageId: number, title: string, content?: string): Observable<ArticleTranslation> {
+    const payload = {
+      article_id: articleId,
+      language_id: languageId,
+      title,
+      content: content || ''
+    };
+
+    return this.http.post<ArticleTranslation>(
+      `${this.apiUrl}/${articleId}/translations`,
+      payload,
+      { headers: this.getHeaders() }
+    ).pipe(
+      catchError(this.handleError)
+    );
+  }
+
   private handleError(error: HttpErrorResponse): Observable<never> {
     let errorMessage = 'Une erreur inattendue est survenue';
     if (error.status === 0) {

@@ -125,6 +125,7 @@ export class ClientsComponent implements OnInit {
   totalPages: number = 1;
   itemsPerPage: number = 12; // Display 10 items per page
   paginatedUsers: any[] = [];
+  paginationPages: (number | string)[] = [];
 
   constructor(
     private userService: UserService,
@@ -214,6 +215,42 @@ export class ClientsComponent implements OnInit {
     this.totalPages = Math.ceil((this.filteredUsers?.length || 0) / this.itemsPerPage);
     this.currentPage = 1;
     this.updatePaginatedUsers();
+    this.calculatePaginationPages();
+  }
+
+  calculatePaginationPages(): void {
+    const pages: (number | string)[] = [];
+    const maxPagesToShow = 5;
+    const halfWindow = Math.floor(maxPagesToShow / 2);
+
+    if (this.totalPages <= maxPagesToShow) {
+      for (let i = 1; i <= this.totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      pages.push(1);
+      let rangeStart = Math.max(2, this.currentPage - halfWindow);
+      let rangeEnd = Math.min(this.totalPages - 1, this.currentPage + halfWindow);
+      if (rangeStart - 2 <= 1) {
+        rangeEnd = Math.min(this.totalPages - 1, rangeStart + maxPagesToShow - 3);
+      }
+      if (rangeEnd + 2 >= this.totalPages) {
+        rangeStart = Math.max(2, rangeEnd - maxPagesToShow + 3);
+      }
+      if (rangeStart > 2) {
+        pages.push('...');
+      }
+      for (let i = rangeStart; i <= rangeEnd; i++) {
+        pages.push(i);
+      }
+      if (rangeEnd < this.totalPages - 1) {
+        pages.push('...');
+      }
+      if (this.totalPages > 1) {
+        pages.push(this.totalPages);
+      }
+    }
+    this.paginationPages = pages;
   }
 
   updatePaginatedUsers(): void {
@@ -226,6 +263,7 @@ export class ClientsComponent implements OnInit {
     if (page >= 1 && page <= this.totalPages) {
       this.currentPage = page;
       this.updatePaginatedUsers();
+      this.calculatePaginationPages();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }

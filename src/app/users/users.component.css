@@ -248,3 +248,25 @@ padding-left: 0.5em !important;
 }
 
 /* imports moved to top to satisfy compiler (@import must come first) */
+
+
+
+::ng-deep .modal .close,::ng-deep .modal .btn-close {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    align-items: center;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    justify-content: center;
+    -webkit-justify-content: center;
+    -ms-flex-pack: center;
+    color: #646b72;
+    opacity: 1;
+    width: 15px !important;
+    height: 15px !important;
+    border: 0;
+    font-weight: 700;
+    background-color: #e6eaed !important;
+    border-radius: 50px;
+}

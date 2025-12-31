@@ -125,6 +125,7 @@ export class UsersComponent implements OnInit {
   itemsPerPage: number = 10;
   totalPages: number = 1;
   filteredUsers: any[] = [];
+  paginationPages: (number | string)[] = [];
 
   constructor(
     private userService: UserService,
@@ -211,12 +212,63 @@ export class UsersComponent implements OnInit {
     this.totalPages = Math.ceil(filtered.length / this.itemsPerPage);
     this.currentPage = 1;
     this.applyPagination(filtered);
+    this.calculatePaginationPages();
   }
 
   applyPagination(data: any[]): void {
     const startIndex = (this.currentPage - 1) * this.itemsPerPage;
     const endIndex = startIndex + this.itemsPerPage;
     this.filteredUsers = data.slice(startIndex, endIndex);
+  }
+
+  calculatePaginationPages(): void {
+    const pages: (number | string)[] = [];
+    const maxPagesToShow = 5;
+    const halfWindow = Math.floor(maxPagesToShow / 2);
+
+    if (this.totalPages <= maxPagesToShow) {
+      // Show all pages if total is less than or equal to maxPagesToShow
+      for (let i = 1; i <= this.totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Always show first page
+      pages.push(1);
+
+      // Calculate the start and end of the middle range
+      let rangeStart = Math.max(2, this.currentPage - halfWindow);
+      let rangeEnd = Math.min(this.totalPages - 1, this.currentPage + halfWindow);
+
+      // Adjust range to always show maxPagesToShow - 2 pages in the middle
+      if (rangeStart - 2 <= 1) {
+        rangeEnd = Math.min(this.totalPages - 1, rangeStart + maxPagesToShow - 3);
+      }
+      if (rangeEnd + 2 >= this.totalPages) {
+        rangeStart = Math.max(2, rangeEnd - maxPagesToShow + 3);
+      }
+
+      // Add ellipsis if needed
+      if (rangeStart > 2) {
+        pages.push('...');
+      }
+
+      // Add middle pages
+      for (let i = rangeStart; i <= rangeEnd; i++) {
+        pages.push(i);
+      }
+
+      // Add ellipsis if needed
+      if (rangeEnd < this.totalPages - 1) {
+        pages.push('...');
+      }
+
+      // Always show last page
+      if (this.totalPages > 1) {
+        pages.push(this.totalPages);
+      }
+    }
+
+    this.paginationPages = pages;
   }
 
   goToPage(page: number): void {
@@ -239,6 +291,7 @@ export class UsersComponent implements OnInit {
       return matchesSearch && matchesRole && matchesStatus;
     });
     this.applyPagination(filtered);
+    this.calculatePaginationPages();
   }
 
   filterCities(event: any) {
@@ -315,33 +368,35 @@ export class UsersComponent implements OnInit {
       }
     }
 
-    // Validate password and confirmPassword
-    if (!this.selectedUser.password || !this.selectedUser.confirmPassword) {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Erreur',
-        detail: 'Le mot de passe et la confirmation du mot de passe sont requis.'
-      });
-      return;
-    }
+    // Only validate password if it's a new user or password is being changed
+    if (!this.selectedUser.id || this.selectedUser.password) {
+      if (!this.selectedUser.password || !this.selectedUser.confirmPassword) {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Le mot de passe et la confirmation du mot de passe sont requis.'
+        });
+        return;
+      }
 
-    if (this.selectedUser.password !== this.selectedUser.confirmPassword) {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Erreur',
-        detail: 'Les mots de passe ne correspondent pas.'
-      });
-      return;
-    }
+      if (this.selectedUser.password !== this.selectedUser.confirmPassword) {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Les mots de passe ne correspondent pas.'
+        });
+        return;
+      }
 
-    const isBreached = this.checkPasswordBreach(this.selectedUser.password);
-    if (isBreached) {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Erreur',
-        detail: 'Ce mot de passe a été compromis. Veuillez en choisir un autre.'
-      });
-      return;
+      const isBreached = this.checkPasswordBreach(this.selectedUser.password);
+      if (isBreached) {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Ce mot de passe a été compromis. Veuillez en choisir un autre.'
+        });
+        return;
+      }
     }
 
     const userPayload: RegisterRequest = {
@@ -393,7 +448,7 @@ export class UsersComponent implements OnInit {
           const userWithMeta = {
             ...newUser,
             created_at: new Date().toISOString(),
-            role_name: roleObj ? roleObj.name : ''
+            role_name: roleObj ? (roleObj.translation?.name || roleObj.name || '') : ''
           };
           this.users.push(userWithMeta);
           this.filterUsers();

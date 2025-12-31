@@ -67,9 +67,12 @@
                     <div class="mb-3 list position-relative">
                       <label class="form-label">Titre ({{ getLanguageName(currentLanguageId) }})<span class="text-danger ms-1">*</span></label>
                       <input type="text" class="form-control list" [(ngModel)]="articleTitle" (ngModelChange)="onTitleChange($event)" name="articleTitle">
-                      <div style="display:flex; gap:8px; margin-top:6px;">
+                      <div style="display:flex; gap:8px; margin-top:6px; flex-wrap:wrap;">
                         <button type="button" class="btn btn-primaryadd" (click)="generateTitleFromContent()" [disabled]="!text || !text.trim()">Générer</button>
                         <button type="button" class="btn btn-outline-secondary" (click)="autoTranslateFromCurrent()" [disabled]="!text || !text.trim()" title="Translation service temporarily unavailable">Traduire</button>
+                        <button type="button" class="btn btn-outline-info" (click)="showLanguageTranslations(2)" title="Voir traduction en anglais">Voir EN</button>
+                        <button type="button" class="btn btn-outline-info" (click)="showLanguageTranslations(3)" title="Voir traduction en espagnol">Voir ES</button>
+                        <button type="button" class="btn btn-outline-warning" (click)="forceRetranslateSpanish()" title="Retraduire l'espagnol depuis le français">Retraduire ES</button>
                       </div>
                       <small class="text-muted" style="display:block; margin-top:4px;">Note: Veuillez entrer les traductions manuellement ou utiliser Google Translate</small>
                     </div>

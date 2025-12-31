@@ -69,6 +69,12 @@ export class AddArticleComponent implements OnInit {
   selectedMedia: File[] = [];
   selectedMediaToView: { url: string; type: 'image' | 'video' } | null = null;
 
+  // Suggested tags from API
+  suggestedTags: any[] = [];
+
+  // Suggested categories from API
+  suggestedCategories: any[] = [];
+
   // Article types for checkboxes
   articleTypes: ArticleType[] = [
 
@@ -274,10 +280,34 @@ export class AddArticleComponent implements OnInit {
         this.text = generatedContent;
         currentTrans.content = generatedContent;
         
+        // Extract and auto-select suggested tags
+        if (response.suggestedTags && Array.isArray(response.suggestedTags)) {
+          this.suggestedTags = response.suggestedTags;
+          console.log('Suggested tags from API:', this.suggestedTags);
+          
+          // Auto-select suggested tags
+          const suggestedTagIds = response.suggestedTags.map((tag: any) => tag.id);
+          this.articleTags = [...new Set([...this.articleTags, ...suggestedTagIds])];
+          console.log('Auto-selected tags:', this.articleTags);
+        }
+
+        // Extract and auto-select suggested categories
+        if (response.suggestedCategories && Array.isArray(response.suggestedCategories) && response.suggestedCategories.length > 0) {
+          this.suggestedCategories = response.suggestedCategories;
+          console.log('Suggested categories from API:', this.suggestedCategories);
+          
+          // Auto-select the first suggested category if none is selected
+          if (!this.selectedCategory && response.suggestedCategories[0]) {
+            const suggestedCategoryId = response.suggestedCategories[0].id;
+            this.selectedCategory = suggestedCategoryId;
+            console.log('Auto-selected category:', suggestedCategoryId, response.suggestedCategories[0]);
+          }
+        }
+        
         this.messageService.add({ 
           severity: 'success', 
           summary: 'Succès', 
-          detail: 'Article généré avec succès.',
+          detail: 'Article généré avec succès. Tags et catégories suggérés sélectionnés automatiquement.',
           sticky: false
         });
       } else {
@@ -309,7 +339,61 @@ export class AddArticleComponent implements OnInit {
    * Translate text using the Translation Service
    */
   async translateText(text: string, source: string, target: string): Promise<string> {
-    return this.translationService.translateWithRetry(text, target, 3);
+    console.log(`Translating text from ${source} to ${target}:`, text);
+    try {
+      const containsHtml = /<[^>]+>/i.test(text || '');
+      const textToTranslate = String(text || '');
+
+      if (containsHtml && typeof DOMParser !== 'undefined') {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(textToTranslate, 'text/html');
+
+        const walker = doc.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT, {
+          acceptNode(node: Node) {
+            if (!node.nodeValue) return NodeFilter.FILTER_REJECT;
+            return /\S/.test(node.nodeValue) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+          }
+        } as any);
+
+        const textNodes: Node[] = [];
+        const parts: string[] = [];
+        let nd = walker.nextNode();
+        while (nd) {
+          textNodes.push(nd);
+          parts.push(nd.nodeValue || '');
+          nd = walker.nextNode();
+        }
+
+        if (parts.length === 0) return '';
+
+        const DELIM = '\uE000\uE001__SEP__';
+        const joined = parts.join(DELIM);
+
+        const translatedJoined = await this.translationService.translateWithRetry(joined, target, source, 3);
+        if (!translatedJoined) return '';
+
+        const translatedParts = translatedJoined.split(DELIM);
+        if (translatedParts.length === parts.length) {
+          for (let i = 0; i < textNodes.length; i++) {
+            textNodes[i].nodeValue = translatedParts[i];
+          }
+          return doc.body.innerHTML;
+        }
+
+        const paragraphs = translatedJoined
+          .split(/\n{2,}/)
+          .map(p => p.trim())
+          .filter(p => p.length > 0)
+          .map(p => `<p>${p}</p>`)
+          .join('\n');
+        return paragraphs || translatedJoined;
+      }
+
+      return await this.translationService.translateWithRetry(textToTranslate, target, source, 3);
+    } catch (err) {
+      console.error('translateText helper error:', err);
+      return this.translationService.translateWithRetry(text, target, source, 3);
+    }
   }
 
   /**
@@ -343,10 +427,14 @@ export class AddArticleComponent implements OnInit {
         try {
           // Only translate if source has content
           if (currentTrans.title) {
-            trans.title = await this.translateText(currentTrans.title, sourceCode, targetCode);
+            const translatedTitle = await this.translateText(currentTrans.title, sourceCode, targetCode);
+            trans.title = translatedTitle;
+            console.log(`Successfully translated title to ${targetCode}:`, translatedTitle);
           }
           if (currentTrans.content) {
-            trans.content = await this.translateText(currentTrans.content, sourceCode, targetCode);
+            const translatedContent = await this.translateText(currentTrans.content, sourceCode, targetCode);
+            trans.content = translatedContent;
+            console.log(`Successfully translated content to ${targetCode}, length:`, translatedContent.length);
           }
           successCount++;
         } catch (e) {
@@ -574,39 +662,52 @@ export class AddArticleComponent implements OnInit {
     }
 
     try {
-      // 1. Create article with all translations (using French first)
-      let articleId: number | null = null;
-
-      for (const trans of this.translations) {
-        const articlePayload = {
-          title: trans.title,
-          content: trans.content,
-          isfree: this.accessType == 'gratuit' ? 1 : 0,
-          type: this.articleTypes.filter(t => t.model).map(t => t.type).join(','),
-          language_id: trans.language_id
-        };
-
-        console.log('Creating article with language', trans.language_id, ':', articlePayload);
-        try {
-          const articleResp = await this.articleService.create(articlePayload).toPromise();
-          console.log('Article created successfully for language', trans.language_id, 'with ID:', articleResp?.id);
-          if (articleResp && articleResp.id) {
-            if (!articleId) {
-              articleId = articleResp.id; // Store ID from first language
-            }
-          }
-        } catch (error) {
-          console.error('Error creating article for language', trans.language_id, ':', error);
-          throw error;
-        }
+      // 1. Create article with PRIMARY language (French - language_id = 1)
+      const primaryTrans = this.translations.find(t => t.language_id === 1);
+      if (!primaryTrans) {
+        throw new Error('French translation not found');
       }
 
-      if (!articleId) {
-        this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Erreur lors de la création de l\'article.' });
+      const articlePayload = {
+        title: primaryTrans.title,
+        content: primaryTrans.content,
+        isfree: this.accessType == 'gratuit' ? 1 : 0,
+        type: this.articleTypes.filter(t => t.model).map(t => t.type).join(','),
+        language_id: 1  // Always create with French first
+      };
+
+      console.log('Creating article with language 1 (French):', articlePayload);
+      const articleResp = await this.articleService.create(articlePayload).toPromise();
+      
+      if (!articleResp || !articleResp.id) {
         throw new Error('Article ID not returned from API');
       }
 
-      // 2. Upload medias using MediaService.upload and link to article
+      const articleId = articleResp.id;
+      console.log('Article created successfully with ID:', articleId);
+
+      // 2. Save translations for other languages (English and Spanish)
+      const translationErrors: string[] = [];
+      for (const trans of this.translations) {
+        if (trans.language_id === 1) continue; // Skip French as it's already the main article
+
+        try {
+          console.log(`Saving translation for language ${trans.language_id}:`, trans);
+          await this.articleService.saveTranslation(
+            articleId,
+            trans.language_id,
+            trans.title,
+            trans.content
+          ).toPromise();
+          console.log(`Translation saved successfully for language ${trans.language_id}`);
+        } catch (error) {
+          const errorMsg = `Failed to save translation for language ${trans.language_id}`;
+          console.error(errorMsg, error);
+          translationErrors.push(errorMsg);
+        }
+      }
+
+      // 3. Upload medias using MediaService.upload and link to article
       let mediaIds: number[] = [];
       const uploadedMediaResults = await Promise.all(
         this.selectedMedia.map(file => {
@@ -646,13 +747,13 @@ export class AddArticleComponent implements OnInit {
         }
       }
 
-      // 3. Link article to category
+      // 4. Link article to category
       await this.articleCategoryService.create({
         article_id: articleId,
         category_id: this.selectedCategory
       }).toPromise();
 
-      // 4. Link article to tags
+      // 5. Link article to tags
       await Promise.all(
         this.articleTags.map(tagId =>
           this.articleTagService.create({
@@ -662,9 +763,15 @@ export class AddArticleComponent implements OnInit {
         )
       );
 
-      // Succès final unique
-      this.messageService.add({ severity: 'success', summary: 'Succès', detail: 'Article ajouté avec succès !' });
-     // setTimeout(() => window.location.href = '/articles', 1200);
+      // Final success message
+      let successMessage = 'Article ajouté avec succès !';
+      if (translationErrors.length > 0) {
+        successMessage += ` (${translationErrors.length} traductions non sauvegardées)`;
+        console.warn('Translation save warnings:', translationErrors);
+      }
+      
+      this.messageService.add({ severity: 'success', summary: 'Succès', detail: successMessage });
+      // setTimeout(() => window.location.href = '/articles', 1200);
     } catch (error) {
       this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Erreur lors de l\'ajout de l\'article.' });
       console.error('Erreur lors du workflow de création d\'article:', error);
@@ -684,6 +791,106 @@ export class AddArticleComponent implements OnInit {
       }
     }
     return null;
+  }
+
+  /**
+   * Debug method to check translation state
+   */
+  debugTranslations() {
+    console.log('=== TRANSLATIONS DEBUG ===');
+    console.log('Current Language ID:', this.currentLanguageId);
+    console.log('All Translations:');
+    this.translations.forEach((t, idx) => {
+      console.log(`  [${idx}] Language ${t.language_id} (${t.language_code}):`, {
+        title: t.title.substring(0, 50) + (t.title.length > 50 ? '...' : ''),
+        contentLength: t.content.length
+      });
+    });
+  }
+
+  /**
+   * Show translations for a specific language in a toast message (short preview)
+   */
+  showLanguageTranslations(languageId: number): void {
+    const trans = this.translations.find(t => t.language_id === languageId);
+    if (!trans) {
+      this.messageService.add({ severity: 'error', summary: 'Erreur', detail: `Traduction pour la langue ${languageId} non trouvée.` });
+      return;
+    }
+
+    const titlePreview = trans.title && trans.title.length > 0 ? trans.title : '(vide)';
+    const contentPreview = trans.content ? (trans.content.length > 300 ? trans.content.slice(0, 300) + '...' : trans.content) : '(vide)';
+
+    this.messageService.add({
+      severity: 'info',
+      summary: `Traduction ${this.getLanguageName(languageId)}`,
+      detail: `${titlePreview}\n\n${contentPreview}`,
+      sticky: false
+    });
+
+    console.log(`Translation preview for language ${languageId}:`, trans);
+  }
+
+  /**
+   * Force reset Spanish translation to ensure it's properly saved
+   * This can be used if Spanish translation got corrupted with English content
+   */
+  async forceRetranslateSpanish(): Promise<void> {
+    try {
+      const frenchTrans = this.translations.find(t => t.language_id === 1);
+      const spanishTrans = this.translations.find(t => t.language_id === 3);
+      
+      if (!frenchTrans) {
+        this.messageService.add({ 
+          severity: 'error', 
+          summary: 'Erreur', 
+          detail: 'Traduction française non trouvée.'
+        });
+        return;
+      }
+
+      if (!frenchTrans.title || !frenchTrans.content) {
+        this.messageService.add({ 
+          severity: 'error', 
+          summary: 'Erreur', 
+          detail: 'Veuillez d\'abord remplir le titre et le contenu en français.'
+        });
+        return;
+      }
+
+      this.messageService.add({ 
+        severity: 'info', 
+        summary: 'Traduction', 
+        detail: 'Traduction en espagnol en cours... Cela peut prendre quelques secondes.',
+        sticky: false
+      });
+
+      if (spanishTrans) {
+        // Re-translate French title and content to Spanish
+        spanishTrans.title = await this.translateText(frenchTrans.title, 'fr', 'es');
+        spanishTrans.content = await this.translateText(frenchTrans.content, 'fr', 'es');
+        
+        console.log('Spanish translation updated:', spanishTrans);
+
+        this.messageService.add({ 
+          severity: 'success', 
+          summary: 'Succès', 
+          detail: 'Traduction espagnole mise à jour avec succès.'
+        });
+
+        // Switch to Spanish to verify
+        this.currentLanguageId = 3;
+        this.updateCurrentLanguageDisplay();
+      }
+    } catch (err) {
+      const errorDetail = err instanceof Error ? err.message : 'Erreur inconnue';
+      this.messageService.add({ 
+        severity: 'error', 
+        summary: 'Erreur', 
+        detail: `Erreur lors de la traduction: ${errorDetail}`
+      });
+      console.error('forceRetranslateSpanish error:', err);
+    }
   }
 
   annulerArticle() {
