@@ -1,0 +1,253 @@
+.table {
+  margin-bottom: 0;
+}
+
+.table thead th {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+  font-weight: 600;
+  padding: 12px 15px;
+}
+
+.table tbody td {
+  padding: 12px 15px;
+  vertical-align: middle;
+}
+
+.table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.btn-sm {
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.modal.show {
+  z-index: 1050;
+}
+
+.modal-backdrop.show {
+  z-index: 1040;
+}
+
+.text-primary {
+  color: #0d6efd;
+  text-decoration: none;
+}
+
+.text-primary:hover {
+  text-decoration: underline;
+}
+
+.d-flex.gap-2 {
+  gap: 8px;
+}
+
+.text-muted {
+  color: #6c757d;
+  font-size: 13px;
+}
+
+
+.card {
+  border: 1px solid #e3e6f0;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+  border-bottom: 1px solid #e3e6f0;
+  padding: 15px 20px;
+  background-color: #f8f9fa;
+}
+
+.card-body {
+  padding: 20px;
+}
+
+.form-label {
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.text-danger {
+  color: #dc3545;
+}
+
+.form-control {
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 14px;
+}
+
+.form-control:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.btn {
+  font-weight: 500;
+  border-radius: 4px;
+  padding: 8px 16px;
+}
+
+.btn-primary {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #0b5ed7;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  border-color: #6c757d;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background-color: #5c636a;
+}
+
+.btn-sm {
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.table {
+  margin-bottom: 0;
+}
+
+.table thead th {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+  font-weight: 600;
+}
+
+.table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.text-primary {
+  color: #0d6efd;
+  text-decoration: none;
+}
+
+.text-primary:hover {
+  text-decoration: underline;
+}
+
+.d-flex.gap-2 {
+  gap: 8px;
+}
+
+.text-muted {
+  color: #6c757d;
+  font-size: 13px;
+}
+
+textarea.form-control {
+  resize: vertical;
+}
+
+.modal.show {
+  z-index: 1050;
+}
+
+.modal-backdrop.show {
+  z-index: 1040;
+}
+
+
+::ng-deep .modal .close,::ng-deep .modal .btn-close {
+    background-color: #f0efef !important;
+}
+
+.badge.bg-secondary {
+        font-size: 0.7rem !important;
+}
+
+
+::ng-deep .select2-dropdown {
+border: 1px solid #e6eaed !important;
+
+}
+
+
+::ng-deep div#pn_id_2 {
+        width: 100% !important;
+          border-color: #E6EAED;
+}
+
+::ng-deep span.p-element.p-dropdown-label.p-inputtext.p-placeholder {
+    border-color: #E6EAED;
+    color: #212B36;
+    background-color: #ffffff;
+    font-size: 0.875rem !important;
+    font-weight: 400;
+    line-height: 1.6;
+    border-radius: 0.35rem;
+    padding: 0.45rem 0.85rem;
+    
+    font-size: 0.875rem !important;
+    font-family: "Nunito", sans-serif  !important;
+}
+
+
+
+::ng-deep li#pn_id_2_0 {
+    font-family: "Nunito", sans-serif !important;
+    font-size: 0.875rem !important;
+}
+
+
+::ng-deep span.p-element.p-dropdown-label.p-inputtext {
+    font-size: 0.875rem !important; 
+        font-family: "Nunito", sans-serif !important;
+
+}
+
+
+::ng-deep p-multiselect.p-element.p-inputwrapper {
+            width: 100% !important;
+          border-color: #E6EAED;
+              width: 100% !important;
+    border-color: #E6EAED;
+    display: grid !important
+;
+}
+
+
+::ng-deep .p-multiselect-token {
+        font-family: "Nunito", sans-serif !important;
+    font-size: 0.875rem !important;
+}
+
+::ng-deep p-dropdown{
+    width: 100% !important; 
+    display: grid !important;
+}
+
+::ng-deep .dropdown-item:not(.active):hover, ::ng-deep .dropdown-item:not(.active):focus,::ng-deep  .dropdown-item:not(.active):active {
+    color: #37773a;
+    background-color: #37773a0d;
+}
+::ng-deep span.p-tag-value {
+    font-family: 'Nunito';
+    font-size: 0.7rem !important;
+}
+
+::ng-deep span.myclass {
+        font-family: "Nunito", sans-serif !important;
+    font-size: 0.875rem !important;
+}
+
+
+::ng-deep .badge.bg-secondary {
+        font-size: 0.7rem !important;
+}

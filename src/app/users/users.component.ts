@@ -134,15 +134,19 @@ export class UsersComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.getAllUsers();
     this.getRoles();
-    this.filterUsers();
   }
 
   getAllUsers() {
     this.userService.getAllUtilisateurs().subscribe({
       next: (users: any[]) => {
-        this.users = users;
+        this.users = users.map(user => {
+          const roleObj = this.roles.find(r => r.id === user.role_id);
+          return {
+            ...user,
+            role_name: roleObj?.translation?.name || roleObj?.name || user.role_slug || 'Unknown'
+          };
+        });
         this.filterUsers();
         console.log('Utilisateurs chargés:', this.users);
       },
@@ -155,11 +159,18 @@ export class UsersComponent implements OnInit {
   getRoles() {
     this.roleService.getAll().subscribe({
       next: (roles: any[]) => {
-        this.roles = roles;
+        this.roles = roles.map(role => ({
+          ...role,
+          name: role.translation?.name || role.name || 'Unknown'
+        }));
         console.log('Rôles chargés:', this.roles);
+        // Load users after roles are loaded
+        this.getAllUsers();
       },
       error: (error) => {
         console.error('Erreur lors du chargement des rôles:', error);
+        // Still load users even if roles fail
+        this.getAllUsers();
       }
     });
   }
@@ -420,7 +431,12 @@ export class UsersComponent implements OnInit {
         next: (updatedUser) => {
           const index = this.users.findIndex(u => u.id === updatedUser.id);
           if (index !== -1) {
-            this.users[index] = { ...this.users[index], ...updatedUser };
+            const roleObj = this.roles.find(r => r.id === updatedUser.role_id);
+            this.users[index] = {
+              ...this.users[index],
+              ...updatedUser,
+              role_name: roleObj?.translation?.name || roleObj?.name || 'Unknown'
+            };
           }
           this.filterUsers();
           this.messageService.add({
@@ -450,7 +466,7 @@ export class UsersComponent implements OnInit {
           const userWithMeta = {
             ...newUser,
             created_at: new Date().toISOString(),
-            role_name: roleObj ? (roleObj.translation?.name || roleObj.name || '') : ''
+            role_name: roleObj?.translation?.name || roleObj?.name || 'Unknown'
           };
           this.users.push(userWithMeta);
           this.filterUsers();

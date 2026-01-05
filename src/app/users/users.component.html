@@ -299,7 +299,7 @@
                                     <p-dropdown 
                                         [options]="roles" 
                                         [(ngModel)]="selectedUser.role_id" 
-                                        optionLabel="translation.name" 
+                                        optionLabel="name" 
                                         optionValue="id" 
                                         name="role_id" 
                                         placeholder="Sélectionner un rôle" 
@@ -352,12 +352,10 @@
                                         styleClass="w-100"
                                         [required]="true">
                                     </p-autoComplete>
-                                    <small class="text-muted d-block mt-1" *ngIf="selectedUser.city">✓ Sélectionné: <strong>{{ selectedUser.city }}</strong></small>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">Code postal<span class="text-danger ms-1">*</span></label>
                                     <input type="text" class="form-control" [(ngModel)]="selectedUser.code_postal" name="code_postal" readonly required>
-                                    <small class="text-muted d-block mt-1" *ngIf="selectedUser.code_postal">✓ Code: <strong>{{ selectedUser.code_postal }}</strong></small>
                                 </div>
                                 <div class="col-12">
                                     <label class="form-label">Type d'appareil<span class="text-danger ms-1">*</span></label>
@@ -371,7 +369,6 @@
                                         styleClass="w-100"
                                         [required]="true">
                                     </p-dropdown>
-                                    <small class="text-muted d-block mt-1" *ngIf="selectedUser.device_type">✓ Sélectionné: <strong>{{ selectedUser.device_type }}</strong></small>
                                 </div>
                             </div>
                         </div>

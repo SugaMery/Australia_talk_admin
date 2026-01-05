@@ -1,6 +1,9 @@
 <app-header></app-header>
 <app-sidebar></app-sidebar>
 <p-toast></p-toast>
+<app-header></app-header>
+<app-sidebar></app-sidebar>
+<p-toast></p-toast>
 <div class="page-wrapper">
     <div class="content">
         <div class="page-header">
@@ -106,6 +109,19 @@
                         </div>
                     </div>
                     <div class="d-flex table-dropdown my-xl-auto right-content align-items-center flex-wrap row-gap-3">
+                        <div class="dropdown me-2">
+                            <a href="javascript:void(0);" class="dropdown-toggle btn btn-white btn-md d-inline-flex align-items-center" data-bs-toggle="dropdown">
+                                Fonction
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end p-3">
+                                <li>
+                                    <a href="javascript:void(0);" class="dropdown-item rounded-1" (click)="roleFilter = null; filterUsers()">Tous</a>
+                                </li>
+                                <li *ngFor="let role of roles">
+                                    <a href="javascript:void(0);" class="dropdown-item rounded-1" (click)="roleFilter = role.id; filterUsers()">{{ role.name }}</a>
+                                </li>
+                            </ul>
+                        </div>
 
                         <div class="dropdown me-2">
                             <a href="javascript:void(0);" class="dropdown-toggle btn btn-white btn-md d-inline-flex align-items-center" data-bs-toggle="dropdown">
@@ -248,39 +264,38 @@
         </div>
     </div>
     <app-footer></app-footer>
+
 </div>
 
 <!-- Edit/Add Customer -->
 <div class="modal fade" id="edit-customer">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
             <div class="page-wrapper-new p-0">
                 <div class="content">
-                    <div class="modal-header">
+                    <div class="modal-header border-bottom">
                         <div class="page-title">
                             <h4>{{ selectedUser?.id ? 'Modifier Utilisateur' : 'Ajouter Utilisateur' }}</h4>
                         </div>
-                        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <form (ngSubmit)="saveUserChanges()">
                         <div class="modal-body">
-                            <div class="row">
-                                <div class="col-lg-6 mb-3">
+                            <div class="row g-3">
+                                <div class="col-md-6">
                                     <label class="form-label">Prénom<span class="text-danger ms-1">*</span></label>
                                     <input type="text" class="form-control" [(ngModel)]="selectedUser.first_name" name="first_name" required>
                                 </div>
-                                <div class="col-lg-6 mb-3">
+                                <div class="col-md-6">
                                     <label class="form-label">Nom<span class="text-danger ms-1">*</span></label>
                                     <input type="text" class="form-control" [(ngModel)]="selectedUser.last_name" name="last_name" required>
                                 </div>
 
-                                <div class="col-lg-6 mb-3">
+                                <div class="col-md-6">
                                     <label class="form-label">Téléphone<span class="text-danger ms-1">*</span></label>
                                     <input type="tel" class="form-control" [(ngModel)]="selectedUser.telephone" name="telephone" required>
                                 </div>
-                                <div class="col-lg-6 mb-3">
+                                <div class="col-md-6">
                                     <label class="form-label">Rôle<span class="text-danger ms-1">*</span></label>
                                     <p-dropdown 
                                         [options]="roles" 
@@ -289,36 +304,40 @@
                                         optionValue="id" 
                                         name="role_id" 
                                         placeholder="Sélectionner un rôle" 
-                                        [required]="true">
+                                        [required]="true"
+                                        styleClass="w-100">
                                     </p-dropdown>
                                 </div>
-                                <div class="col-12 mb-3">
+                                <div class="col-12">
                                     <label class="form-label">Email<span class="text-danger ms-1">*</span></label>
                                     <input type="email" class="form-control" [(ngModel)]="selectedUser.email" name="email" required>
                                 </div>
-                                <div class="col-lg-6 mb-3">
-                                    <label class="form-label">Mot de passe <span class="text-danger ms-1">*</span></label>
+                                <div class="col-md-6">
+                                    <label class="form-label">Mot de passe <span class="text-danger ms-1" *ngIf="!selectedUser?.id">*</span></label>
                                     <p-password 
                                         [(ngModel)]="selectedUser.password" 
                                         name="password" 
                                         [toggleMask]="true" 
-                                        [style.display]="'grid'"
+                                        styleClass="w-100"
                                         inputStyleClass="form-control w-100"
-                                        [required]="true">
+                                        [required]="!selectedUser?.id">
                                     </p-password>
+                                    <small class="form-text text-muted d-block mt-1" *ngIf="selectedUser?.id">
+                                        Laisser vide pour ne pas changer le mot de passe
+                                    </small>
                                 </div>
-                                <div class="col-lg-6 mb-3">
-                                    <label class="form-label">Confirmer le mot de passe <span class="text-danger ms-1">*</span></label>
+                                <div class="col-md-6">
+                                    <label class="form-label">Confirmer le mot de passe <span class="text-danger ms-1" *ngIf="!selectedUser?.id">*</span></label>
                                     <p-password 
                                         [(ngModel)]="selectedUser.confirmPassword" 
                                         name="confirmPassword" 
                                         [toggleMask]="true" 
-                                        [style.display]="'grid'"
+                                        styleClass="w-100"
                                         inputStyleClass="form-control w-100"
-                                        [required]="true">
+                                        [required]="!selectedUser?.id">
                                     </p-password>
                                 </div>
-                                <div class="col-lg-6 mb-3">
+                                <div class="col-md-6">
                                     <label class="form-label">Ville<span class="text-danger ms-1">*</span></label>
                                     <p-autoComplete 
                                         [(ngModel)]="selectedUser.city" 
@@ -331,14 +350,15 @@
                                         (onSelect)="onCitySelected($event)"
                                         (onChange)="onCityChange()"
                                         placeholder="Rechercher une ville..."
+                                        styleClass="w-100"
                                         [required]="true">
                                     </p-autoComplete>
                                 </div>
-                                <div class="col-lg-6 mb-3">
+                                <div class="col-md-6">
                                     <label class="form-label">Code postal<span class="text-danger ms-1">*</span></label>
                                     <input type="text" class="form-control" [(ngModel)]="selectedUser.code_postal" name="code_postal" readonly required>
                                 </div>
-                                <div class="col-lg-12 mb-3">
+                                <div class="col-12">
                                     <label class="form-label">Type d'appareil<span class="text-danger ms-1">*</span></label>
                                     <p-dropdown 
                                         [options]="deviceTypes" 
@@ -347,14 +367,15 @@
                                         optionLabel="label" 
                                         optionValue="value" 
                                         placeholder="Sélectionner un appareil"
+                                        styleClass="w-100"
                                         [required]="true">
                                     </p-dropdown>
                                 </div>
                             </div>
                         </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn me-2 btn-secondary fs-13 fw-medium p-2 px-3 shadow-none" data-bs-dismiss="modal" (click)="closeEditUserModal()">Annuler</button>
-                            <button type="submit" class="btn btn-primary fs-13 fw-medium p-2 px-3">
+                        <div class="modal-footer border-top">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" (click)="closeEditUserModal()">Annuler</button>
+                            <button type="submit" class="btn btn-primary">
                                 {{ selectedUser?.id ? 'Enregistrer' : 'Ajouter' }}
                             </button>
                         </div>

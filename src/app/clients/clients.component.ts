@@ -134,15 +134,19 @@ export class ClientsComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.getAllUsers();
     this.getRoles();
-    this.filterUsers();
   }
 
   getAllUsers() {
     this.userService.getAllClients().subscribe({
       next: (users: any[]) => {
-        this.users = users;
+        this.users = users.map(user => {
+          const roleObj = this.roles.find(r => r.id === user.role_id);
+          return {
+            ...user,
+            role_name: roleObj?.translation?.name || roleObj?.name || user.role_slug || 'Unknown'
+          };
+        });
         this.filterUsers();
         console.log('Utilisateurs chargés:', this.users);
       },
@@ -155,11 +159,18 @@ export class ClientsComponent implements OnInit {
   getRoles() {
     this.roleService.getAll().subscribe({
       next: (roles: any[]) => {
-        this.roles = roles;
+        this.roles = roles.map(role => ({
+          ...role,
+          name: role.translation?.name || role.name || 'Unknown'
+        }));
         console.log('Rôles chargés:', this.roles);
+        // Load users after roles are loaded
+        this.getAllUsers();
       },
       error: (error) => {
         console.error('Erreur lors du chargement des rôles:', error);
+        // Still load users even if roles fail
+        this.getAllUsers();
       }
     });
   }
@@ -343,32 +354,34 @@ export class ClientsComponent implements OnInit {
     }
 
     // Validate password and confirmPassword
-    if (!this.selectedUser.password || !this.selectedUser.confirmPassword) {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Erreur',
-        detail: 'Le mot de passe et la confirmation du mot de passe sont requis.'
-      });
-      return;
-    }
+    if (!this.selectedUser.id || this.selectedUser.password) {
+      if (!this.selectedUser.password || !this.selectedUser.confirmPassword) {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Le mot de passe et la confirmation du mot de passe sont requis.'
+        });
+        return;
+      }
 
-    if (this.selectedUser.password !== this.selectedUser.confirmPassword) {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Erreur',
-        detail: 'Les mots de passe ne correspondent pas.'
-      });
-      return;
-    }
+      if (this.selectedUser.password !== this.selectedUser.confirmPassword) {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Les mots de passe ne correspondent pas.'
+        });
+        return;
+      }
 
-    const isBreached = this.checkPasswordBreach(this.selectedUser.password);
-    if (isBreached) {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Erreur',
-        detail: 'Ce mot de passe a été compromis. Veuillez en choisir un autre.'
-      });
-      return;
+      const isBreached = this.checkPasswordBreach(this.selectedUser.password);
+      if (isBreached) {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Ce mot de passe a été compromis. Veuillez en choisir un autre.'
+        });
+        return;
+      }
     }
 
     const userPayload: RegisterRequest = {
@@ -420,7 +433,7 @@ export class ClientsComponent implements OnInit {
           const userWithMeta = {
             ...newUser,
             created_at: new Date().toISOString(),
-            role_name: roleObj ? roleObj.name : ''
+            role_name: roleObj?.translation?.name || roleObj?.name || 'Unknown'
           };
           this.users.push(userWithMeta);
           this.filterUsers();

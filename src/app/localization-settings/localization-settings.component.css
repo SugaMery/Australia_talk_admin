@@ -1,168 +1,125 @@
-::ng-deep div.dataTables_wrapper div.dataTables_paginate ul.pagination {
-    margin: 2px 0 !important;
-    white-space: nowrap !important;
-    justify-content: flex-end !important;
+.card {
+  border: 1px solid #e3e6f0;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.pagination {
-    --bs-pagination-padding-x: 0.75rem;
-    --bs-pagination-padding-y: 0.375rem;
-    --bs-pagination-font-size: 1rem;
-    --bs-pagination-color: var(--bs-link-color);
-    --bs-pagination-bg: var(--bs-body-bg);
-    --bs-pagination-border-width: var(--bs-border-width);
-    --bs-pagination-border-color: var(--bs-border-color);
-    --bs-pagination-border-radius: var(--bs-border-radius);
-    --bs-pagination-hover-color: var(--bs-link-hover-color);
-    --bs-pagination-hover-bg: var(--bs-tertiary-bg);
-    --bs-pagination-hover-border-color: var(--bs-border-color);
-    --bs-pagination-focus-color: var(--bs-link-hover-color);
-    --bs-pagination-focus-bg: var(--bs-secondary-bg);
-    --bs-pagination-focus-box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-    --bs-pagination-active-color: #fff;
-    --bs-pagination-active-bg: #0d6efd;
-    --bs-pagination-active-border-color: #0d6efd;
-    --bs-pagination-disabled-color: var(--bs-secondary-color);
-    --bs-pagination-disabled-bg: var(--bs-secondary-bg);
-    --bs-pagination-disabled-border-color: var(--bs-border-color);
-    display: flex
-;
-    padding-left: 0;
-    list-style: none;
+.card-header {
+  border-bottom: 1px solid #e3e6f0;
+  padding: 15px 20px;
+  background-color: #f8f9fa;
 }
 
-::ng-deep div.dataTables_wrapper div.dataTables_length label {
-    font-weight: normal;
-    text-align: left;
-    white-space: nowrap;
+.card-body {
+  padding: 20px;
 }
 
-
-::ng-deep tr.odd {
-    display: none !important;
-}
-/* Show empty row if no data */
-:host-context(.no-category-data) ::ng-deep tr.odd {
-    display: block !important;
+.form-label {
+  font-weight: 500;
+  margin-bottom: 8px;
 }
 
-
-::ng-deep div#DataTables_Table_0_filter{
-      display: none !important;
-  
+.text-danger {
+  color: #dc3545;
 }
 
-::ng-deep .badge.table-badge::before {
-    position: relative;
-    content: "";
-    display: inline-block;
-    width: 5px;
-    height: 5px;
-    background-color: #ffffff;
-    border-radius: 20px;
-    margin-right: 4px;
+.form-control {
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 14px;
 }
 
-
-::ng-deep .dropdown-item.active {
-    background-color: #37773aa3 !important;
+.form-control:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
 }
 
-::ng-deep .dropdown-item:not(.active):hover, ::ng-deep .dropdown-item:not(.active):focus, ::ng-deep .dropdown-item:not(.active):active {
-    color: #ffffff;
-background-color: #37773a56 !important;
+.btn {
+  font-weight: 500;
+  border-radius: 4px;
+  padding: 8px 16px;
 }
 
-::ng-deep div.dataTables_wrapper div.dataTables_paginate ul.pagination {
-    margin: 2px 0 !important;
-    white-space: nowrap !important;
-    justify-content: flex-end !important;
+.btn-primary {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+  color: white;
 }
 
-.pagination {
-    --bs-pagination-padding-x: 0.75rem;
-    --bs-pagination-padding-y: 0.375rem;
-    --bs-pagination-font-size: 1rem;
-    --bs-pagination-color: var(--bs-link-color);
-    --bs-pagination-bg: var(--bs-body-bg);
-    --bs-pagination-border-width: var(--bs-border-width);
-    --bs-pagination-border-color: var(--bs-border-color);
-    --bs-pagination-border-radius: var(--bs-border-radius);
-    --bs-pagination-hover-color: var(--bs-link-hover-color);
-    --bs-pagination-hover-bg: var(--bs-tertiary-bg);
-    --bs-pagination-hover-border-color: var(--bs-border-color);
-    --bs-pagination-focus-color: var(--bs-link-hover-color);
-    --bs-pagination-focus-bg: var(--bs-secondary-bg);
-    --bs-pagination-focus-box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-    --bs-pagination-active-color: #fff;
-    --bs-pagination-active-bg: #0d6efd;
-    --bs-pagination-active-border-color: #0d6efd;
-    --bs-pagination-disabled-color: var(--bs-secondary-color);
-    --bs-pagination-disabled-bg: var(--bs-secondary-bg);
-    --bs-pagination-disabled-border-color: var(--bs-border-color);
-    display: flex
-;
-    padding-left: 0;
-    list-style: none;
+.btn-primary:hover {
+  background-color: #0b5ed7;
 }
 
-::ng-deep div.dataTables_wrapper div.dataTables_length label {
-    font-weight: normal;
-    text-align: left;
-    white-space: nowrap;
+.btn-secondary {
+  background-color: #6c757d;
+  border-color: #6c757d;
+  color: white;
 }
 
-
-::ng-deep tr.odd {
-    display: none !important;
+.btn-secondary:hover {
+  background-color: #5c636a;
 }
-/* Show empty row if no data */
-:host-context(.no-category-data) ::ng-deep tr.odd {
-    display: block !important;
+
+.btn-sm {
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.table {
+  margin-bottom: 0;
+}
+
+.table thead th {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+  font-weight: 600;
+}
+
+.table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.d-flex.gap-2 {
+  gap: 8px;
+}
+
+.badge {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.badge.bg-secondary {
+  background-color: #6c757d !important;
+  color: white;
+}
+
+.text-muted {
+  color: #6c757d;
+  font-size: 13px;
+}
+
+.form-check-input {
+  width: 1.25em;
+  height: 1.25em;
+  margin-top: 0.125em;
+  margin-right: 0.5em;
+  cursor: pointer;
+}
+
+.modal.show {
+  z-index: 1050;
+}
+
+.modal-backdrop.show {
+  z-index: 1040;
 }
 
 
-::ng-deep div#DataTables_Table_0_filter{
-      display: none !important;
-  
-}
-
-::ng-deep #DataTables_Table_0_length{
-    display: none !important;
-}
-
-::ng-deep #DataTables_Table_0_paginate{
-    display: none !important;
-}
-
-::ng-deep .badge.table-badge::before {
-    position: relative;
-    content: "";
-    display: inline-block;
-    width: 5px;
-    height: 5px;
-    background-color: #ffffff;
-    border-radius: 20px;
-    margin-right: 4px;
-}
-
-
-::ng-deep .dropdown-item.active {
-    background-color: #37773aa3 !important;
-}
-
-
-::ng-deep .bg-dark {
-    background-color: #ff0000 !important;
-}
-
-::ng-deep .dropdown-item.active {
-    background-color: #37773aa3 !important;
-}
-
-::ng-deep .dropdown-item:not(.active):hover, ::ng-deep .dropdown-item:not(.active):focus, ::ng-deep .dropdown-item:not(.active):active {
-    color: #ffffff;
-background-color: #37773a56 !important;
+::ng-deep span {
+font-family: 'Nunito' !important;
 }
 
 @import "../../../node_modules/quill/dist/quill.core.css";
@@ -436,4 +393,15 @@ padding-left: 0.5em !important;
     font-weight: 700;
     background-color: #e6eaed !important;
     border-radius: 50px;
+}
+
+
+
+::ng-deep .badge.bg-secondary {
+        font-size: 0.7rem !important;
+}
+
+
+::ng-deep .badge {
+    font-size: 11px !important;
 }

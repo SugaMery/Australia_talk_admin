@@ -137,10 +137,21 @@
                         <li class="submenu-open">
                             <h6 class="submenu-hdr">Site Web</h6>
                             <ul>
-                                <li><a href="system-settings.html"><i class="ti ti-world fs-16 me-2"></i><span>Paramètres du site web</span></a></li>
-                                <li><a href="system-settings.html"><i class="ti ti-link fs-16 me-2"></i><span>Lien système</span></a></li>
-                                <li><a href="company-settings.html"><i class="ti ti-building fs-16 me-2"></i><span>Lien entreprise</span></a></li>
-                                <li><a href="localization-settings.html"><i class="ti ti-map-pin fs-16 me-2"></i><span>Localisation</span></a></li>
+                                <li [class.active]="selectedMenu === 'system-settings'">
+                                    <a href="system-settings" (click)="selectedMenu = 'system-settings'"><i class="ti ti-world fs-16 me-2"></i><span>Paramètres du site web</span></a>
+                                </li>
+                                <li [class.active]="selectedMenu === 'system-link'">
+                                    <a href="system-link" (click)="selectedMenu = 'system-link'"><i class="ti ti-link fs-16 me-2"></i><span>Lien système</span></a>
+                                </li>
+                                <li [class.active]="selectedMenu === 'company-settings'">
+                                    <a href="company-settings" (click)="selectedMenu = 'company-settings'"><i class="ti ti-building fs-16 me-2"></i><span>Lien entreprise</span></a>
+                                </li>
+                                <li [class.active]="selectedMenu === 'localization-settings'">
+                                    <a href="localization-settings" (click)="selectedMenu = 'localization-settings'"><i class="ti ti-map-pin fs-16 me-2"></i><span>Localisation</span></a>
+                                </li>
+                                <li [class.active]="selectedMenu === 'email-templates'">
+                                    <a href="email-templates" (click)="selectedMenu = 'email-templates'"><i class="ti ti-mail fs-16 me-2"></i><span>Templates Email</span></a>
+                                </li>
                             </ul>
                         </li>
                         <!-- Paramètres -->

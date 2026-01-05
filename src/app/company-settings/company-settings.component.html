@@ -1,0 +1,314 @@
+<app-header></app-header>
+<app-sidebar></app-sidebar>
+<p-toast></p-toast>
+<div class="page-wrapper">
+    <div class="content">
+        <div class="page-header">
+            <div class="add-item d-flex">
+                <div class="page-title">
+                    <h4>Paramètres d'entreprise</h4>
+                    <h6>Gérez les informations et liens de l'entreprise</h6>
+
+<!--                     <h4>Paramètres du site web</h4>
+                    <h6>Gérez les paramètres généraux de votre site</h6>
+ -->
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Company Info -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <h5>Informations de l'entreprise</h5>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <form>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Nom de l'entreprise<span class="text-danger ms-1">*</span></label>
+                                    <input type="text" class="form-control" [(ngModel)]="companyInfo.company_name" name="company_name" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Website</label>
+                                    <input type="url" class="form-control" [(ngModel)]="companyInfo.company_website" name="company_website">
+                                </div>
+                                <div class="col-12 mb-3">
+                                    <label class="form-label">Description</label>
+                                    <textarea class="form-control" rows="3" [(ngModel)]="companyInfo.company_description" name="company_description"></textarea>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" class="form-control" [(ngModel)]="companyInfo.company_email" name="company_email">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Téléphone</label>
+                                    <input type="tel" class="form-control" [(ngModel)]="companyInfo.company_phone" name="company_phone">
+                                </div>
+                                <div class="col-12 mb-3">
+                                    <label class="form-label">Adresse</label>
+                                    <input type="text" class="form-control" [(ngModel)]="companyInfo.company_address" name="company_address">
+                                </div>
+                                <div class="col-12 mb-3">
+                                    <label class="form-label">Logo URL</label>
+                                    <input type="url" class="form-control" [(ngModel)]="companyInfo.company_logo_url" name="company_logo_url">
+                                    <small class="text-muted d-block mt-1" *ngIf="companyInfo.company_logo_url">
+                                        <img [src]="companyInfo.company_logo_url" alt="Logo" style="max-height: 50px; margin-top: 10px;">
+                                    </small>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Social Media -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <h5>Réseaux sociaux</h5>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <form>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Facebook</label>
+                                    <input type="url" class="form-control" [(ngModel)]="companyInfo.facebook_url" name="facebook_url">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Twitter</label>
+                                    <input type="url" class="form-control" [(ngModel)]="companyInfo.twitter_url" name="twitter_url">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Instagram</label>
+                                    <input type="url" class="form-control" [(ngModel)]="companyInfo.instagram_url" name="instagram_url">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">LinkedIn</label>
+                                    <input type="url" class="form-control" [(ngModel)]="companyInfo.linkedin_url" name="linkedin_url">
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Company Links -->
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <div class="card-title">
+                            <h5>Liens de l'entreprise</h5>
+                        </div>
+                        <button class="btn btn-sm btn-primary" (click)="openAddLinkModal()">
+                            <i class="ti ti-plus me-1"></i>Ajouter un lien
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Nom</th>
+                                        <th>URL</th>
+                                        <th>Statut</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let link of paginatedLinks">
+                                        <td>{{ link.name }}</td>
+                                        <td>
+                                            <a [href]="link.url" target="_blank" class="text-primary">
+                                                {{ link.url }}
+                                            </a>
+                                        </td>
+                                        <td>
+                                            <p-tag 
+                                                [value]="link.active ? 'Actif' : 'Inactif'" 
+                                                [severity]="link.active ? 'success' : 'danger'">
+                                            </p-tag>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex gap-2">
+                                                <button class="btn btn-sm btn-info" (click)="openSeoModal(link)" title="Métadonnées SEO">
+                                                    <i class="ti ti-seo"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-primary" (click)="openEditLinkModal(link)" title="Modifier">
+                                                    <i class="ti ti-edit"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-danger" (click)="deleteLink(link.id)" title="Supprimer">
+                                                    <i class="ti ti-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination controls -->
+                        <div class="d-flex justify-content-center my-3" *ngIf="totalPages > 1">
+                            <nav>
+                                <ul class="pagination">
+                                    <!-- Previous button -->
+                                    <li class="page-item" [class.disabled]="currentPage === 1">
+                                        <a class="page-link" href="#" (click)="goToPage(currentPage - 1); $event.preventDefault();" [attr.aria-disabled]="currentPage === 1">&laquo;</a>
+                                    </li>
+                                    
+                                    <!-- Page numbers -->
+                                    <li class="page-item" *ngFor="let page of getDisplayPages()" [class.active]="currentPage === page" [class.disabled]="page === '...'">
+                                        <a *ngIf="page !== '...'" class="page-link" href="#" (click)="onPageClick(+page, $event)">{{ page }}</a>
+                                        <span *ngIf="page === '...'" class="page-link">...</span>
+                                    </li>
+                                    
+                                    <!-- Next button -->
+                                    <li class="page-item" [class.disabled]="currentPage === totalPages">
+                                        <a class="page-link" href="#" (click)="goToPage(currentPage + 1); $event.preventDefault();" [attr.aria-disabled]="currentPage === totalPages">&raquo;</a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <h5>Actions</h5>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <button class="btn btn-primary w-100 mb-2" (click)="saveCompanyInfo()" [disabled]="isSaving">
+                            <span *ngIf="!isSaving"><i class="ti ti-device-floppy me-2"></i>Enregistrer</span>
+                            <span *ngIf="isSaving"><i class="ti ti-loader me-2"></i>Enregistrement...</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <h5>Information</h5>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted">
+                            <i class="ti ti-info-circle me-2"></i>
+                            Ces informations sont affichées sur votre site public.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <app-footer></app-footer>
+</div>
+
+<!-- Add/Edit Link Modal -->
+<div class="modal fade" id="company-link-modal" [class.show]="showLinkModal" [style.display]="showLinkModal ? 'block' : 'none'">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{ isEditingLink ? 'Modifier le lien' : 'Ajouter un lien' }}</h5>
+                <button type="button" class="btn-close" (click)="closeLinkModal()"></button>
+            </div>
+            <form (ngSubmit)="saveLink()">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Nom<span class="text-danger ms-1">*</span></label>
+                        <input type="text" class="form-control" [(ngModel)]="selectedLink.name" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">URL<span class="text-danger ms-1">*</span></label>
+                        <input type="url" class="form-control" [(ngModel)]="selectedLink.url" name="url" required>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" [(ngModel)]="selectedLink.active" name="active" id="activeLinkCheck">
+                        <label class="form-check-label" for="activeLinkCheck">
+                            Actif
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer gap-2">
+                    <button type="button" class="btn btn-secondary" (click)="closeLinkModal()">Annuler</button>
+                    <button type="submit" class="btn btn-primary">{{ isEditingLink ? 'Enregistrer' : 'Ajouter' }}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal-backdrop fade" [class.show]="showLinkModal" *ngIf="showLinkModal"></div>
+<!-- SEO Metadata Modal -->
+<div class="modal fade" id="seo-modal" [class.show]="showSeoModal" [style.display]="showSeoModal ? 'block' : 'none'">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Métadonnées SEO - {{ selectedLinkForSeo.name }}</h5>
+                <button type="button" class="btn-close" (click)="closeSeoModal()"></button>
+            </div>
+            <form (ngSubmit)="saveSeoMetadata()">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Langue<span class="text-danger ms-1">*</span></label>
+                        <p-dropdown 
+                            [options]="languages" 
+                            [(ngModel)]="selectedLanguageForSeo" 
+                            name="language"
+                            optionLabel="name"
+                            optionValue="id"
+                            placeholder="Sélectionnez une langue"
+                            (onChange)="onLanguageChange()"
+                            styleClass="w-100">
+                            <ng-template pTemplate="item" let-option>
+                                <div *ngIf="option" class="d-flex align-items-center gap-2">
+                                    <img [src]="'assets/img/flags/' + (option.code | lowercase) + '.svg'" 
+                                         alt="{{ option.name }}" 
+                                         style="width: 20px; height: 15px; object-fit: cover;">
+                                    <span>{{ option.name }} {{ option.isDefault ? '(Défaut)' : '' }}</span>
+                                </div>
+                            </ng-template>
+                            <ng-template pTemplate="selectedItem" let-option>
+                                <div *ngIf="option" class="d-flex align-items-center gap-2">
+                                    <img [src]="'assets/img/flags/' + (option.code | lowercase) + '.svg'" 
+                                         alt="{{ option.name }}" 
+                                         style="width: 20px; height: 15px; object-fit: cover;">
+                                    <span>{{ option.name }}</span>
+                                </div>
+                            </ng-template>
+                        </p-dropdown>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Titre SEO<span class="text-danger ms-1">*</span></label>
+                        <input type="text" class="form-control" [(ngModel)]="selectedLinkForSeo.seo_title" name="seo_title" maxlength="60" required>
+                        <small class="text-muted d-block">{{ selectedLinkForSeo.seo_title?.length || 0 }}/60 caractères</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description SEO<span class="text-danger ms-1">*</span></label>
+                        <textarea class="form-control" rows="3" [(ngModel)]="selectedLinkForSeo.seo_description" name="seo_description" maxlength="160" required></textarea>
+                        <small class="text-muted d-block">{{ selectedLinkForSeo.seo_description?.length || 0 }}/160 caractères</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Mots-clés SEO</label>
+                        <input type="text" class="form-control" [(ngModel)]="selectedLinkForSeo.seo_keywords" name="seo_keywords" placeholder="Séparés par des virgules">
+                        <small class="text-muted d-block">ex: seo, métadonnées, keywords</small>
+                    </div>
+                    <div class="alert alert-info" role="alert">
+                        <i class="ti ti-info-circle me-2"></i>
+                        <strong>Conseil SEO:</strong> Le titre doit faire 50-60 caractères, la description 150-160 caractères pour un affichage optimal dans les résultats de recherche.
+                    </div>
+                </div>
+                <div class="modal-footer gap-2">
+                    <button type="button" class="btn btn-secondary" (click)="closeSeoModal()">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Enregistrer les métadonnées</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal-backdrop fade" [class.show]="showSeoModal" *ngIf="showSeoModal"></div>

@@ -35,6 +35,11 @@ import { ClientsComponent } from './clients/clients.component';
 import { RolesPermissionsComponent } from './roles-permissions/roles-permissions.component';
 import { LogUsersComponent } from './log-users/log-users.component';
 import { ParametresGenerauxComponent } from './parametres-generaux/parametres-generaux.component';
+import { SystemSettingsComponent } from './system-settings/system-settings.component';
+import { SystemLinkComponent } from './system-link/system-link.component';
+import { CompanySettingsComponent } from './company-settings/company-settings.component';
+import { LocalizationSettingsComponent } from './localization-settings/localization-settings.component';
+import { EmailTemplatesComponent } from './email-templates/email-templates.component';
 @NgModule({
   declarations: [
     AppComponent,
@@ -57,7 +62,12 @@ import { ParametresGenerauxComponent } from './parametres-generaux/parametres-ge
     ClientsComponent,
     RolesPermissionsComponent,
     LogUsersComponent,
-    ParametresGenerauxComponent
+    ParametresGenerauxComponent,
+    SystemSettingsComponent,
+    SystemLinkComponent,
+    CompanySettingsComponent,
+    LocalizationSettingsComponent,
+    EmailTemplatesComponent
   ],
   imports: [
     BrowserModule,

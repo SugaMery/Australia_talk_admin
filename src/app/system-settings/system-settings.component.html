@@ -1,0 +1,203 @@
+<app-header></app-header>
+<app-sidebar></app-sidebar>
+<p-toast></p-toast>
+<div class="page-wrapper">
+    <div class="content">
+        <div class="page-header">
+            <div class="add-item d-flex">
+                <div class="page-title">
+                    <h4>Paramètres Email</h4>
+                    <h6>Configurez les paramètres SMTP et les notifications email</h6>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- SMTP Configuration -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <h5>Configuration SMTP</h5>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <form>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Hôte SMTP<span class="text-danger ms-1">*</span></label>
+                                    <input type="text" class="form-control" [(ngModel)]="mailSettings.smtp_host" name="smtp_host" placeholder="smtp.gmail.com" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Port<span class="text-danger ms-1">*</span></label>
+                                    <input type="number" class="form-control" [(ngModel)]="mailSettings.smtp_port" name="smtp_port" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Utilisateur SMTP</label>
+                                    <input type="text" class="form-control" [(ngModel)]="mailSettings.smtp_username" name="smtp_username">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Mot de passe SMTP</label>
+                                    <div class="input-group">
+                                        <input [type]="showPassword ? 'text' : 'password'" class="form-control" [(ngModel)]="mailSettings.smtp_password" name="smtp_password">
+                                        <button class="btn btn-outline-secondary" type="button" (click)="showPassword = !showPassword">
+                                            <i [class]="showPassword ? 'ti ti-eye-off' : 'ti ti-eye'"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Email d'envoi<span class="text-danger ms-1">*</span></label>
+                                    <input type="email" class="form-control" [(ngModel)]="mailSettings.from_email" name="from_email" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Nom d'expéditeur</label>
+                                    <input type="text" class="form-control" [(ngModel)]="mailSettings.from_name" name="from_name">
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Email Notifications -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <h5>Notifications Email</h5>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <form>
+                            <!-- Sitemap Email -->
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" [(ngModel)]="mailSettings.enable_sitemap_email" name="enable_sitemap_email" id="enableSitemapEmail">
+                                    <label class="form-check-label" for="enableSitemapEmail">
+                                        Activer l'envoi du sitemap par email
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="row" *ngIf="mailSettings.enable_sitemap_email">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Fréquence d'envoi</label>
+                                    <select class="form-control" [(ngModel)]="mailSettings.sitemap_email_frequency" name="sitemap_frequency">
+                                        <option value="weekly">Hebdomadaire</option>
+                                        <option value="monthly">Mensuel</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Newsletter -->
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" [(ngModel)]="mailSettings.enable_newsletter" name="enable_newsletter" id="enableNewsletter">
+                                    <label class="form-check-label" for="enableNewsletter">
+                                        Activer les emails de newsletter
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Contact Form Email -->
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" [(ngModel)]="mailSettings.enable_contact_form_email" name="enable_contact_form" id="enableContactForm">
+                                    <label class="form-check-label" for="enableContactForm">
+                                        Activer les notifications du formulaire de contact
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Error Notifications -->
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" [(ngModel)]="mailSettings.enable_error_notifications" name="enable_errors" id="enableErrors">
+                                    <label class="form-check-label" for="enableErrors">
+                                        Activer les notifications d'erreur
+                                    </label>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <h5>Actions</h5>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <button class="btn btn-primary w-100 mb-2" (click)="saveMailSettings()" [disabled]="isSaving">
+                            <span *ngIf="!isSaving"><i class="ti ti-device-floppy me-2"></i>Enregistrer</span>
+                            <span *ngIf="isSaving"><i class="ti ti-loader me-2"></i>Enregistrement...</span>
+                        </button>
+                        <button class="btn btn-info w-100" (click)="openTestEmailModal()">
+                            <i class="ti ti-mail me-2"></i>Envoyer un test
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <h5>Information</h5>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted mb-2">
+                            <i class="ti ti-info-circle me-2"></i>
+                            Configurez les paramètres SMTP pour activer l'envoi d'emails.
+                        </p>
+                        <p class="text-muted">
+                            <i class="ti ti-alert-circle me-2"></i>
+                            Testez votre configuration avant de l'utiliser en production.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <app-footer></app-footer>
+</div>
+
+<!-- Test Email Modal -->
+<div class="modal fade" id="test-email-modal" [class.show]="showTestEmailModal" [style.display]="showTestEmailModal ? 'block' : 'none'">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Envoyer un Email Test</h5>
+                <button type="button" class="btn-close" (click)="closeTestEmailModal()"></button>
+            </div>
+            <form (ngSubmit)="sendTestEmail()">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Email Destinataire<span class="text-danger ms-1">*</span></label>
+                        <input type="email" class="form-control" [(ngModel)]="testEmailData.recipient_email" name="recipient_email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Sujet</label>
+                        <input type="text" class="form-control" [(ngModel)]="testEmailData.subject" name="subject">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Type de Test</label>
+                        <select class="form-control" [(ngModel)]="testEmailData.test_type" name="test_type">
+                            <option value="general">Email Général</option>
+                            <option value="sitemap">Sitemap</option>
+                            <option value="newsletter">Newsletter</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer gap-2">
+                    <button type="button" class="btn btn-secondary" (click)="closeTestEmailModal()">Annuler</button>
+                    <button type="submit" class="btn btn-primary" [disabled]="isSendingTest">
+                        <span *ngIf="!isSendingTest"><i class="ti ti-send me-2"></i>Envoyer</span>
+                        <span *ngIf="isSendingTest"><i class="ti ti-loader me-2"></i>Envoi...</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal-backdrop fade" [class.show]="showTestEmailModal" *ngIf="showTestEmailModal"></div>

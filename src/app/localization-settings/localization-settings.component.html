@@ -1,0 +1,307 @@
+<app-header></app-header>
+<app-sidebar></app-sidebar>
+<p-toast></p-toast>
+<div class="page-wrapper">
+    <div class="content">
+        <div class="page-header">
+            <div class="add-item d-flex">
+                <div class="page-title">
+                    <h4>Localisation</h4>
+                    <h6>Gérez les langues et les paramètres régionaux</h6>
+                </div>
+            </div>
+            <div class="page-btn">
+                <button class="btn btn-primary" (click)="openAddLanguageModal()">
+                    <i class="ti ti-circle-plus me-1"></i>Ajouter une langue
+                </button>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Languages -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <h5>Langues disponibles</h5>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Drapeau</th>
+                                        <th>Nom</th>
+                                        <th>Code</th>
+                                        <th>Statut</th>
+                                        <th>Défaut</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let language of languages">
+                                        <td>
+                                            <img [src]="getFlagForCode(language.code)" alt="{{ language.name }}" style="height: 24px; width: 32px; border-radius: 2px;">
+                                        </td>
+                                        <td>
+                                            <div>
+                                                <strong>{{ language.name }}</strong>
+                                                <br>
+                                                <small class="text-muted">{{ language.native_name }}</small>
+                                            </div>
+                                        </td>
+                                        <td>{{ language.code }}</td>
+                                        <td>
+                                            <p-tag 
+                                                [value]="language.active ? 'Actif' : 'Inactif'" 
+                                                [severity]="language.active ? 'success' : 'danger'">
+                                            </p-tag>
+                                        </td>
+                                        <td>
+                                            <p-tag 
+                                                *ngIf="language.default"
+                                                value="Défaut" 
+                                                severity="info">
+                                            </p-tag>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex gap-2">
+                                                <button class="btn btn-sm btn-primary" (click)="openEditLanguageModal(language)" title="Modifier">
+                                                    <i class="ti ti-edit"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-warning" (click)="toggleLanguageActive(language)" title="Activer/Désactiver">
+                                                    <i class="ti ti-eye-check"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-info" (click)="setDefaultLanguage(language)" [disabled]="language.default" title="Définir par défaut">
+                                                    <i class="ti ti-star"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-danger" (click)="deleteLanguage(language.id)" [disabled]="language.default" title="Supprimer">
+                                                    <i class="ti ti-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contract Pricing -->
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <div class="card-title">
+                            <h5>Prix des contrats</h5>
+                        </div>
+                        <button class="btn btn-sm btn-primary" (click)="openAddContractModal()">
+                            <i class="ti ti-circle-plus me-1"></i>Ajouter contrat
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Drapeau</th>
+                                        <th>Type</th>
+                                        <th>Pays</th>
+                                        <th>Code</th>
+                                        <th>Prix</th>
+                                        <th>Devise</th>
+                                        <th>Statut</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let contract of contracts">
+                                        <td>
+                                            <img [src]="contract.flag" alt="{{ contract.country }}" style="height: 24px; width: 32px; border-radius: 2px;">
+                                        </td>
+                                        <td><span class="badge bg-success">{{ contract.type }}</span></td>
+                                        <td>{{ contract.country }}</td>
+                                        <td><span class="badge bg-secondary">{{ contract.code }}</span></td>
+                                        <td><strong>{{ contract.price | number:'1.2-2' }}</strong></td>
+                                        <td>{{ contract.currency }}</td>
+                                        <td>
+                                            <p-tag 
+                                                [value]="contract.status" 
+                                                [severity]="contract.status === 'Actif' ? 'success' : 'danger'">
+                                            </p-tag>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex gap-2">
+                                                <button class="btn btn-sm btn-primary" (click)="openEditContractModal(contract)" title="Modifier">
+                                                    <i class="ti ti-edit"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-danger" (click)="deleteContract(contract.id)" title="Supprimer">
+                                                    <i class="ti ti-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <h5>Statistiques</h5>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <p class="text-muted">
+                                <i class="ti ti-world me-2"></i>
+                                Langues actives: <strong>{{ getActiveLanguagesCount() }}</strong>
+                            </p>
+                        </div>
+                        <div class="mb-3">
+                            <p class="text-muted">
+                                <i class="ti ti-star me-2"></i>
+                                Langue par défaut: <strong>{{ getDefaultLanguage()?.name }}</strong>
+                            </p>
+                        </div>
+                        <div>
+                            <p class="text-muted">
+                                <i class="ti ti-map me-2"></i>
+                                Pays supportés: <strong>{{ countries.length }}</strong>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <h5>Actions</h5>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <button class="btn btn-primary w-100" (click)="saveAllSettings()" [disabled]="isSaving">
+                            <span *ngIf="!isSaving"><i class="ti ti-device-floppy me-2"></i>Enregistrer tout</span>
+                            <span *ngIf="isSaving"><i class="ti ti-loader me-2"></i>Enregistrement...</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <h5>Information</h5>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted">
+                            <i class="ti ti-info-circle me-2"></i>
+                            Vous devez avoir au moins une langue activée et définie par défaut.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <app-footer></app-footer>
+</div>
+
+<!-- Add/Edit Language Modal -->
+<div class="modal fade" id="language-modal" [class.show]="showLanguageModal" [style.display]="showLanguageModal ? 'block' : 'none'">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{ isEditingLanguage ? 'Modifier la langue' : 'Ajouter une langue' }}</h5>
+                <button type="button" class="btn-close" (click)="closeLanguageModal()"></button>
+            </div>
+            <form (ngSubmit)="saveLanguage()">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Code de langue<span class="text-danger ms-1">*</span></label>
+                        <input type="text" class="form-control" [(ngModel)]="selectedLanguage.code" name="code" placeholder="ex: en, fr, es" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Nom<span class="text-danger ms-1">*</span></label>
+                        <input type="text" class="form-control" [(ngModel)]="selectedLanguage.name" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Nom natif</label>
+                        <input type="text" class="form-control" [(ngModel)]="selectedLanguage.native_name" name="native_name">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Drapeau (emoji)</label>
+                        <input type="text" class="form-control" [(ngModel)]="selectedLanguage.flag" name="flag" placeholder="ex: 🇫🇷">
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" [(ngModel)]="selectedLanguage.active" name="active" id="activeCheck">
+                        <label class="form-check-label" for="activeCheck">
+                            Actif
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" (click)="closeLanguageModal()">Annuler</button>
+                    <button type="submit" class="btn btn-primary">{{ isEditingLanguage ? 'Enregistrer' : 'Ajouter' }}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal-backdrop fade" [class.show]="showLanguageModal" *ngIf="showLanguageModal"></div>
+<!-- Add/Edit Contract Modal -->
+<div class="modal fade" id="contract-modal" [class.show]="showContractModal" [style.display]="showContractModal ? 'block' : 'none'">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{ isEditingContract ? 'Modifier le contrat' : 'Ajouter un contrat' }}</h5>
+                <button type="button" class="btn-close" (click)="closeContractModal()"></button>
+            </div>
+            <form (ngSubmit)="saveContract()">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Type de contrat<span class="text-danger ms-1">*</span></label>
+                        <select class="form-control" [(ngModel)]="selectedContract.type" name="type" required>
+                            <option value="">-- Sélectionner un type --</option>
+                            <option value="Australia Talk">Australia Talk</option>
+                            <option value="Premium Pack">Premium Pack</option>
+                            <option value="Standard Pack">Standard Pack</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Pays<span class="text-danger ms-1">*</span></label>
+                        <input type="text" class="form-control" [(ngModel)]="selectedContract.country" name="country" placeholder="ex: France" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Code<span class="text-danger ms-1">*</span></label>
+                        <input type="text" class="form-control" [(ngModel)]="selectedContract.code" name="code" placeholder="ex: FR" maxlength="2" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Prix<span class="text-danger ms-1">*</span></label>
+                        <input type="number" class="form-control" [(ngModel)]="selectedContract.price" name="price" placeholder="ex: 6.00" step="0.01" min="0" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Devise<span class="text-danger ms-1">*</span></label>
+                        <input type="text" class="form-control" [(ngModel)]="selectedContract.currency" name="currency" placeholder="ex: €" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Statut</label>
+                        <select class="form-control" [(ngModel)]="selectedContract.status" name="status">
+                            <option>Actif</option>
+                            <option>Inactif</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer gap-2">
+                    <button type="button" class="btn btn-secondary" (click)="closeContractModal()">Annuler</button>
+                    <button type="submit" class="btn btn-primary">{{ isEditingContract ? 'Enregistrer' : 'Ajouter' }}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal-backdrop fade" [class.show]="showContractModal" *ngIf="showContractModal"></div>

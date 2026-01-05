@@ -1,0 +1,216 @@
+<app-header></app-header>
+<app-sidebar></app-sidebar>
+<p-toast></p-toast>
+<div class="page-wrapper">
+    <div class="content">
+        <div class="page-header">
+            <div class="add-item d-flex">
+                <div class="page-title">
+                    <h4>Lien système</h4>
+                    <h6>Gérez les liens système de votre plateforme</h6>
+                </div>
+            </div>
+            <div class="page-btn">
+                <button class="btn btn-primary" (click)="openAddModal()">
+                    <i class="ti ti-circle-plus me-1"></i>Ajouter un lien
+                </button>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <h5>Liste des liens système</h5>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Nom</th>
+                                        <th>URL</th>
+                                        <th>Icône</th>
+                                        <th>Statut</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let link of systemLinks">
+                                        <td>{{ link.name }}</td>
+                                        <td>
+                                            <a [href]="link.url" target="_blank" class="text-primary">
+                                                {{ link.url }}
+                                            </a>
+                                        </td>
+                                        <td><i [class]="'ti ' + link.icon"></i></td>
+                                        <td>
+                                            <p-tag 
+                                                [value]="link.active ? 'Actif' : 'Inactif'" 
+                                                [severity]="link.active ? 'success' : 'danger'">
+                                            </p-tag>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex gap-2">
+                                                <button class="btn btn-sm btn-info" (click)="openSeoModal(link)" title="Métadonnées SEO">
+                                                    <i class="ti ti-seo"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-primary" (click)="openEditModal(link)" title="Modifier">
+                                                    <i class="ti ti-edit"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-warning" (click)="toggleActive(link)" title="Activer/Désactiver">
+                                                    <i class="ti ti-eye-check"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-danger" (click)="deleteLink(link.id)" title="Supprimer">
+                                                    <i class="ti ti-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <h5>Information</h5>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted mb-3">
+                            <i class="ti ti-info-circle me-2"></i>
+                            Les liens système sont affichés dans le footer ou le menu de navigation.
+                        </p>
+                        <p class="text-muted mb-3">
+                            <i class="ti ti-alert-circle me-2"></i>
+                            Vous pouvez activer ou désactiver les liens sans les supprimer.
+                        </p>
+                        <p class="text-muted">
+                            <i class="ti ti-link me-2"></i>
+                            Total de liens: <strong>{{ systemLinks.length }}</strong>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <app-footer></app-footer>
+</div>
+
+<!-- Add/Edit Modal -->
+<div class="modal fade" id="link-modal" [class.show]="showModal" [style.display]="showModal ? 'block' : 'none'">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{ isEditing ? 'Modifier le lien' : 'Ajouter un lien' }}</h5>
+                <button type="button" class="btn-close" (click)="closeModal()"></button>
+            </div>
+            <form (ngSubmit)="saveLink()">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Nom<span class="text-danger ms-1">*</span></label>
+                        <input type="text" class="form-control" [(ngModel)]="selectedLink.name" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">URL<span class="text-danger ms-1">*</span></label>
+                        <input type="url" class="form-control" [(ngModel)]="selectedLink.url" name="url" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Classe de l'icône</label>
+                        <input type="text" class="form-control" [(ngModel)]="selectedLink.icon" name="icon" placeholder="Ex: ti-book">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Ordre</label>
+                        <input type="number" class="form-control" [(ngModel)]="selectedLink.order" name="order" min="1">
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" [(ngModel)]="selectedLink.active" name="active" id="activeCheck">
+                        <label class="form-check-label" for="activeCheck">
+                            Actif
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" (click)="closeModal()">Annuler</button>
+                    <button type="submit" class="btn btn-primary">{{ isEditing ? 'Enregistrer' : 'Ajouter' }}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- SEO Metadata Modal -->
+<div class="modal fade" id="seo-modal" [class.show]="showSeoModal" [style.display]="showSeoModal ? 'block' : 'none'">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Métadonnées SEO - {{ selectedLinkForSeo.name }}</h5>
+                <button type="button" class="btn-close" (click)="closeSeoModal()"></button>
+            </div>
+            <form (ngSubmit)="saveSeoMetadata()">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Langue<span class="text-danger ms-1">*</span></label>
+                        <p-dropdown 
+                            [options]="languages" 
+                            [(ngModel)]="selectedLanguageForSeo" 
+                            name="language"
+                            optionLabel="name"
+                            optionValue="id"
+                            placeholder="Sélectionnez une langue"
+                            (onChange)="onLanguageChange()"
+                            styleClass="w-100">
+                            <ng-template pTemplate="item" let-option>
+                                <div *ngIf="option" class="d-flex align-items-center gap-2">
+                                    <img [src]="'assets/img/flags/' + (option.code | lowercase) + '.svg'" 
+                                         alt="{{ option.name }}" 
+                                         style="width: 20px; height: 15px; object-fit: cover;">
+                                    <span class="myclass">{{ option.name }} {{ option.isDefault ? '(Défaut)' : '' }}</span>
+                                </div>
+                            </ng-template>
+                            <ng-template pTemplate="selectedItem" let-option>
+                                <div *ngIf="option" class="d-flex align-items-center gap-2">
+                                    <img [src]="'assets/img/flags/' + (option.code | lowercase) + '.svg'" 
+                                         alt="{{ option.name }}" 
+                                         style="width: 20px; height: 15px; object-fit: cover;">
+                                    <span class="myclass">{{ option.name }}</span>
+                                </div>
+                            </ng-template>
+                        </p-dropdown>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Titre SEO<span class="text-danger ms-1">*</span></label>
+                        <input type="text" class="form-control" [(ngModel)]="selectedLinkForSeo.seo_title" name="seo_title" maxlength="60" required>
+                        <small class="text-muted d-block">{{ selectedLinkForSeo.seo_title?.length || 0 }}/60 caractères</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description SEO<span class="text-danger ms-1">*</span></label>
+                        <textarea class="form-control" rows="3" [(ngModel)]="selectedLinkForSeo.seo_description" name="seo_description" maxlength="160" required></textarea>
+                        <small class="text-muted d-block">{{ selectedLinkForSeo.seo_description?.length || 0 }}/160 caractères</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Mots-clés SEO</label>
+                        <input type="text" class="form-control" [(ngModel)]="selectedLinkForSeo.seo_keywords" name="seo_keywords" placeholder="Séparés par des virgules">
+                        <small class="text-muted d-block">ex: seo, métadonnées, keywords</small>
+                    </div>
+                    <div class="alert alert-info" role="alert">
+                        <i class="ti ti-info-circle me-2"></i>
+                        <strong>Conseil SEO:</strong> Le titre doit faire 50-60 caractères, la description 150-160 caractères pour un affichage optimal dans les résultats de recherche.
+                    </div>
+                </div>
+                <div class="modal-footer gap-2">
+                    <button type="button" class="btn btn-secondary" (click)="closeSeoModal()">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Enregistrer les métadonnées</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="modal-backdrop fade" [class.show]="showSeoModal" *ngIf="showSeoModal"></div>
