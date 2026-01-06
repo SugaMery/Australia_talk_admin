@@ -109,6 +109,9 @@
                                 <li [class.active]="selectedMenu === 'create-article'">
                                     <a href="create-article" (click)="selectedMenu = 'create-article'"><i class="ti ti-table-plus fs-16 me-2"></i><span>Créer Article</span></a>
                                 </li>
+                                <li [class.active]="selectedMenu === 'create-newsletter'">
+                                    <a href="create-newsletter" (click)="selectedMenu = 'create-newsletter'"><i class="ti ti-mail-plus fs-16 me-2"></i><span>Créer Newsletter</span></a>
+                                </li>
                                 <li [class.active]="selectedMenu === 'categories'">
                                     <a href="categories" (click)="selectedMenu = 'categories'"><i class="ti ti-list-details fs-16 me-2"></i><span>Catégories</span></a>
                                 </li>
@@ -119,7 +122,7 @@
                                     <a href="artisans" (click)="selectedMenu = 'artisans'"><i class="ti ti-user fs-16 me-2"></i><span>Artisans</span></a>
                                 </li>
                                 <li [class.active]="selectedMenu === 'newsletter'">
-                                    <a href="newsletter.html" (click)="selectedMenu = 'newsletter'"><i class="ti ti-mail fs-16 me-2"></i><span>Newsletter</span></a>
+                                    <a href="newsletter" (click)="selectedMenu = 'newsletter'"><i class="ti ti-mail fs-16 me-2"></i><span>Newsletter</span></a>
                                 </li>
                             </ul>
                         </li>

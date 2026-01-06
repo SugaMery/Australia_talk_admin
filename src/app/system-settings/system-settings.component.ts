@@ -31,7 +31,7 @@ export class SystemSettingsComponent implements OnInit {
   testEmailData = {
     recipient_email: '',
     subject: 'Test Email - Australia Talk',
-    test_type: 'general' // general, sitemap, newsletter
+    test_type: 'test_general' // general, sitemap, newsletter
   };
 
   isLoading = false;

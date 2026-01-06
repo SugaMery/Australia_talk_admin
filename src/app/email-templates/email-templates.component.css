@@ -474,3 +474,9 @@
 ::ng-deep i.ti.ti-x {
       font-size: large !important;
 }
+
+
+::ng-deep .modal-modern {
+  color: white !important;
+  
+}

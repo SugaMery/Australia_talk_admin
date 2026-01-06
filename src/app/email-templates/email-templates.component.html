@@ -216,11 +216,13 @@
         <div class="modal-content modal-modern border-0 shadow-lg">
             <div class="modal-header bg-gradient border-0 text-white">
                 <div>
-                    <h5 class="modal-title mb-0">
+                    <h5 class="modal-title mb-0" style="color: white;">
                         <i class="ti ti-eye me-2"></i>Aperçu - {{ previewTemplate?.template_name }}
                     </h5>
                 </div>
-                <button type="button" class="btn-close btn-close-white" (click)="closePreviewModal()"></button>
+                <button type="button" class="btn-close btn-close-white" (click)="closePreviewModal()">
+                    <i class="ti ti-x"></i>
+                </button>
             </div>
             <div class="modal-body p-4">
                 <div class="preview-section mb-4">

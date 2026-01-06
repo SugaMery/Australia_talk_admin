@@ -1,0 +1,36 @@
+.page-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.content {
+  flex: 1;
+  padding: 20px;
+}
+
+.table-responsive {
+  overflow-x: auto;
+}
+
+.btn-edit {
+  color: #0069d4;
+  text-decoration: none;
+}
+
+.btn-edit:hover {
+  color: #0051a8;
+}
+
+.btn-delete {
+  color: #dc3545;
+  text-decoration: none;
+}
+
+.btn-delete:hover {
+  color: #a71d2a;
+}
+
+.badge {
+  font-size: 0.85rem;
+  padding: 0.35rem 0.65rem;
+}

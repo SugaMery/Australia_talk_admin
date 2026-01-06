@@ -1,0 +1,143 @@
+<app-header></app-header>
+<app-sidebar></app-sidebar>
+<p-toast></p-toast>
+
+<div class="page-wrapper">
+  <div class="content">
+    <div class="page-header">
+      <div class="add-item d-flex">
+        <div class="page-title">
+          <h4 class="fw-bold">Newsletter</h4>
+          <h6>Gérez vos newsletters et abonnés</h6>
+        </div>
+      </div>
+      <ul class="table-top-head">
+        <li>
+          <a data-bs-toggle="tooltip" data-bs-placement="top" title="PDF" (click)="exportPdf()">
+            <img src="assets/img/icons/pdf.svg" alt="img">
+          </a>
+        </li>
+        <li>
+          <a data-bs-toggle="tooltip" data-bs-placement="top" title="Excel" (click)="exportExcel()">
+            <img src="assets/img/icons/excel.svg" alt="img">
+          </a>
+        </li>
+        <li>
+          <a data-bs-toggle="tooltip" data-bs-placement="top" title="Rafraîchir" (click)="refresh()">
+            <i class="ti ti-refresh"></i>
+          </a>
+        </li>
+        <li>
+          <a data-bs-toggle="tooltip" data-bs-placement="top" title="Réduire" id="collapse-header">
+            <i class="ti ti-chevron-up"></i>
+          </a>
+        </li>
+      </ul>
+      <div class="page-btn">
+        <a href="#" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add-newsletter">
+          <i class="ti ti-circle-plus me-1"></i>Créer une Newsletter
+        </a>
+      </div>
+    </div>
+
+    <!-- Newsletter Section -->
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="card-title">Liste des Newsletters</h5>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Titre</th>
+                    <th>Date de création</th>
+                    <th>Statut</th>
+                    <th>Destinataires</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngIf="newsletters.length === 0">
+                    <td colspan="5" class="text-center">Aucune newsletter trouvée</td>
+                  </tr>
+                  <tr *ngFor="let newsletter of newsletters">
+                    <td>{{ newsletter.title }}</td>
+                    <td>{{ newsletter.created_at | date: 'dd/MM/yyyy' }}</td>
+                    <td>
+                      <span class="badge" [ngClass]="{
+                        'bg-success': newsletter.status === 'sent',
+                        'bg-warning': newsletter.status === 'draft',
+                        'bg-info': newsletter.status === 'scheduled'
+                      }">
+                        {{ newsletter.status }}
+                      </span>
+                    </td>
+                    <td>{{ newsletter.recipients_count }}</td>
+                    <td>
+                      <a href="#" class="btn btn-sm btn-edit">
+                        <i class="ti ti-edit"></i>
+                      </a>
+                      <a href="#" class="btn btn-sm btn-delete">
+                        <i class="ti ti-trash"></i>
+                      </a>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Subscribers Section -->
+    <div class="row mt-4">
+      <div class="col-lg-12">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="card-title">Abonnés</h5>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Email</th>
+                    <th>Date d'abonnement</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngIf="subscribers.length === 0">
+                    <td colspan="4" class="text-center">Aucun abonné</td>
+                  </tr>
+                  <tr *ngFor="let subscriber of subscribers">
+                    <td>{{ subscriber.email }}</td>
+                    <td>{{ subscriber.subscribed_at | date: 'dd/MM/yyyy' }}</td>
+                    <td>
+                      <span class="badge" [ngClass]="{
+                        'bg-success': subscriber.status === 'active',
+                        'bg-danger': subscriber.status === 'unsubscribed'
+                      }">
+                        {{ subscriber.status }}
+                      </span>
+                    </td>
+                    <td>
+                      <a href="#" class="btn btn-sm btn-delete">
+                        <i class="ti ti-trash"></i>
+                      </a>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

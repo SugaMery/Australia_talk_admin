@@ -22,6 +22,8 @@ import { SystemLinkComponent } from './system-link/system-link.component';
 import { CompanySettingsComponent } from './company-settings/company-settings.component';
 import { LocalizationSettingsComponent } from './localization-settings/localization-settings.component';
 import { EmailTemplatesComponent } from './email-templates/email-templates.component';
+import { NewsletterComponent } from './newsletter/newsletter.component';
+import { CreateNewsletterComponent } from './create-newsletter/create-newsletter.component';
 
 // AuthGuard implementation
 @Injectable({ providedIn: 'root' })
@@ -63,6 +65,8 @@ const routes: Routes = [
   { path: 'company-settings', component: CompanySettingsComponent },
   { path: 'localization-settings', component: LocalizationSettingsComponent },
   { path: 'email-templates', component: EmailTemplatesComponent },
+  { path: 'newsletter', component: NewsletterComponent },
+  { path: 'create-newsletter', component: CreateNewsletterComponent },
 
 
 ];

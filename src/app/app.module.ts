@@ -40,6 +40,8 @@ import { SystemLinkComponent } from './system-link/system-link.component';
 import { CompanySettingsComponent } from './company-settings/company-settings.component';
 import { LocalizationSettingsComponent } from './localization-settings/localization-settings.component';
 import { EmailTemplatesComponent } from './email-templates/email-templates.component';
+import { NewsletterComponent } from './newsletter/newsletter.component';
+import { CreateNewsletterComponent } from './create-newsletter/create-newsletter.component';
 @NgModule({
   declarations: [
     AppComponent,
@@ -67,7 +69,9 @@ import { EmailTemplatesComponent } from './email-templates/email-templates.compo
     SystemLinkComponent,
     CompanySettingsComponent,
     LocalizationSettingsComponent,
-    EmailTemplatesComponent
+    EmailTemplatesComponent,
+    NewsletterComponent,
+    CreateNewsletterComponent
   ],
   imports: [
     BrowserModule,
