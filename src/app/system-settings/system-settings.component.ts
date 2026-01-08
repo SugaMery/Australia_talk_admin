@@ -29,7 +29,7 @@ export class SystemSettingsComponent implements OnInit {
   };
 
   testEmailData = {
-    recipient_email: '',
+    recipient_email: 'bmaryam@ept.sn',
     subject: 'Test Email - Australia Talk',
     test_type: 'test_general' // general, sitemap, newsletter
   };
