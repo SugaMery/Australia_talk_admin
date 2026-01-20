@@ -13,28 +13,28 @@
       </div>
       <ul class="table-top-head">
         <li>
-          <a data-bs-toggle="tooltip" data-bs-placement="top" title="PDF" (click)="exportPdf()">
+          <a data-bs-toggle="tooltip" data-bs-placement="top" title="PDF" (click)="exportPdf()" class="cursor-pointer">
             <img src="assets/img/icons/pdf.svg" alt="img">
           </a>
         </li>
         <li>
-          <a data-bs-toggle="tooltip" data-bs-placement="top" title="Excel" (click)="exportExcel()">
+          <a data-bs-toggle="tooltip" data-bs-placement="top" title="Excel" (click)="exportExcel()" class="cursor-pointer">
             <img src="assets/img/icons/excel.svg" alt="img">
           </a>
         </li>
         <li>
-          <a data-bs-toggle="tooltip" data-bs-placement="top" title="Rafraîchir" (click)="refresh()">
+          <a data-bs-toggle="tooltip" data-bs-placement="top" title="Rafraîchir" (click)="refresh()" class="cursor-pointer">
             <i class="ti ti-refresh"></i>
           </a>
         </li>
         <li>
-          <a data-bs-toggle="tooltip" data-bs-placement="top" title="Réduire" id="collapse-header">
+          <a data-bs-toggle="tooltip" data-bs-placement="top" title="Réduire" id="collapse-header" class="cursor-pointer">
             <i class="ti ti-chevron-up"></i>
           </a>
         </li>
       </ul>
       <div class="page-btn">
-        <a href="#" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add-newsletter">
+        <a (click)="openNewsletterModal()" class="btn btn-primary cursor-pointer">
           <i class="ti ti-circle-plus me-1"></i>Créer une Newsletter
         </a>
       </div>
@@ -52,35 +52,41 @@
               <table class="table">
                 <thead>
                   <tr>
-                    <th>Titre</th>
-                    <th>Date de création</th>
+                    <th>ID</th>
+                    <th>Nom</th>
+                    <th>Sujet</th>
+                    <th>Modèle</th>
+                    <th>Date d'envoi</th>
                     <th>Statut</th>
-                    <th>Destinataires</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr *ngIf="newsletters.length === 0">
-                    <td colspan="5" class="text-center">Aucune newsletter trouvée</td>
+                    <td colspan="7" class="text-center">Aucune newsletter trouvée</td>
                   </tr>
                   <tr *ngFor="let newsletter of newsletters">
-                    <td>{{ newsletter.title }}</td>
-                    <td>{{ newsletter.created_at | date: 'dd/MM/yyyy' }}</td>
+                    <td>{{ newsletter.id }}</td>
+                    <td>{{ newsletter.name }}</td>
+                    <td>{{ newsletter.subject }}</td>
+                    <td><span class="badge bg-secondary">{{ newsletter.template_name || 'Default' }}</span></td>
+                    <td>{{ newsletter.sending_date | date: 'dd/MM/yyyy' }}</td>
                     <td>
                       <span class="badge" [ngClass]="{
-                        'bg-success': newsletter.status === 'sent',
-                        'bg-warning': newsletter.status === 'draft',
-                        'bg-info': newsletter.status === 'scheduled'
+                        'bg-success': newsletter.is_sent,
+                        'bg-warning': !newsletter.is_sent
                       }">
-                        {{ newsletter.status }}
+                        {{ newsletter.is_sent ? 'Envoyé' : 'Brouillon' }}
                       </span>
                     </td>
-                    <td>{{ newsletter.recipients_count }}</td>
                     <td>
-                      <a href="#" class="btn btn-sm btn-edit">
+                      <a (click)="editNewsletter(newsletter)" class="btn btn-sm btn-edit cursor-pointer" title="Éditer">
                         <i class="ti ti-edit"></i>
                       </a>
-                      <a href="#" class="btn btn-sm btn-delete">
+                      <a *ngIf="!newsletter.is_sent" (click)="sendNewsletter(newsletter.id)" class="btn btn-sm btn-send cursor-pointer" title="Envoyer">
+                        <i class="ti ti-send"></i>
+                      </a>
+                      <a (click)="deleteNewsletter(newsletter.id)" class="btn btn-sm btn-delete cursor-pointer" title="Supprimer">
                         <i class="ti ti-trash"></i>
                       </a>
                     </td>
@@ -127,7 +133,7 @@
                       </span>
                     </td>
                     <td>
-                      <a href="#" class="btn btn-sm btn-delete">
+                      <a (click)="deleteSubscriber(subscriber.id)" class="btn btn-sm btn-delete cursor-pointer">
                         <i class="ti ti-trash"></i>
                       </a>
                     </td>
@@ -141,3 +147,66 @@
     </div>
   </div>
 </div>
+
+<!-- Newsletter Modal -->
+<div class="modal fade" id="add-newsletter" tabindex="-1" role="dialog" aria-hidden="true" [class.show]="showNewsletterModal" [style.display]="showNewsletterModal ? 'block' : 'none'">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          {{ isEditingNewsletter ? 'Éditer la Newsletter' : 'Créer une Newsletter' }}
+        </h5>
+        <button type="button" class="btn-close" (click)="closeNewsletterModal()" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="mb-3">
+            <label for="newsletter-name" class="form-label">Nom *</label>
+            <input type="text" class="form-control" id="newsletter-name" 
+              [(ngModel)]="selectedNewsletter.name" name="name" placeholder="Nom de la newsletter">
+          </div>
+          <div class="mb-3">
+            <label for="newsletter-slug" class="form-label">Slug</label>
+            <input type="text" class="form-control" id="newsletter-slug" 
+              [(ngModel)]="selectedNewsletter.slug" name="slug" placeholder="URL-friendly name">
+          </div>
+          <div class="mb-3">
+            <label for="newsletter-subject" class="form-label">Sujet *</label>
+            <input type="text" class="form-control" id="newsletter-subject" 
+              [(ngModel)]="selectedNewsletter.subject" name="subject" placeholder="Sujet de l'email">
+          </div>
+          <div class="mb-3">
+            <label for="newsletter-template-id" class="form-label">Modèle *</label>
+            <select class="form-select" id="newsletter-template-id" 
+              [(ngModel)]="selectedNewsletter.template_id" name="template_id">
+              <option [value]="0" disabled>Sélectionner un modèle</option>
+              <option *ngFor="let template of emailTemplates" [value]="template.id">
+                {{ template.template_name }}
+              </option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="newsletter-description" class="form-label">Description</label>
+            <textarea class="form-control" id="newsletter-description" rows="3"
+              [(ngModel)]="selectedNewsletter.description" name="description" placeholder="Description de la newsletter"></textarea>
+          </div>
+          <div class="mb-3">
+            <label for="newsletter-preview-text" class="form-label">Texte de prévisualisation</label>
+            <input type="text" class="form-control" id="newsletter-preview-text" 
+              [(ngModel)]="selectedNewsletter.preview_text" name="preview_text" placeholder="Texte affiché dans la preview">
+          </div>
+        </form>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeNewsletterModal()">Annuler</button>
+        <button type="button" class="btn btn-primary" (click)="saveNewsletter()">
+          {{ isEditingNewsletter ? 'Mettre à jour' : 'Créer' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Backdrop -->
+<div class="modal-backdrop fade" [class.show]="showNewsletterModal" [style.display]="showNewsletterModal ? 'block' : 'none'"></div>

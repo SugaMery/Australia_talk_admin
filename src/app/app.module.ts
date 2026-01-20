@@ -11,7 +11,7 @@ import { PreloaderComponent } from './preloader/preloader.component';
 import { LoginComponent } from './login/login.component';
 import { RegisterComponent } from './register/register.component';
 import { HomeComponent } from './home/home.component';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { SidebarComponent } from './sidebar/sidebar.component';
@@ -78,6 +78,7 @@ import { CreateNewsletterComponent } from './create-newsletter/create-newsletter
     BrowserAnimationsModule,
     AppRoutingModule,
     FormsModule,
+    ReactiveFormsModule,
     ToastModule,
     EditorModule,
     MultiSelectModule,

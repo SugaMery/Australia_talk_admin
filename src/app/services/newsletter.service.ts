@@ -3,6 +3,7 @@ import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { environment } from '../environments/environment';
+import { EmailTemplatesService, EmailTemplate } from './email-templates.service';
 
 export interface Newsletter {
   id: number;
@@ -26,7 +27,10 @@ export class NewsletterService {
   private apiUrl = `${environment.apiUrl}/newsletters`;
   private token: string | null = localStorage.getItem('token');
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private emailTemplatesService: EmailTemplatesService
+  ) {}
 
   setToken(token: string): void {
     this.token = token;
@@ -76,6 +80,13 @@ export class NewsletterService {
     return this.http.delete<{ message: string }>(`${this.apiUrl}/${id}`, { headers: this.getHeaders() }).pipe(
       catchError(this.handleError)
     );
+  }
+
+  /**
+   * Get email templates from EmailTemplatesService
+   */
+  getEmailTemplates(): Observable<EmailTemplate[]> {
+    return this.emailTemplatesService.getTemplatesArray();
   }
 
   private handleError(error: HttpErrorResponse): Observable<never> {

@@ -41,7 +41,7 @@ export class EmailTemplatesComponent implements OnInit {
 
   loadEmailTemplates(): void {
     this.isLoading = true;
-    this.emailTemplatesService.getEmailTemplates().subscribe({
+    this.emailTemplatesService.getTemplatesArray().subscribe({
       next: (templates: any[]) => {
         this.emailTemplates = templates.map(t => ({
           ...t,

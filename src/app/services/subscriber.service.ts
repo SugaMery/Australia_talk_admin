@@ -75,6 +75,12 @@ export class SubscriberService {
     );
   }
 
+  getUsersWithSubscribers(): Observable<Subscriber[]> {
+    return this.http.get<Subscriber[]>('http://localhost:5000/users-with-subscribers', { headers: this.getHeaders() }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
   private handleError(error: HttpErrorResponse): Observable<never> {
     let errorMessage = 'Une erreur inattendue est survenue';
     if (error.status === 0) {

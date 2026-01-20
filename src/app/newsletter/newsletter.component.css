@@ -15,22 +15,59 @@
 .btn-edit {
   color: #0069d4;
   text-decoration: none;
+  margin-right: 5px;
+  transition: all 0.3s ease;
 }
 
 .btn-edit:hover {
   color: #0051a8;
+  transform: scale(1.1);
+}
+
+.btn-send {
+  color: #28a745;
+  text-decoration: none;
+  margin-right: 5px;
+  transition: all 0.3s ease;
+}
+
+.btn-send:hover {
+  color: #1e7e34;
+  transform: scale(1.1);
 }
 
 .btn-delete {
   color: #dc3545;
   text-decoration: none;
+  transition: all 0.3s ease;
 }
 
 .btn-delete:hover {
   color: #a71d2a;
+  transform: scale(1.1);
 }
 
 .badge {
   font-size: 0.85rem;
   padding: 0.35rem 0.65rem;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.modal {
+  z-index: 1050;
+}
+
+.modal-backdrop {
+  z-index: 1040;
+}
+
+table tbody td {
+  vertical-align: middle;
+}
+
+.page-btn a {
+  cursor: pointer;
 }
