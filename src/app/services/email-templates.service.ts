@@ -14,6 +14,11 @@ export interface EmailTemplate {
   is_default?: number | boolean;
   active: boolean | number;
   mail_settings_id?: number;
+  type?: 'SYSTEM' | 'NEWSLETTER';
+  requiredVariables?: string[];
+  manualVariables?: string[];
+  autoVariables?: string[];
+  manualVariablesLabels?: { [key: string]: string };
   created_at?: string;
   updated_at?: string;
   deleted_at?: string | null;
@@ -76,7 +81,7 @@ export class EmailTemplatesService {
   }
 
   /**
-   * Get all email templates with fallback to defaults
+   * Get email templates with fallback to defaults
    */
   getEmailTemplates(): Observable<EmailTemplate[]> {
     return this.http.get<EmailTemplate[]>(this.apiUrl, { headers: this.getHeaders() }).pipe(
@@ -100,6 +105,46 @@ export class EmailTemplatesService {
         return of(defaults);
       })
     );
+  }
+
+  /**
+   * Get NEWSLETTER type templates only
+   */
+  getNewsletterTemplates(): Observable<EmailTemplate[]> {
+    return this.http.get<EmailTemplate[]>(`${this.apiUrl.replace('/email-templates', '')}/newsletters/templates/available`, { headers: this.getHeaders() }).pipe(
+      tap((templates) => {
+        if (Array.isArray(templates)) {
+          // Enrich with requiredVariables
+          const enriched = templates.map(t => ({
+            ...t,
+            requiredVariables: this.extractVariables(t.variables)
+          }));
+          this.templatesSubject.next(enriched);
+        }
+      }),
+      catchError((error) => {
+        console.warn('Newsletter templates endpoint not available, filtering from defaults');
+        const defaults = this.getDefaultTemplates().filter(t => t.type === 'NEWSLETTER');
+        const enriched = defaults.map(t => ({
+          ...t,
+          requiredVariables: this.extractVariables(t.variables)
+        }));
+        this.templatesSubject.next(enriched);
+        return of(enriched);
+      })
+    );
+  }
+
+  /**
+   * Extract variable names from template variables string
+   */
+  private extractVariables(variables?: string): string[] {
+    if (!variables) return [];
+    return variables
+      .split(',')
+      .map(v => v.trim())
+      .map(v => v.replace(/\{\{|\}\}/g, ''))
+      .filter(v => v.length > 0);
   }
 
   /**
@@ -183,6 +228,7 @@ export class EmailTemplatesService {
         body: '<div style="font-family: Arial, sans-serif; padding: 20px;">{{ARTICLES_PLACEHOLDER}}</div>',
         active: true,
         is_default: 1,
+        type: 'NEWSLETTER',
         variables: '{{ARTICLES_PLACEHOLDER}}'
       },
       {
@@ -193,6 +239,7 @@ export class EmailTemplatesService {
         body: '<div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f5f5f5;">{{ARTICLES_PLACEHOLDER}}</div>',
         active: true,
         is_default: 0,
+        type: 'NEWSLETTER',
         variables: '{{ARTICLES_PLACEHOLDER}}'
       },
       {
@@ -203,6 +250,7 @@ export class EmailTemplatesService {
         body: '<div style="font-family: Arial, sans-serif; padding: 20px; border-left: 4px solid #007bff;">{{ARTICLES_PLACEHOLDER}}</div>',
         active: true,
         is_default: 0,
+        type: 'NEWSLETTER',
         variables: '{{ARTICLES_PLACEHOLDER}}'
       }
     ];

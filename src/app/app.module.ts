@@ -14,6 +14,7 @@ import { HomeComponent } from './home/home.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
+import { ConfirmationService } from 'primeng/api';
 import { SidebarComponent } from './sidebar/sidebar.component';
 import { CategoryComponent } from './category/category.component';
 import { FilePreviewPipe } from './pipes/file-preview.pipe';
@@ -31,6 +32,15 @@ import { PasswordModule } from 'primeng/password';
 import { AutoCompleteModule } from 'primeng/autocomplete';
 import { BadgeModule } from 'primeng/badge';
 import { TagModule } from 'primeng/tag';
+import { DialogModule } from 'primeng/dialog';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { InputTextareaModule } from 'primeng/inputtextarea';
+import { TableModule } from 'primeng/table';
+import { PaginatorModule } from 'primeng/paginator';
+import { CardModule } from 'primeng/card';
+import { TooltipModule } from 'primeng/tooltip';
 import { ClientsComponent } from './clients/clients.component';
 import { RolesPermissionsComponent } from './roles-permissions/roles-permissions.component';
 import { LogUsersComponent } from './log-users/log-users.component';
@@ -86,12 +96,22 @@ import { CreateNewsletterComponent } from './create-newsletter/create-newsletter
     PasswordModule,
     AutoCompleteModule,
     BadgeModule,
-    TagModule
+    TagModule,
+    DialogModule,
+    ConfirmDialogModule,
+    ButtonModule,
+    InputTextModule,
+    InputTextareaModule,
+    TableModule,
+    PaginatorModule,
+    CardModule,
+    TooltipModule
   ],
   providers: [
     provideClientHydration(),
     provideHttpClient(withFetch()),
-    MessageService
+    MessageService,
+    ConfirmationService
   ],
   bootstrap: [AppComponent]
 })

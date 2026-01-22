@@ -22,25 +22,26 @@
           <div class="card-body">
             <!-- Name -->
             <div class="mb-3">
-              <label class="form-label">Nom de la Newsletter <span class="text-danger">*</span></label>
+              <label class="form-label">Nom de la newsletter <span class="text-danger">*</span></label>
               <input 
                 type="text" 
                 class="form-control" 
-                placeholder="Ex: Actualités du mois"
+                placeholder="Nom interne de la newsletter"
                 [(ngModel)]="newsletter.name"
+                (ngModelChange)="onNameChange($event)"
                 name="name">
             </div>
 
             <!-- Slug -->
             <div class="mb-3">
-              <label class="form-label">Slug (URL-friendly)</label>
+              <label class="form-label">Slug <span class="text-danger">*</span></label>
               <input 
                 type="text" 
                 class="form-control" 
-                placeholder="Ex: actualites-du-mois"
+                placeholder="slug-url-friendly"
                 [(ngModel)]="newsletter.slug"
                 name="slug">
-              <small class="text-muted">Généré automatiquement à partir du nom si vide</small>
+              <small class="text-muted">Utilisé dans l'URL, généré automatiquement depuis le nom</small>
             </div>
 
             <!-- Subject -->
@@ -60,13 +61,27 @@
               <select 
                 class="form-select" 
                 [(ngModel)]="newsletter.template_id" 
-                (change)="onTemplateSelected()"
+                (ngModelChange)="onTemplateSelected()"
                 name="template_id">
-                <option [value]="0" disabled>Sélectionner un modèle</option>
-                <option *ngFor="let template of emailTemplates" [value]="template.id">
+                <option [ngValue]="0" disabled>Sélectionner un modèle</option>
+                <option *ngFor="let template of emailTemplates" [ngValue]="template.id">
                   {{ template.template_name }}
                 </option>
               </select>
+            </div>
+
+            <!-- Template Variables (show manual variables labels when available) -->
+            <div *ngIf="templateVariables.length > 0" class="mb-3">
+              <label class="form-label">Variables du modèle</label>
+              <div *ngFor="let v of templateVariables" class="mb-2">
+                <div *ngIf="v !== 'ARTICLES_PLACEHOLDER'">
+                  <label class="form-label">{{ getManualLabel(v) }}</label>
+                  <input type="text" class="form-control" [placeholder]="getManualLabel(v)" [(ngModel)]="newsletter.variables[v]" (ngModelChange)="buildPreview()" name="var-{{v}}">
+                </div>
+                <div *ngIf="v === 'ARTICLES_PLACEHOLDER'" class="alert alert-info p-2">
+                  Le modèle attend une section d'articles. Sélectionnez les articles à inclure (maximum 4). Les articles sélectionnés apparaîtront dans l'aperçu et seront inclus dans la newsletter.
+                </div>
+              </div>
             </div>
 
             <!-- Description -->
@@ -80,16 +95,110 @@
                 name="description"></textarea>
             </div>
 
-            <!-- Preview Text -->
-            <div class="mb-3">
-              <label class="form-label">Texte de prévisualisation</label>
-              <input 
-                type="text" 
-                class="form-control"
-                placeholder="Texte affiché en aperçu dans la boîte de réception"
-                [(ngModel)]="newsletter.preview_text"
-                name="preview_text">
+            <!-- Articles Section with horizontal scrolling carousel -->
+            <div *ngIf="exampleArticles.length > 0" class="mb-3">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <label class="form-label mb-0">
+                  {{ templateVariables.includes('ARTICLES_PLACEHOLDER') ? 'Articles à inclure dans la newsletter' : 'Articles disponibles' }}
+                </label>
+                <small class="text-muted fw-500">
+                  {{ templateVariables.includes('ARTICLES_PLACEHOLDER') ? 'Sélectionnés' : 'Sélectionnez jusqu\'à' }} {{ getSelectedArticlesCount() }} / 4
+                </small>
+              </div>
+              
+              <!-- Horizontal Scrolling Container with Navigation Buttons -->
+              <div class="articles-carousel-wrapper">
+                <!-- Left Button -->
+                <button type="button" class="carousel-nav-btn carousel-nav-left" (click)="scrollCarouselLeft()" title="Voir les articles précédents">
+                  <i class="ti ti-chevron-left"></i>
+                </button>
+
+                <!-- Carousel -->
+                <div #articlesCarousel class="articles-carousel">
+                  <div *ngFor="let article of exampleArticles" class="article-card-item" [class.selected]="article.selected">
+                    
+                    <!-- Selection Checkbox -->
+                    <div class="article-checkbox-container">
+                      <input 
+                        type="checkbox" 
+                        class="article-checkbox" 
+                        [id]="'article-' + article.id" 
+                        [(ngModel)]="article.selected"
+                        [disabled]="!article.selected && getSelectedArticlesCount() >= 4"
+                        (change)="onArticleSelectionChange()"
+                        name="article-select-{{article.id}}">
+                      <label [for]="'article-' + article.id" class="checkbox-label">
+                        <span class="checkmark"></span>
+                      </label>
+                    </div>
+
+                    <!-- Article Image -->
+                    <div class="article-image-wrapper">
+                      <img *ngIf="article.media && article.media.length > 0 && article.media[0]?.path" 
+                           [src]="article.media[0].path" 
+                           alt="{{ article.translation?.title }}" 
+                           class="article-image">
+                      <div *ngIf="!(article.media && article.media.length > 0 && article.media[0]?.path)" class="article-image-placeholder">
+                        📰
+                      </div>
+                      
+                      <!-- Selection Badge -->
+                      <div *ngIf="article.selected" class="selection-badge">
+                        <i class="ti ti-check" style="font-size: 0.9rem;"></i>
+                      </div>
+                    </div>
+                    
+                    <!-- Article Content -->
+                    <div class="article-content">
+                      <!-- Tags Section -->
+                      <div class="article-tags">
+                        <span *ngIf="article.categories && article.categories.length > 0" class="badge badge-category">
+                          {{ article.categories[0]?.translation?.name || article.categories[0]?.name || 'Article' }}
+                        </span>
+                        <span *ngFor="let tag of (article.tags || []).slice(0, 1)" class="badge badge-tag">
+                          {{ tag.translation?.name || tag.name }}
+                        </span>
+                      </div>
+                      
+                      <!-- Article Title -->
+                      <h6 class="article-title">
+                        {{ article.translation?.title || article.title || article.name || article.heading }}
+                      </h6>
+                      
+                      <!-- Article Excerpt -->
+                      <p class="article-excerpt">
+                        {{ article.excerpt || article.subtitle || article.summary || 'Article intéressant à découvrir' }}
+                      </p>
+                      
+                      <!-- Read More Link -->
+                      <a [href]="'/articles/' + (article.slug || article.id)" target="_blank" class="read-more-link">
+                        Lire plus <i class="ti ti-arrow-right"></i>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Right Button -->
+                <button type="button" class="carousel-nav-btn carousel-nav-right" (click)="scrollCarouselRight()" title="Voir les articles suivants">
+                  <i class="ti ti-chevron-right"></i>
+                </button>
+              </div>
+              
+              <!-- Selection Counter and Progress -->
+              <div class="articles-footer">
+                <div class="selection-info">
+                  <strong>Sélectionnés:</strong> <span class="counter">{{ getSelectedArticlesCount() }}</span> / 4
+                </div>
+                <div class="articles-progress">
+                  <div class="progress-bar" [style.width.%]="(getSelectedArticlesCount() / 4) * 100"></div>
+                </div>
+                <div class="total-info">
+                  <strong>Total:</strong> {{ exampleArticles.length }} articles
+                </div>
+              </div>
             </div>
+
+            <!-- Preview Text removed; generated from Sujet de l'email -->
           </div>
         </div>
       </div>
@@ -124,8 +233,8 @@
                   [checked]="selectedSubscribers.includes(subscriber.id)"
                   (change)="toggleSubscriber(subscriber.id)">
                 <label class="form-check-label" [for]="'subscriber-' + subscriber.id">
-                  {{ subscriber.email }}
-                  <small class="text-muted d-block">{{ subscriber.full_name || 'N/A' }}</small>
+                  {{ subscriber.display_name || subscriber.email }}
+                  <small class="text-muted d-block">{{ subscriber.email }}</small>
                 </label>
               </div>
             </div>
@@ -197,6 +306,11 @@
                   <small class="text-muted d-block">Sujet du modèle: {{ selectedTemplate.subject }}</small>
                   <small class="text-muted d-block">Slug: {{ selectedTemplate.template_slug }}</small>
                   <small *ngIf="selectedTemplate.variables" class="text-muted d-block">Variables: {{ selectedTemplate.variables }}</small>
+                </div>
+
+                <div *ngIf="safePreviewBody" class="mt-3 pt-3 border-top">
+                  <strong>Corps du modèle (aperçu):</strong>
+                  <div class="mt-2" [innerHtml]="safePreviewBody"></div>
                 </div>
               </div>
             </div>

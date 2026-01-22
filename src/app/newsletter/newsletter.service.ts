@@ -105,6 +105,12 @@ export interface EmailTemplate {
   subject: string;
   body: string;
   active: boolean;
+  type?: 'SYSTEM' | 'NEWSLETTER';
+  variables?: string;
+  requiredVariables?: string[];
+  manualVariables?: string[];
+  autoVariables?: string[];
+  manualVariablesLabels?: { [key: string]: string };
   created_at?: Date;
   updated_at?: Date;
 }
@@ -198,7 +204,7 @@ export class NewsletterService {
   }
 
   /**
-   * Create new newsletter
+   * Create new newsletter with required variables validation
    */
   createNewsletter(newsletter: {
     name: string;
@@ -207,6 +213,7 @@ export class NewsletterService {
     template_id: number;
     description?: string;
     preview_text?: string;
+    [key: string]: any; // Allow additional template variables
   }): Observable<ApiResponse<any>> {
     return this.http.post<ApiResponse<any>>(
       this.apiUrl,
@@ -247,6 +254,17 @@ export class NewsletterService {
         const current = this.newslettersSubject.value;
         this.newslettersSubject.next(current.filter(n => n.id !== id));
       })
+    );
+  }
+
+  /**
+   * Duplicate newsletter
+   */
+  duplicateNewsletter(id: string | number): Observable<ApiResponse<any>> {
+    return this.http.post<ApiResponse<any>>(
+      `${this.apiUrl}/${id}/duplicate`,
+      {},
+      { headers: this.getHeaders() }
     );
   }
 
@@ -350,6 +368,22 @@ export class NewsletterService {
         }
         console.error('Error loading subscribers:', error);
         // Return empty array on other errors
+        return of([]);
+      })
+    );
+  }
+
+  /**
+   * Get available recipients for newsletter creation
+   */
+  getAvailableRecipients(): Observable<any[]> {
+    return this.http.get<any[]>(
+      `${this.apiUrl}/recipients/available`,
+      { headers: this.getHeaders() }
+    ).pipe(
+      catchError((error) => {
+        console.error('Error loading available recipients:', error);
+        // Return empty array on error
         return of([]);
       })
     );

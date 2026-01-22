@@ -1,6 +1,7 @@
 <app-header></app-header>
 <app-sidebar></app-sidebar>
 <p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
 
 <div class="page-wrapper">
   <div class="content">
@@ -83,8 +84,11 @@
                       <a (click)="editNewsletter(newsletter)" class="btn btn-sm btn-edit cursor-pointer" title="Éditer">
                         <i class="ti ti-edit"></i>
                       </a>
-                      <a *ngIf="!newsletter.is_sent" (click)="sendNewsletter(newsletter.id)" class="btn btn-sm btn-send cursor-pointer" title="Envoyer">
-                        <i class="ti ti-send"></i>
+                      <a (click)="duplicateNewsletter(newsletter)" class="btn btn-sm btn-duplicate cursor-pointer" title="Dupliquer">
+                        <i class="ti ti-copy"></i>
+                      </a>
+                      <a *ngIf="!newsletter.is_sent" (click)="sendNewsletter(newsletter.id)" class="btn btn-sm btn-send cursor-pointer" title="Envoyer la newsletter">
+                        <i class="ti ti-mail-forward"></i>
                       </a>
                       <a (click)="deleteNewsletter(newsletter.id)" class="btn btn-sm btn-delete cursor-pointer" title="Supprimer">
                         <i class="ti ti-trash"></i>

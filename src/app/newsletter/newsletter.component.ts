@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ToastModule } from 'primeng/toast';
-import { MessageService } from 'primeng/api';
+import { MessageService, ConfirmationService } from 'primeng/api';
 import { NewsletterService, Newsletter, Subscriber, EmailTemplate } from './newsletter.service';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -30,7 +30,8 @@ export class NewsletterComponent implements OnInit, OnDestroy {
 
   constructor(
     private newsletterService: NewsletterService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private confirmationService: ConfirmationService
   ) {}
 
   ngOnInit(): void {
@@ -102,23 +103,63 @@ export class NewsletterComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Load all subscribers
+   * Load all subscribers using the available recipients endpoint
    */
   loadSubscribers(): void {
+    this.newsletterService.getAvailableRecipients()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data: any) => {
+          // Handle the API response format - getAvailableRecipients returns any[]
+          const subscribers = Array.isArray(data) ? data : [];
+          this.subscribers = subscribers.map((sub: any) => ({
+            id: sub.id,
+            email: sub.email,
+            first_name: sub.first_name || sub.user_first_name || '',
+            last_name: sub.last_name || sub.user_last_name || '',
+            display_name: sub.display_name || `${sub.first_name || sub.user_first_name || ''} ${sub.last_name || sub.user_last_name || ''}`.trim() || sub.email,
+            created_at: sub.created_at,
+            subscribed_at: sub.created_at,
+            status: 'active'
+          }));
+
+          if (this.subscribers.length === 0) {
+            this.messageService.add({
+              severity: 'info',
+              summary: 'Information',
+              detail: 'Aucun abonné actif trouvé'
+            });
+          }
+        },
+        error: (error) => {
+          const errorMsg = error?.error?.message || error?.message || 'Impossible de charger les abonnés depuis l\'API';
+          this.messageService.add({
+            severity: 'warn',
+            summary: 'Attention',
+            detail: errorMsg
+          });
+          console.error('Error loading available recipients:', error);
+
+          // Fallback to old subscribers endpoint
+          this.loadSubscribersFallback();
+        }
+      });
+  }
+
+  /**
+   * Fallback: Load subscribers from old endpoint
+   */
+  private loadSubscribersFallback(): void {
     this.newsletterService.getSubscribers()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data) => {
-          this.subscribers = data;
+          this.subscribers = data.filter(
+            sub => sub.status === 'active'
+          ) as Subscriber[];
         },
         error: (error) => {
-          const errorMsg = error?.error?.message || 'Impossible de charger les abonnés';
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Erreur',
-            detail: errorMsg
-          });
-          console.error('Error loading subscribers:', error);
+          console.error('Error loading subscribers from fallback:', error);
         }
       });
   }
@@ -287,93 +328,209 @@ export class NewsletterComponent implements OnInit, OnDestroy {
    * Delete newsletter
    */
   deleteNewsletter(id: string | number): void {
-    if (confirm('Êtes-vous sûr de vouloir supprimer cette newsletter ?')) {
-      this.newsletterService.deleteNewsletter(id)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: () => {
-            this.messageService.add({
-              severity: 'success',
-              summary: 'Succès',
-              detail: 'Newsletter supprimée avec succès'
-            });
-            this.loadNewsletters();
-          },
-          error: (error) => {
-            const errorMsg = error?.error?.message || error?.error?.error || 'Erreur lors de la suppression';
-            this.messageService.add({
-              severity: 'error',
-              summary: 'Erreur',
-              detail: errorMsg
-            });
-            console.error('Error deleting newsletter:', error);
-          }
-        });
-    }
+    this.confirmationService.confirm({
+      message: 'Cette newsletter sera supprimée définitivement. Cette action est irréversible.<br><br><strong>Êtes-vous sûr de vouloir continuer ?</strong>',
+      header: '🗑️ Supprimer la newsletter',
+      icon: 'pi pi-trash',
+      acceptLabel: 'Supprimer',
+      rejectLabel: 'Annuler',
+      acceptButtonStyleClass: 'p-button-danger p-button-lg',
+      rejectButtonStyleClass: 'p-button-secondary p-button-lg',
+      acceptIcon: 'pi pi-trash',
+      rejectIcon: 'pi pi-times',
+      accept: () => {
+        this.newsletterService.deleteNewsletter(id)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: () => {
+              this.messageService.add({
+                severity: 'success',
+                summary: '✅ Newsletter supprimée',
+                detail: 'La newsletter a été supprimée avec succès',
+                life: 5000
+              });
+              this.loadNewsletters();
+            },
+            error: (error) => {
+              const errorMsg = error?.error?.message || error?.error?.error || 'Erreur lors de la suppression';
+              this.messageService.add({
+                severity: 'error',
+                summary: '❌ Erreur de suppression',
+                detail: errorMsg,
+                life: 8000
+              });
+              console.error('Error deleting newsletter:', error);
+            }
+          });
+      }
+    });
   }
 
   /**
    * Send newsletter to subscribers
    */
   sendNewsletter(id: string | number): void {
-    if (confirm('Êtes-vous sûr de vouloir envoyer cette newsletter à tous les abonnés actifs ?')) {
-      this.loading = true;
-      this.newsletterService.sendNewsletter(id, false, [])
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: (response) => {
-            this.loading = false;
-            if (response.data) {
-              const { sent, failed } = response.data;
-              this.messageService.add({
-                severity: sent > 0 ? 'success' : 'warn',
-                summary: 'Succès',
-                detail: `Newsletter envoyée à ${sent} abonné(s)${failed > 0 ? `, ${failed} échoué(s)` : ''}`
-              });
-              this.loadNewsletters();
-            }
-          },
-          error: (error) => {
-            this.loading = false;
-            const errorMsg = error?.error?.message || error?.error?.error || 'Erreur lors de l\'envoi';
-            this.messageService.add({
-              severity: 'error',
-              summary: 'Erreur',
-              detail: errorMsg
-            });
-            console.error('Error sending newsletter:', error);
-          }
+    this.confirmationService.confirm({
+      message: `Vous êtes sur le point d'envoyer cette newsletter à tous les abonnés actifs. Cette action est irréversible et la newsletter sera marquée comme "envoyée".<br><br><strong>Êtes-vous sûr de vouloir continuer ?</strong>`,
+      header: '📧 Confirmation d\'envoi de newsletter',
+      icon: 'pi pi-envelope',
+      acceptLabel: 'Oui, envoyer maintenant',
+      rejectLabel: 'Annuler',
+      acceptButtonStyleClass: 'p-button-success p-button-lg',
+      rejectButtonStyleClass: 'p-button-secondary p-button-lg',
+      acceptIcon: 'pi pi-send',
+      rejectIcon: 'pi pi-times',
+      accept: () => {
+        this.loading = true;
+        this.messageService.add({
+          severity: 'info',
+          summary: '🚀 Envoi en cours',
+          detail: 'La newsletter est en cours d\'envoi aux abonnés...',
+          life: 5000
         });
-    }
+
+        this.newsletterService.sendNewsletter(id, false, [])
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: (response) => {
+              this.loading = false;
+              if (response.data) {
+                const { sent, failed } = response.data;
+                if (sent > 0 && failed === 0) {
+                  this.messageService.add({
+                    severity: 'success',
+                    summary: '✅ Newsletter envoyée avec succès',
+                    detail: `La newsletter a été envoyée à ${sent} abonné(s)`,
+                    life: 8000
+                  });
+                } else if (sent > 0 && failed > 0) {
+                  this.messageService.add({
+                    severity: 'warn',
+                    summary: '⚠️ Envoi partiellement réussi',
+                    detail: `Newsletter envoyée à ${sent} abonné(s), ${failed} échec(s)`,
+                    life: 10000
+                  });
+                } else {
+                  this.messageService.add({
+                    severity: 'error',
+                    summary: '❌ Échec de l\'envoi',
+                    detail: 'Aucun email n\'a pu être envoyé',
+                    life: 8000
+                  });
+                }
+                this.loadNewsletters();
+              }
+            },
+            error: (error) => {
+              this.loading = false;
+              const errorMsg = error?.error?.message || error?.error?.error || 'Erreur lors de l\'envoi de la newsletter';
+              this.messageService.add({
+                severity: 'error',
+                summary: '❌ Erreur d\'envoi',
+                detail: errorMsg,
+                life: 10000
+              });
+              console.error('Error sending newsletter:', error);
+            }
+          });
+      }
+    });
+  }
+
+  /**
+   * Duplicate newsletter
+   */
+  duplicateNewsletter(newsletter: Newsletter): void {
+    this.confirmationService.confirm({
+      message: `Vous allez créer une copie de la newsletter "${newsletter.name}". La nouvelle newsletter aura le même contenu et paramètres.<br><br><strong>Continuer ?</strong>`,
+      header: '📋 Dupliquer la newsletter',
+      icon: 'pi pi-copy',
+      acceptLabel: 'Dupliquer',
+      rejectLabel: 'Annuler',
+      acceptButtonStyleClass: 'p-button-primary p-button-lg',
+      rejectButtonStyleClass: 'p-button-secondary p-button-lg',
+      acceptIcon: 'pi pi-copy',
+      rejectIcon: 'pi pi-times',
+      accept: () => {
+        this.loading = true;
+        this.messageService.add({
+          severity: 'info',
+          summary: '🔄 Duplication en cours',
+          detail: 'Création de la copie de la newsletter...',
+          life: 3000
+        });
+
+        this.newsletterService.duplicateNewsletter(newsletter.id)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: (response) => {
+              this.loading = false;
+              if (response.success) {
+                this.messageService.add({
+                  severity: 'success',
+                  summary: '✅ Newsletter dupliquée',
+                  detail: `La newsletter "${newsletter.name}" a été dupliquée avec succès`,
+                  life: 6000
+                });
+                this.loadNewsletters();
+              }
+            },
+            error: (error) => {
+              this.loading = false;
+              const errorMsg = error?.error?.message || 'Erreur lors de la duplication';
+              this.messageService.add({
+                severity: 'error',
+                summary: '❌ Erreur de duplication',
+                detail: errorMsg,
+                life: 8000
+              });
+              console.error('Error duplicating newsletter:', error);
+            }
+          });
+      }
+    });
   }
 
   /**
    * Delete subscriber
    */
   deleteSubscriber(id: string | number): void {
-    if (confirm('Êtes-vous sûr de vouloir supprimer cet abonné ?')) {
-      this.newsletterService.deleteSubscriber(id)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: () => {
-            this.messageService.add({
-              severity: 'success',
-              summary: 'Succès',
-              detail: 'Abonné supprimé avec succès'
-            });
-            this.loadSubscribers();
-          },
-          error: (error) => {
-            const errorMsg = error?.error?.message || error?.error?.error || 'Erreur lors de la suppression';
-            this.messageService.add({
-              severity: 'error',
-              summary: 'Erreur',
-              detail: errorMsg
-            });
-            console.error('Error deleting subscriber:', error);
-          }
-        });
-    }
+    this.confirmationService.confirm({
+      message: 'Cet abonné sera supprimé de la liste. Il ne recevra plus de newsletters.<br><br><strong>Cette action est irréversible. Continuer ?</strong>',
+      header: '👤 Supprimer l\'abonné',
+      icon: 'pi pi-user-minus',
+      acceptLabel: 'Supprimer',
+      rejectLabel: 'Annuler',
+      acceptButtonStyleClass: 'p-button-danger p-button-lg',
+      rejectButtonStyleClass: 'p-button-secondary p-button-lg',
+      acceptIcon: 'pi pi-user-minus',
+      rejectIcon: 'pi pi-times',
+      accept: () => {
+        this.newsletterService.deleteSubscriber(id)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: () => {
+              this.messageService.add({
+                severity: 'success',
+                summary: '✅ Abonné supprimé',
+                detail: 'L\'abonné a été supprimé avec succès',
+                life: 5000
+              });
+              this.loadSubscribers();
+            },
+            error: (error) => {
+              const errorMsg = error?.error?.message || error?.error?.error || 'Erreur lors de la suppression';
+              this.messageService.add({
+                severity: 'error',
+                summary: '❌ Erreur de suppression',
+                detail: errorMsg,
+                life: 8000
+              });
+              console.error('Error deleting subscriber:', error);
+            }
+          });
+      }
+    });
   }
 
   /**
