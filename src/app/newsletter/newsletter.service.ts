@@ -88,6 +88,13 @@ export interface ApiResponse<T> {
     total: number;
     pages: number;
   };
+  stats?: {
+    total?: number;
+    pending?: number;
+    sent?: number;
+    failed?: number;
+    bounced?: number;
+  };
 }
 
 export interface SendNewsletterResponse {
@@ -342,6 +349,25 @@ export class NewsletterService {
   getNewsletterStats(id: string | number): Observable<ApiResponse<NewsletterStatistics>> {
     return this.http.get<ApiResponse<NewsletterStatistics>>(
       `${this.apiUrl}/${id}/stats`,
+      { headers: this.getHeaders() }
+    );
+  }
+
+  /**
+   * Get newsletter recipients with delivery status
+   */
+  getNewsletterRecipients(
+    id: string | number,
+    page: number = 1,
+    limit: number = 50,
+    status?: string
+  ): Observable<ApiResponse<any>> {
+    let url = `${this.apiUrl}/${id}/recipients?page=${page}&limit=${limit}`;
+    if (status) {
+      url += `&status=${status}`;
+    }
+    return this.http.get<ApiResponse<any>>(
+      url,
       { headers: this.getHeaders() }
     );
   }

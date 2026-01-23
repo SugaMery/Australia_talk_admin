@@ -54,9 +54,9 @@
                 <thead>
                   <tr>
                     <th>ID</th>
-                    <th>Nom</th>
                     <th>Sujet</th>
                     <th>Modèle</th>
+                    <th>Date de création</th>
                     <th>Date d'envoi</th>
                     <th>Statut</th>
                     <th>Actions</th>
@@ -67,11 +67,16 @@
                     <td colspan="7" class="text-center">Aucune newsletter trouvée</td>
                   </tr>
                   <tr *ngFor="let newsletter of newsletters">
-                    <td>{{ newsletter.id }}</td>
-                    <td>{{ newsletter.name }}</td>
+                    <td><span class="badge bg-light text-dark">{{ newsletter.id }}</span></td>
                     <td>{{ newsletter.subject }}</td>
                     <td><span class="badge bg-secondary">{{ newsletter.template_name || 'Default' }}</span></td>
-                    <td>{{ newsletter.sending_date | date: 'dd/MM/yyyy' }}</td>
+                    <td>{{ newsletter.created_at | date: 'dd/MM/yyyy HH:mm' }}</td>
+                    <td>
+                      <span *ngIf="newsletter.sent_at; else noSent">{{ newsletter.sent_at | date: 'dd/MM/yyyy HH:mm' }}</span>
+                      <ng-template #noSent>
+                        <span class="text-muted">-</span>
+                      </ng-template>
+                    </td>
                     <td>
                       <span class="badge" [ngClass]="{
                         'bg-success': newsletter.is_sent,
@@ -81,18 +86,23 @@
                       </span>
                     </td>
                     <td>
-                      <a (click)="editNewsletter(newsletter)" class="btn btn-sm btn-edit cursor-pointer" title="Éditer">
-                        <i class="ti ti-edit"></i>
-                      </a>
-                      <a (click)="duplicateNewsletter(newsletter)" class="btn btn-sm btn-duplicate cursor-pointer" title="Dupliquer">
-                        <i class="ti ti-copy"></i>
-                      </a>
-                      <a *ngIf="!newsletter.is_sent" (click)="sendNewsletter(newsletter.id)" class="btn btn-sm btn-send cursor-pointer" title="Envoyer la newsletter">
-                        <i class="ti ti-mail-forward"></i>
-                      </a>
-                      <a (click)="deleteNewsletter(newsletter.id)" class="btn btn-sm btn-delete cursor-pointer" title="Supprimer">
-                        <i class="ti ti-trash"></i>
-                      </a>
+                      <div class="btn-group" role="group">
+                        <a *ngIf="!newsletter.is_sent" (click)="editNewsletter(newsletter)" class="btn btn-sm btn-edit cursor-pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Éditer">
+                          <i class="ti ti-edit"></i>
+                        </a>
+                        <a *ngIf="newsletter.is_sent" (click)="openRecipientsModal(newsletter)" class="btn btn-sm btn-send cursor-pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Voir les destinataires">
+                          <i class="ti ti-mail"></i>
+                        </a>
+                        <a (click)="duplicateNewsletter(newsletter)" class="btn btn-sm btn-duplicate cursor-pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Dupliquer">
+                          <i class="ti ti-copy"></i>
+                        </a>
+                        <a *ngIf="!newsletter.is_sent" (click)="sendNewsletter(newsletter.id)" class="btn btn-sm btn-send-primary cursor-pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Envoyer la newsletter">
+                          <i class="ti ti-mail-forward"></i>
+                        </a>
+                        <a (click)="deleteNewsletter(newsletter.id)" class="btn btn-sm btn-delete cursor-pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Supprimer">
+                          <i class="ti ti-trash"></i>
+                        </a>
+                      </div>
                     </td>
                   </tr>
                 </tbody>
@@ -214,3 +224,117 @@
 
 <!-- Modal Backdrop -->
 <div class="modal-backdrop fade" [class.show]="showNewsletterModal" [style.display]="showNewsletterModal ? 'block' : 'none'"></div>
+
+<!-- Recipients Modal -->
+<div class="modal fade" id="recipients-modal" tabindex="-1" role="dialog" aria-hidden="true" [class.show]="showRecipientsModal" [style.display]="showRecipientsModal ? 'block' : 'none'">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          Destinataires - {{ selectedNewsletter.name }}
+        </h5>
+        <button type="button" class="btn-close" (click)="closeRecipientsModal()" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Stats Section -->
+        <div class="row mb-4" *ngIf="recipientsStats">
+          <div class="col-md-3">
+            <div class="card text-center">
+              <div class="card-body">
+                <h6 class="card-subtitle mb-2">Total</h6>
+                <h3 class="text-primary">{{ recipientsStats.total || 0 }}</h3>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card text-center">
+              <div class="card-body">
+                <h6 class="card-subtitle mb-2">Envoyés</h6>
+                <h3 class="text-success">{{ recipientsStats.sent || 0 }}</h3>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card text-center">
+              <div class="card-body">
+                <h6 class="card-subtitle mb-2">Échoués</h6>
+                <h3 class="text-danger">{{ recipientsStats.failed || 0 }}</h3>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card text-center">
+              <div class="card-body">
+                <h6 class="card-subtitle mb-2">En attente</h6>
+                <h3 class="text-secondary">{{ recipientsStats.pending || 0 }}</h3>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recipients Table -->
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Email</th>
+                <th>Nom</th>
+                <th>Statut</th>
+                <th>Date d'envoi</th>
+                <th>Message d'erreur</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngIf="newsletterRecipients.length === 0 && !recipientsLoading">
+                <td colspan="5" class="text-center">Aucun destinataire</td>
+              </tr>
+              <tr *ngIf="recipientsLoading">
+                <td colspan="5" class="text-center">
+                  <div class="spinner-border spinner-border-sm" role="status">
+                    <span class="visually-hidden">Chargement...</span>
+                  </div>
+                </td>
+              </tr>
+              <tr *ngFor="let recipient of newsletterRecipients">
+                <td>{{ recipient.email }}</td>
+                <td>{{ recipient.first_name }} {{ recipient.last_name }}</td>
+                <td>
+                  <span class="badge" [ngClass]="getStatusBadgeClass(recipient.status)">
+                    {{ getStatusLabel(recipient.status) }}
+                  </span>
+                </td>
+                <td>{{ recipient.sent_at | date: 'dd/MM/yyyy HH:mm' }}</td>
+                <td>
+                  <small *ngIf="recipient.error_message" class="text-danger">
+                    {{ recipient.error_message }}
+                  </small>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <nav aria-label="Page navigation" *ngIf="recipientsTotalPages > 1">
+          <ul class="pagination justify-content-center">
+            <li class="page-item" [class.disabled]="recipientsPage === 1">
+              <a class="page-link" (click)="recipientsPage > 1 && onRecipientsPageChange({page: recipientsPage - 2})">Précédent</a>
+            </li>
+            <li class="page-item" *ngFor="let p of [].constructor(recipientsTotalPages); let i = index" [class.active]="i + 1 === recipientsPage">
+              <a class="page-link" (click)="onRecipientsPageChange({page: i})">{{ i + 1 }}</a>
+            </li>
+            <li class="page-item" [class.disabled]="recipientsPage === recipientsTotalPages">
+              <a class="page-link" (click)="recipientsPage < recipientsTotalPages && onRecipientsPageChange({page: recipientsPage})">Suivant</a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeRecipientsModal()">Fermer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Recipients Modal Backdrop -->
+<div class="modal-backdrop fade" [class.show]="showRecipientsModal" [style.display]="showRecipientsModal ? 'block' : 'none'"></div>

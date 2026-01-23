@@ -7,8 +7,8 @@
     <div class="page-header">
       <div class="add-item d-flex">
         <div class="page-title">
-          <h4 class="fw-bold">Créer une Newsletter</h4>
-          <h6>Composez et envoyez une nouvelle newsletter</h6>
+          <h4 class="fw-bold">{{ isEditMode ? 'Éditer la Newsletter' : 'Créer une Newsletter' }}</h4>
+          <h6>{{ isEditMode ? 'Modifiez et enregistrez votre newsletter' : 'Composez et envoyez une nouvelle newsletter' }}</h6>
         </div>
       </div>
     </div>
@@ -20,29 +20,17 @@
             <h5 class="card-title">Informations de la Newsletter</h5>
           </div>
           <div class="card-body">
-            <!-- Name -->
-            <div class="mb-3">
-              <label class="form-label">Nom de la newsletter <span class="text-danger">*</span></label>
-              <input 
-                type="text" 
-                class="form-control" 
-                placeholder="Nom interne de la newsletter"
-                [(ngModel)]="newsletter.name"
-                (ngModelChange)="onNameChange($event)"
-                name="name">
-            </div>
+            <!-- Name (hidden) -->
+            <input 
+              type="hidden" 
+              [(ngModel)]="newsletter.name"
+              name="name">
 
-            <!-- Slug -->
-            <div class="mb-3">
-              <label class="form-label">Slug <span class="text-danger">*</span></label>
-              <input 
-                type="text" 
-                class="form-control" 
-                placeholder="slug-url-friendly"
-                [(ngModel)]="newsletter.slug"
-                name="slug">
-              <small class="text-muted">Utilisé dans l'URL, généré automatiquement depuis le nom</small>
-            </div>
+            <!-- Slug (hidden) -->
+            <input 
+              type="hidden" 
+              [(ngModel)]="newsletter.slug"
+              name="slug">
 
             <!-- Subject -->
             <div class="mb-3">
@@ -52,6 +40,7 @@
                 class="form-control" 
                 placeholder="Objet qui apparaîtra dans la boîte de réception"
                 [(ngModel)]="newsletter.subject"
+                (ngModelChange)="onSubjectChange($event)"
                 name="subject">
             </div>
 
@@ -95,8 +84,23 @@
                 name="description"></textarea>
             </div>
 
+            <!-- Selected Articles Display Section -->
+            <div *ngIf="getSelectedArticles().length > 0" class="mb-3 p-3 bg-light border rounded">
+              <h6 class="fw-bold mb-3">
+                <i class="ti ti-bookmark me-2"></i>Articles Sélectionnés ({{ getSelectedArticles().length }} / 4)
+              </h6>
+              <div class="d-flex flex-wrap gap-2">
+                <div *ngFor="let article of getSelectedArticles()" class="badge badge-info p-2 d-flex align-items-center gap-2" style="background-color: #e3f2fd; color: #1976d2; font-size: 0.85rem; max-width: 100%;">
+                  <span class="text-truncate" [title]="article.translation?.title || article.title || article.name || 'Article'">
+                    {{ (article.translation?.title || article.title || article.name || 'Article') | slice:0:30 }}{{ (article.translation?.title || article.title || article.name || 'Article').length > 30 ? '...' : '' }}
+                  </span>
+                  <button type="button" class="btn-close btn-sm" style="font-size: 0.7rem;" (click)="article.selected = false; onArticleSelectionChange()" title="Retirer cet article"></button>
+                </div>
+              </div>
+            </div>
+
             <!-- Articles Section with horizontal scrolling carousel -->
-            <div *ngIf="exampleArticles.length > 0" class="mb-3">
+            <div *ngIf="exampleArticles.length > 0 && newsletter.template_id > 0 && templateVariables.includes('ARTICLES_PLACEHOLDER')" class="mb-3">
               <div class="d-flex justify-content-between align-items-center mb-3">
                 <label class="form-label mb-0">
                   {{ templateVariables.includes('ARTICLES_PLACEHOLDER') ? 'Articles à inclure dans la newsletter' : 'Articles disponibles' }}
@@ -115,7 +119,7 @@
 
                 <!-- Carousel -->
                 <div #articlesCarousel class="articles-carousel">
-                  <div *ngFor="let article of exampleArticles" class="article-card-item" [class.selected]="article.selected">
+                  <div *ngFor="let article of exampleArticles" class="article-card-item" [class.selected]="article.selected" (click)="toggleArticleSelection(article)" style="cursor: pointer;">
                     
                     <!-- Selection Checkbox -->
                     <div class="article-checkbox-container">
@@ -149,7 +153,7 @@
                     </div>
                     
                     <!-- Article Content -->
-                    <div class="article-content">
+                    <div class="article-content" >
                       <!-- Tags Section -->
                       <div class="article-tags">
                         <span *ngIf="article.categories && article.categories.length > 0" class="badge badge-category">
@@ -199,6 +203,19 @@
             </div>
 
             <!-- Preview Text removed; generated from Sujet de l'email -->
+
+            <!-- Template Body Preview Section - appears at bottom when template is selected -->
+            <div *ngIf="selectedTemplate" class="mt-4 pt-4 border-top">
+              <h6 class="fw-bold mb-3">
+                <i class="ti ti-eye me-2"></i>Corps du modèle (aperçu)
+              </h6>
+              <div class="preview-body-container" style="background-color: #f8f9fa; padding: 15px; border-radius: 4px; border: 1px solid #ddd; max-height: 600px; overflow-y: auto;">
+                <div *ngIf="safePreviewBody; else noBodyPreview" [innerHtml]="safePreviewBody"></div>
+                <ng-template #noBodyPreview>
+                  <p class="text-muted text-center">Aperçu du modèle en cours de chargement...</p>
+                </ng-template>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -268,7 +285,7 @@
               [disabled]="loading">
               <i *ngIf="!loading" class="ti ti-check me-1"></i>
               <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
-              {{ loading ? 'Enregistrement...' : 'Enregistrer' }}
+              {{ loading ? (isEditMode ? 'Mise à jour...' : 'Enregistrement...') : (isEditMode ? 'Mettre à jour' : 'Enregistrer') }}
             </button>
           </div>
         </div>
@@ -285,32 +302,16 @@
                 <strong>Sujet:</strong> {{ newsletter.subject || 'Non défini' }}<br>
                 <strong>Modèle:</strong> {{ selectedTemplate?.template_name || 'Aucun sélectionné' }}
               </div>
-              <div class="preview-content" style="padding: 15px; min-height: 200px; background-color: #fff; border-radius: 0 0 4px 4px;">
-                <div *ngIf="newsletter.preview_text; else noPreview" class="mb-3">
-                  <strong>Aperçu:</strong> {{ newsletter.preview_text }}
-                </div>
-                <ng-template #noPreview>
-                  <p class="text-muted mb-3">Aucun aperçu défini</p>
-                </ng-template>
+              <div class="preview-content" style="padding: 15px; min-height: 200px; background-color: #fff; border-radius: 0 0 4px 4px; max-height: 600px; overflow-y: auto;">
 
-                <div *ngIf="newsletter.description; else noDescription">
-                  <strong>Description:</strong><br>
-                  {{ newsletter.description }}
-                </div>
-                <ng-template #noDescription>
-                  <p class="text-muted text-center">Description non définie</p>
-                </ng-template>
 
+                <!-- Template Info -->
                 <div *ngIf="selectedTemplate" class="mt-3 pt-3 border-top">
-                  <strong>Détails du modèle:</strong><br>
-                  <small class="text-muted d-block">Sujet du modèle: {{ selectedTemplate.subject }}</small>
+                  <strong>Informations du modèle:</strong><br>
+                  <small class="text-muted d-block">Nom: {{ selectedTemplate.template_name }}</small>
+                  <small class="text-muted d-block">Sujet: {{ selectedTemplate.subject }}</small>
                   <small class="text-muted d-block">Slug: {{ selectedTemplate.template_slug }}</small>
                   <small *ngIf="selectedTemplate.variables" class="text-muted d-block">Variables: {{ selectedTemplate.variables }}</small>
-                </div>
-
-                <div *ngIf="safePreviewBody" class="mt-3 pt-3 border-top">
-                  <strong>Corps du modèle (aperçu):</strong>
-                  <div class="mt-2" [innerHtml]="safePreviewBody"></div>
                 </div>
               </div>
             </div>

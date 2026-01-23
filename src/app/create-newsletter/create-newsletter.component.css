@@ -413,3 +413,13 @@ textarea.form-control {
     position: relative !important;
 
 }
+
+
+
+::ng-deep span.p-toast-message-icon {
+  padding-right: 0.2rem !important;
+}
+
+::ng-deep .p-toast-message-content {
+      padding: 0.5rem !important;
+}

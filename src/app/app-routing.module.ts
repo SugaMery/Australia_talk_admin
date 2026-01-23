@@ -67,6 +67,7 @@ const routes: Routes = [
   { path: 'email-templates', component: EmailTemplatesComponent },
   { path: 'newsletter', component: NewsletterComponent },
   { path: 'create-newsletter', component: CreateNewsletterComponent },
+  { path: 'edit-newsletter/:id', component: CreateNewsletterComponent },
 
 
 ];

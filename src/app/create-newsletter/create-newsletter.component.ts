@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
 import { NewsletterService, Newsletter, Subscriber } from '../newsletter/newsletter.service';
 import { EmailTemplatesService, EmailTemplate } from '../services/email-templates.service';
@@ -58,6 +59,8 @@ export class CreateNewsletterComponent implements OnInit, OnDestroy {
   // UI State
   loading: boolean = false;
   previewMode: boolean = false;
+  isEditMode: boolean = false;
+  editingNewsletterID: string | null = null;
   fromEmail: string = 'noreply@australia-talk.com';
   fromName: string = 'Australia Talk';
 
@@ -75,9 +78,10 @@ export class CreateNewsletterComponent implements OnInit, OnDestroy {
     private http: HttpClient,
     private mailSettingsService: MailSettingsService,
     private subscriberService: SubscriberService,
-    private articleService: ArticleService
-    ,
-    private sanitizer: DomSanitizer
+    private articleService: ArticleService,
+    private sanitizer: DomSanitizer,
+    private route: ActivatedRoute,
+    private router: Router
   ) {}
 
   /**
@@ -91,6 +95,103 @@ export class CreateNewsletterComponent implements OnInit, OnDestroy {
     this.loadMailSettings();
     this.loadEmailTemplates();
     this.loadSubscribers();
+
+    // Check if we're in edit mode by checking the route
+    this.route.url.pipe(takeUntil(this.destroy$)).subscribe(urlSegments => {
+      const isEditRoute = urlSegments.some(segment => segment.path === 'edit-newsletter');
+      
+      if (isEditRoute) {
+        this.route.paramMap.pipe(takeUntil(this.destroy$)).subscribe(params => {
+          const id = params.get('id');
+          if (id) {
+            this.isEditMode = true;
+            this.editingNewsletterID = id;
+            this.loadNewsletterForEdit(id);
+          }
+        });
+      }
+    });
+  }
+
+  /**
+   * Load newsletter data for editing
+   */
+  private loadNewsletterForEdit(id: string): void {
+    this.loading = true;
+    this.newsletterService.getNewsletterById(id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response: any) => {
+          const data = response.data || response;
+          this.newsletter.name = data.name || '';
+          this.newsletter.slug = data.slug || '';
+          this.newsletter.subject = data.subject || '';
+          this.newsletter.template_id = data.template_id || 0;
+          this.newsletter.description = data.description || '';
+          this.newsletter.preview_text = data.preview_text || '';
+          
+          // Parse manual_variables_data and populate form variables
+          let manualVariablesData = {};
+          if (data.manual_variables_data) {
+            try {
+              manualVariablesData = typeof data.manual_variables_data === 'string' 
+                ? JSON.parse(data.manual_variables_data) 
+                : data.manual_variables_data;
+            } catch (e) {
+              console.error('Error parsing manual_variables_data:', e);
+              manualVariablesData = {};
+            }
+          }
+          
+          // Extract ARTICLES_PLACEHOLDER articles but don't auto-select them in edit mode
+          if (manualVariablesData && (manualVariablesData as any)['ARTICLES_PLACEHOLDER']) {
+            try {
+              let articlesData = (manualVariablesData as any)['ARTICLES_PLACEHOLDER'];
+              if (typeof articlesData === 'string') {
+                articlesData = JSON.parse(articlesData);
+              }
+              
+              console.log('Found stored articles in ARTICLES_PLACEHOLDER:', articlesData);
+            } catch (e) {
+              console.error('Error parsing ARTICLES_PLACEHOLDER:', e);
+            }
+            
+            // Remove ARTICLES_PLACEHOLDER from variables as it's handled separately
+            delete (manualVariablesData as any)['ARTICLES_PLACEHOLDER'];
+          }
+          
+          this.newsletter.variables = manualVariablesData;
+
+          // Load template after data is loaded
+          if (this.newsletter.template_id > 0) {
+            setTimeout(() => this.onTemplateSelected(), 100);
+          }
+
+          // Load selected recipients if available
+          if (data.selected_recipients) {
+            try {
+              const recipients = typeof data.selected_recipients === 'string' 
+                ? JSON.parse(data.selected_recipients) 
+                : data.selected_recipients;
+              this.selectedSubscribers = recipients;
+            } catch (e) {
+              console.error('Error parsing selected recipients:', e);
+            }
+          }
+
+          this.loading = false;
+        },
+        error: (error) => {
+          this.loading = false;
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erreur',
+            detail: 'Impossible de charger la newsletter'
+          });
+          console.error('Error loading newsletter:', error);
+          this.router.navigate(['/newsletter']);
+        }
+      });
   }
 
   /**
@@ -115,6 +216,7 @@ export class CreateNewsletterComponent implements OnInit, OnDestroy {
           if (this.emailTemplates.length > 0 && this.newsletter.template_id === 0) {
             this.newsletter.template_id = this.emailTemplates[0].id;
             this.onTemplateSelected();
+            //this.onTemplateSelected();
           }
         },
         error: (error) => {
@@ -126,6 +228,7 @@ export class CreateNewsletterComponent implements OnInit, OnDestroy {
           });
         }
       });
+
   }
 
   /**
@@ -220,7 +323,9 @@ export class CreateNewsletterComponent implements OnInit, OnDestroy {
       this.exampleArticles = [];
       if (this.selectedTemplate) {
         // Debug: log selected template
-        console.log('Template selected:', this.emailTemplates);
+        console.log('Template selected:', this.selectedTemplate);
+        console.log('Template Body:', this.selectedTemplate.body);
+        console.log('Full Template Object:', JSON.stringify(this.selectedTemplate, null, 2));
 
         // Prefer manual_variables (matches backend), fallback to other variable sources
         let parts: string[] = [];
@@ -262,6 +367,15 @@ export class CreateNewsletterComponent implements OnInit, OnDestroy {
     } else {
       this.selectedTemplate = null;
     }
+
+    this.newsletter.subject = this.selectedTemplate!.subject || '';
+    this.onSubjectChange(this.selectedTemplate!.subject);
+    
+    this.buildPreview();
+    console.log('Selected template ID:', this.newsletter.template_id, 'Template:', this.selectedTemplate);
+
+
+
   }
 
   private fetchExampleArticles(): void {
@@ -293,6 +407,8 @@ export class CreateNewsletterComponent implements OnInit, OnDestroy {
 
     let body = (this.selectedTemplate.body || '') as string;
 
+    
+
     // replace variables like {{VAR_NAME}}
     const vars = this.templateVariables || [];
     vars.forEach(v => {
@@ -303,8 +419,7 @@ export class CreateNewsletterComponent implements OnInit, OnDestroy {
     });
 
     // Prepare ARTICLES HTML (use selected articles if ARTICLES_PLACEHOLDER, otherwise first 4 examples)
-    const articlesHtmlParts: string[] = [];
-    articlesHtmlParts.push('<div class="row" style="gap:12px;">');
+    let articlesHtml = '';
     
     let articlesToShow = [];
     if (this.templateVariables.includes('ARTICLES_PLACEHOLDER')) {
@@ -315,23 +430,121 @@ export class CreateNewsletterComponent implements OnInit, OnDestroy {
       articlesToShow = (this.exampleArticles || []).slice(0, 4);
     }
     
-    articlesToShow.forEach(article => {
-        const title = this.escapeHtml(article.title || article.name || article.heading || 'Article');
-        const excerpt = this.escapeHtml(article.excerpt || article.subtitle || article.summary || '');
-        const link = this.escapeHtml(article.url || article.link || '#');
-        const card = `\n          <div class="col-12 col-sm-6 col-md-4" style="min-width:0;">\n            <div class="card p-2">\n              <div class="fw-bold" style="font-size:0.95rem;">${title}</div>\n              <div class="text-muted small">${excerpt}</div>\n              <a href="${link}" target="_blank">Voir l'article</a>\n            </div>\n          </div>\n        `;
-        articlesHtmlParts.push(card);
-      });
-      articlesHtmlParts.push('</div>');
-      const articlesHtml = articlesHtmlParts.join('\n');
-    // If template contains placeholder, replace; otherwise append section at the end
+    if (articlesToShow.length > 0) {
+      // Format articles data
+      const articlesData = articlesToShow.map(article => ({
+        id: article.id,
+        title: article.translation?.title || article.title || article.name || article.heading,
+        slug: article.slug,
+        excerpt: article.excerpt || article.subtitle || article.summary,
+        image: article.media && article.media.length > 0 ? article.media[0].path : 'https://via.placeholder.com/300x200?text=Article',
+        category: article.categories && article.categories.length > 0 ? 
+          article.categories[0]?.translation?.name || article.categories[0]?.name : 'General',
+        date: article.created_at ? new Date(article.created_at).toLocaleDateString('fr-FR') : new Date().toLocaleDateString('fr-FR'),
+        author: 'Australia Talk',
+        read_time: '5 min',
+        link: `/articles/${article.slug || article.id}`
+      }));
+
+      articlesHtml = `
+        <style>
+          .articles-grid-manual {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+          }
+          .article-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: box-shadow 0.3s;
+          }
+          .article-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+          }
+          .article-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            display: block;
+          }
+          .article-content {
+            padding: 16px;
+          }
+          .article-category {
+            display: inline-block;
+            background-color: #e3f2fd;
+            color: #1976d2;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-bottom: 8px;
+          }
+          .article-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 8px 0;
+            color: #333;
+          }
+          .article-excerpt {
+            font-size: 14px;
+            color: #666;
+            margin: 8px 0;
+            line-height: 1.5;
+          }
+          .article-meta {
+            font-size: 12px;
+            color: #999;
+            margin: 12px 0;
+            line-height: 1.6;
+          }
+          .read-more {
+            display: inline-block;
+            color: #1976d2;
+            text-decoration: none;
+            font-weight: 500;
+            margin-top: 8px;
+            transition: color 0.2s;
+          }
+          .read-more:hover {
+            color: #1565c0;
+          }
+          @media (max-width: 640px) {
+            .articles-grid-manual {
+              grid-template-columns: 1fr;
+            }
+          }
+        </style>
+        <div class="articles-grid-manual">
+          ${articlesData
+            .map(
+              (article, index) => `
+                <!-- Article ${index + 1} -->
+                <div class="article-card">
+                  <img src="${this.escapeHtml(article.image)}" alt="${this.escapeHtml(article.title)}" class="article-image" />
+                  <div class="article-content">
+                    <span class="article-category">${this.escapeHtml(article.category)}</span>
+                    <h3 class="article-title">${this.escapeHtml(article.title)}</h3>
+                    <p class="article-excerpt">${this.escapeHtml(article.excerpt || 'Découvrez cet article passionnant sur Australia Talk.')}</p>
+                    <div class="article-meta">
+                      📅 ${this.escapeHtml(article.date)} | 👤 ${this.escapeHtml(article.author)} | ⏱️ ${this.escapeHtml(article.read_time)}
+                    </div>
+                    <a href="${this.escapeHtml(article.link)}" class="read-more">Lire l'article complet →</a>
+                  </div>
+                </div>
+              `
+            )
+            .join('\n')}
+        </div>
+      `;
+    }
+
+    // If template contains placeholder, replace
     if (/\{\{\s*ARTICLES_PLACEHOLDER\s*\}\}/i.test(body) || /ARTICLES_PLACEHOLDER/i.test(body)) {
       body = body.replace(/\{\{\s*ARTICLES_PLACEHOLDER\s*\}\}/gi, articlesHtml);
       body = body.replace(/ARTICLES_PLACEHOLDER/gi, articlesHtml);
-    } else if ((this.exampleArticles || []).length > 0) {
-      // append a bordered section with heading so it appears at the bottom
-      const section = `\n<div class="mt-3 pt-3" style="border-top:1px solid #e9ecef;margin-top:1rem;">\n  <strong>Articles exemples (max 4):</strong>\n  ${articlesHtml}\n</div>\n`;
-      body = body + section;
     }
 
     // final sanitize
@@ -362,6 +575,17 @@ export class CreateNewsletterComponent implements OnInit, OnDestroy {
   onNameChange(value: string): void {
     const text = (value || '').toString().trim();
     if (text) {
+      this.newsletter.slug = this.generateSlug(text);
+    }
+  }
+
+  /**
+   * Auto-generate name and slug from subject
+   */
+  onSubjectChange(value: string): void {
+    const text = (value || '').toString().trim();
+    if (text) {
+      this.newsletter.name = text;
       this.newsletter.slug = this.generateSlug(text);
     }
   }
@@ -481,7 +705,13 @@ export class CreateNewsletterComponent implements OnInit, OnDestroy {
     }
 
     console.log('Saving newsletter with payload:', payload);
-    this.newsletterService.createNewsletter(payload)
+    
+    // Choose between create and update based on edit mode
+    const saveRequest = this.isEditMode && this.editingNewsletterID
+      ? this.newsletterService.updateNewsletter(this.editingNewsletterID, payload)
+      : this.newsletterService.createNewsletter(payload);
+
+    saveRequest
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
@@ -490,20 +720,22 @@ export class CreateNewsletterComponent implements OnInit, OnDestroy {
             this.messageService.add({
               severity: 'success',
               summary: 'Succès',
-              detail: response.message || 'Newsletter créée avec succès'
+              detail: response.message || (this.isEditMode ? 'Newsletter mise à jour avec succès' : 'Newsletter créée avec succès')
             });
-            this.resetForm();
+            setTimeout(() => {
+              this.router.navigate(['/newsletter']);
+            }, 1500);
           }
         },
         error: (error) => {
           this.loading = false;
-          const errorMsg = error?.error?.message || error?.error?.error || 'Erreur lors de la création';
+          const errorMsg = error?.error?.message || error?.error?.error || 'Erreur lors de la sauvegarde';
           this.messageService.add({
             severity: 'error',
             summary: 'Erreur',
             detail: errorMsg
           });
-          console.error('Error creating newsletter:', error);
+          console.error('Error saving newsletter:', error);
         }
       });
   }
@@ -631,11 +863,59 @@ export class CreateNewsletterComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Toggle article selection by clicking on the card
+   */
+  toggleArticleSelection(article: any): void {
+    const selectedCount = this.getSelectedArticlesCount();
+    
+    // If article is already selected, allow deselection
+    if (article.selected) {
+      article.selected = false;
+    } else {
+      // If trying to select and already have 4, show toast
+      if (selectedCount >= 4) {
+        this.messageService.add({
+          severity: 'warn',
+          summary: 'Limite dépassée',
+          detail: 'Vous pouvez sélectionner un maximum de 4 articles',
+          life: 300000
+        });
+        return;
+      }
+      article.selected = true;
+    }
+    
+    this.onArticleSelectionChange();
+  }
+
+  /**
    * Handle article selection change
    */
   onArticleSelectionChange(): void {
+    const selectedCount = this.getSelectedArticlesCount();
+    if (selectedCount > 4) {
+      // Show toast notification if more than 4 articles selected
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Limite dépassée',
+        detail: 'Vous pouvez sélectionner un maximum de 4 articles',
+        life: 3000
+      });
+      // Deselect the last selected article
+      const lastSelected = this.exampleArticles.find(a => a.selected);
+      if (lastSelected) {
+        lastSelected.selected = false;
+      }
+    }
     // Update preview when articles are selected/deselected
     this.buildPreview();
+  }
+
+  /**
+   * Get selected articles
+   */
+  getSelectedArticles(): any[] {
+    return (this.exampleArticles || []).filter(a => a.selected);
   }
 
   /**

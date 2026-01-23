@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { ToastModule } from 'primeng/toast';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { NewsletterService, Newsletter, Subscriber, EmailTemplate } from './newsletter.service';
@@ -25,13 +26,24 @@ export class NewsletterComponent implements OnInit, OnDestroy {
   limit: number = 10;
   total: number = 0;
   totalPages: number = 0;
+  
+  // Recipients modal
+  showRecipientsModal: boolean = false;
+  newsletterRecipients: any[] = [];
+  recipientsLoading: boolean = false;
+  recipientsPage: number = 1;
+  recipientsLimit: number = 20;
+  recipientsTotal: number = 0;
+  recipientsTotalPages: number = 0;
+  recipientsStats: any = {};
 
   private destroy$ = new Subject<void>();
 
   constructor(
     private newsletterService: NewsletterService,
     private messageService: MessageService,
-    private confirmationService: ConfirmationService
+    private confirmationService: ConfirmationService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -247,12 +259,10 @@ export class NewsletterComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Edit existing newsletter
+   * Edit existing newsletter - navigate to edit page with newsletter ID
    */
   editNewsletter(newsletter: Newsletter): void {
-    this.isEditingNewsletter = true;
-    this.selectedNewsletter = { ...newsletter };
-    this.showNewsletterModal = true;
+    this.router.navigate(['/edit-newsletter', newsletter.id]);
   }
 
   /**
@@ -539,6 +549,103 @@ export class NewsletterComponent implements OnInit, OnDestroy {
   closeNewsletterModal(): void {
     this.showNewsletterModal = false;
     this.selectedNewsletter = {};
+  }
+
+  /**
+   * Open recipients modal to view delivery status
+   */
+  openRecipientsModal(newsletter: Newsletter): void {
+    this.selectedNewsletter = newsletter;
+    this.recipientsPage = 1;
+    this.newsletterRecipients = [];
+    this.showRecipientsModal = true;
+    this.loadRecipients();
+  }
+
+  /**
+   * Load recipients for a newsletter
+   */
+  loadRecipients(): void {
+    if (!this.selectedNewsletter.id) {
+      return;
+    }
+
+    this.recipientsLoading = true;
+    this.newsletterService.getNewsletterRecipients(this.selectedNewsletter.id, this.recipientsPage, this.recipientsLimit)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response: any) => {
+          if (response.data) {
+            this.newsletterRecipients = response.data;
+            if (response.pagination) {
+              this.recipientsTotal = response.pagination.total;
+              this.recipientsTotalPages = response.pagination.pages;
+            }
+            if (response.stats) {
+              this.recipientsStats = response.stats;
+            }
+          }
+          this.recipientsLoading = false;
+        },
+        error: (error) => {
+          const errorMsg = error?.error?.message || 'Impossible de charger les destinataires';
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erreur',
+            detail: errorMsg
+          });
+          this.recipientsLoading = false;
+          console.error('Error loading recipients:', error);
+        }
+      });
+  }
+
+  /**
+   * Change recipients page
+   */
+  onRecipientsPageChange(event: any): void {
+    this.recipientsPage = event.page + 1;
+    this.loadRecipients();
+  }
+
+  /**
+   * Close recipients modal
+   */
+  closeRecipientsModal(): void {
+    this.showRecipientsModal = false;
+    this.newsletterRecipients = [];
+    this.recipientsStats = {};
+  }
+
+  /**
+   * Get recipient status badge class
+   */
+  getStatusBadgeClass(status: string): string {
+    switch(status) {
+      case 'sent':
+        return 'bg-success';
+      case 'failed':
+        return 'bg-danger';
+      case 'bounced':
+        return 'bg-warning text-dark';
+      case 'pending':
+        return 'bg-secondary';
+      default:
+        return 'bg-secondary';
+    }
+  }
+
+  /**
+   * Get recipient status label
+   */
+  getStatusLabel(status: string): string {
+    const labels: { [key: string]: string } = {
+      'sent': 'Envoyé',
+      'failed': 'Échoué',
+      'bounced': 'Rejeté',
+      'pending': 'En attente'
+    };
+    return labels[status] || status;
   }
 
   /**
