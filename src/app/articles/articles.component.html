@@ -33,141 +33,156 @@
 					
 					<!-- /article list -->
 					<div class="card">
-						<div class="card-header d-flex align-items-center justify-content-between flex-wrap row-gap-3">
-							<div class="search-set">
-          <div class="search-input">
-            <input type="text" class="form-control" style="padding: 0.45rem 2rem;" placeholder="Rechercher par titre..." [(ngModel)]="searchTerm" (input)="applyFilters()">
-            <span class="btn-searchset"><i class="ti ti-search fs-14 feather-search"></i></span>
-          </div>
+						<div class="card-header card-header-filters">
+							<div class="search-set search-set-expanded">
+								<div class="search-input-wrapper">
+									<input type="text" class="form-control search-input-field" placeholder="Rechercher par titre..." [(ngModel)]="searchTerm" (input)="applyFilters()">
+									<span class="search-icon"><i class="ti ti-search"></i></span>
+								</div>
 							</div>
-							<div class="d-flex table-dropdown my-xl-auto right-content align-items-center flex-wrap row-gap-3">
-    <!-- Filtre Catégorie -->
-    <div class="dropdown me-2">
-        <a href="javascript:void(0);" class="dropdown-toggle btn btn-white btn-md d-inline-flex align-items-center" data-bs-toggle="dropdown">
-            Catégorie
-        </a>
-        <ul class="dropdown-menu dropdown-menu-end p-3">
-            <li>
-                <a href="javascript:void(0);" class="dropdown-item rounded-1"
-                   (click)="selectedCategoryFilter = ''; applyFilters()">Toutes les catégories</a>
-            </li>
-            <li *ngFor="let cat of allCategories">
-                <a href="javascript:void(0);" class="dropdown-item rounded-1"
-                   [class.active]="selectedCategoryFilter === cat"
-                   (click)="selectedCategoryFilter = cat; applyFilters()">{{cat}}</a>
-            </li>
-        </ul>
-    </div>
-    <!-- Filtre Tag -->
-    <div class="dropdown">
-        <a href="javascript:void(0);" class="dropdown-toggle btn btn-white btn-md d-inline-flex align-items-center" data-bs-toggle="dropdown">
-            Tag
-        </a>
-        <ul class="dropdown-menu dropdown-menu-end p-3">
-            <li>
-                <a href="javascript:void(0);" class="dropdown-item rounded-1"
-                   (click)="selectedTagFilter = ''; applyFilters()">Tous les tags</a>
-            </li>
-            <li *ngFor="let tag of allTags">
-                <a href="javascript:void(0);" class="dropdown-item rounded-1"
-                   [class.active]="selectedTagFilter === tag"
-                   (click)="selectedTagFilter = tag; applyFilters()">{{tag}}</a>
-            </li>
-        </ul>
-    </div>
-</div>
+							<div class="filters-group">
+								<!-- Filtre Catégorie -->
+								<div class="dropdown">
+									<a href="javascript:void(0);" class="dropdown-toggle filter-btn d-inline-flex align-items-center" data-bs-toggle="dropdown">
+										Catégorie
+									</a>
+									<ul class="dropdown-menu dropdown-menu-end filter-menu">
+										<li>
+											<a href="javascript:void(0);" class="dropdown-item filter-item"
+											   (click)="selectedCategoryFilter = ''; applyFilters()">Toutes les catégories</a>
+										</li>
+										<li *ngFor="let cat of allCategories">
+											<a href="javascript:void(0);" class="dropdown-item filter-item"
+											   [class.active]="selectedCategoryFilter === cat"
+											   (click)="selectedCategoryFilter = cat; applyFilters()">{{cat}}</a>
+										</li>
+									</ul>
+								</div>
+								<!-- Filtre Tag -->
+								<div class="dropdown">
+									<a href="javascript:void(0);" class="dropdown-toggle filter-btn d-inline-flex align-items-center" data-bs-toggle="dropdown">
+										Tag
+									</a>
+									<ul class="dropdown-menu dropdown-menu-end filter-menu">
+										<li>
+											<a href="javascript:void(0);" class="dropdown-item filter-item"
+											   (click)="selectedTagFilter = ''; applyFilters()">Tous les tags</a>
+										</li>
+										<li *ngFor="let tag of allTags">
+											<a href="javascript:void(0);" class="dropdown-item filter-item"
+											   [class.active]="selectedTagFilter === tag"
+											   (click)="selectedTagFilter = tag; applyFilters()">{{tag}}</a>
+										</li>
+									</ul>
+								</div>
+							</div>
 						</div>
 						<div class="card-body p-0">
 
 							<div class="table-responsive">
-								<table class="table datatable">
-									<thead class="thead-light">
-										<tr>
+								<table class="table datatable articles-table">
+									<thead>
+										<tr class="table-header-row">
 		<!-- 									<th class="no-sort">
 												<label class="checkboxs">
 													<input type="checkbox" id="select-all">
 													<span class="checkmarks"></span>
 												</label>
 											</th> -->
-											<th>ID de l'article</th>
-											<th>Titre</th>
-											<th>Catégorie</th>
-											<th>Est gratuit</th>
-											<th>Statut</th>
-											<th>Tags</th>
-											<th>Nombre de vues</th>
-											<th>Nombre de likes</th>
-											<th>Créé par</th>
-											<th class="no-sort"></th>
+											<th class="header-cell">ID</th>
+											<th class="header-cell">Article</th>
+											<th class="header-cell">Catégorie</th>
+											<th class="header-cell text-center">Gratuit</th>
+											<th class="header-cell text-center">Statut</th>
+											<th class="header-cell">Tags</th>
+											<th class="header-cell text-center">Vues</th>
+											<th class="header-cell text-center">J'aime</th>
+											<th class="header-cell">Auteur</th>
+											<th class="header-cell text-center">Actions</th>
 										</tr>
 									</thead>
 									<tbody>
-										<tr *ngFor="let article of pagedArticles">
+										<tr *ngFor="let article of pagedArticles" class="table-body-row">
 <!-- 		<td>
 			<label class="checkboxs">
 				<input type="checkbox">
 				<span class="checkmarks"></span>
 			</label>
 		</td> -->
-		<td>AUS{{ article.id }}</td>
-    <td>
-      <div class="d-flex align-items-center">
-        <a href="javascript:void(0);" class="avatar avatar-lg me-2" style="min-width: 80px; min-height: 80px;">
+		<td class="cell-id">
+			<span class="id-badge">AUS{{ article.id }}</span>
+		</td>
+    <td class="cell-article-info">
+      <div class="article-info-wrapper">
+        <a href="javascript:void(0);" class="article-thumbnail">
           <ng-container *ngIf="article.media && article.media.length > 0">
             <ng-container *ngIf="article.media[0].file_type === 'image/jpeg'; else videoThumb">
-              <img [src]="article.media[0].path" alt="media" style="object-fit:cover; width:100%; height:100%;">
+              <img [src]="article.media[0].path" alt="media" class="thumbnail-img">
             </ng-container>
             <ng-template #videoThumb>
-              <video style="object-fit:cover; width:100%; height:100%;" muted>
+              <video class="thumbnail-img" muted>
                 <source [src]="article.media[0].path" type="video/mp4">
               </video>
             </ng-template>
           </ng-container>
           <ng-container *ngIf="!article.media || article.media.length === 0">
-            <img src="assets/img/products/stock-img-01.png" alt="product" style="width:100%;height:100%;object-fit:cover;">
+            <img src="assets/img/products/stock-img-01.png" alt="product" class="thumbnail-img">
           </ng-container>
         </a>
-        <a href="javascript:void(0);" style="word-wrap: break-word; white-space: normal; max-width: 250px; display: block;">
+        <a href="javascript:void(0);" class="article-title">
           {{ article.title }}
         </a>
       </div>
     </td>
-		<td>
-			<!-- Affiche la première catégorie si présente, sinon le type -->
-			<span *ngIf="article.categories && article.categories.length > 0">
-				{{ article.categories[0].name || article.categories[0].type }}
-			</span>
-			<span *ngIf="(!article.categories || article.categories.length === 0)">
-				{{ article.type }}
+		<td class="cell-category">
+			<span class="category-badge">
+				<ng-container *ngIf="article.categories && article.categories.length > 0">
+					{{ article.categories[0].name || article.categories[0].type }}
+				</ng-container>
+				<ng-container *ngIf="(!article.categories || article.categories.length === 0)">
+					{{ article.type }}
+				</ng-container>
 			</span>
 		</td>
-		<td>
-			<span class="badge tag-custom">{{ article.isfree ? 'Oui' : 'Non' }}</span>
+		<td class="cell-free text-center">
+			<span class="badge" [ngClass]="article.isfree ? 'badge-success' : 'badge-secondary'">
+				{{ article.isfree ? 'Oui' : 'Non' }}
+			</span>
 		</td>
-		<td>
-			<span class="badge tag-custom">
+		<td class="cell-status text-center">
+			<span class="badge" [ngClass]="{
+				'badge-primary': article.status === 'published',
+				'badge-warning': article.status === 'pending',
+				'badge-danger': article.status === 'draft'
+			}">
 				{{ article.status === 'published' ? 'Publié' : (article.status === 'pending' ? 'En attente' : article.status) }}
 			</span>
 		</td>
-		<td class="tags-td">
-  <ng-container *ngIf="article.tags && article.tags.length > 0; else noTags">
-    <span class="badge tag-custom" style="margin-right: 6px;">{{ article.tags[0].translation.name }}</span>
-    <span *ngIf="article.tags.length > 1" class="badge tag-custom" style="margin-right: 6px;">
-      +{{ article.tags.length - 1 }}
-    </span>
-  </ng-container>
-  <ng-template #noTags>
-    <span class="text-muted">-</span>
-  </ng-template>
+		<td class="cell-tags">
+  <div class="tags-container">
+    <ng-container *ngIf="article.tags && article.tags.length > 0; else noTags">
+      <span class="tag-badge">{{ article.tags[0].translation.name }}</span>
+      <span *ngIf="article.tags.length > 1" class="tag-badge-more">
+        +{{ article.tags.length - 1 }}
+      </span>
+    </ng-container>
+    <ng-template #noTags>
+      <span class="text-muted">-</span>
+    </ng-template>
+  </div>
 </td>
-	<td class="text-center">{{ (article.views_count ?? 0) < 10 ? '0' + (article.views_count ?? 0) : (article.views_count ?? 0) }}</td>
-	<td class="text-center">{{ (article.likes_count ?? 0) < 10 ? '0' + (article.likes_count ?? 0) : (article.likes_count ?? 0) }}</td>
-		<td>
-  <div class="d-flex align-items-center">
-    <span class="avatar avatar-sm me-2 author-avatar-custom" *ngIf="article.author && article.author.first_name && article.author.last_name">
+	<td class="cell-stats text-center">
+		<span class="stat-value">{{ (article.views_count ?? 0) < 10 ? '0' + (article.views_count ?? 0) : (article.views_count ?? 0) }}</span>
+	</td>
+	<td class="cell-stats text-center">
+		<span class="stat-value">{{ (article.likes_count ?? 0) < 10 ? '0' + (article.likes_count ?? 0) : (article.likes_count ?? 0) }}</span>
+	</td>
+		<td class="cell-author">
+  <div class="author-info">
+    <span class="author-avatar" *ngIf="article.author && article.author.first_name && article.author.last_name">
       {{ article.author.first_name.charAt(0) }}{{ article.author.last_name.charAt(0) }}
     </span>
-    <a href="javascript:void(0);">
+    <a href="javascript:void(0);" class="author-name">
       <span *ngIf="article.author && article.author.first_name && article.author.last_name">
         {{ article.author.first_name }} {{ article.author.last_name }}
       </span>
@@ -177,14 +192,14 @@
     </a>
   </div>
 </td>
-		<td class="action-table-data">
-			<div class="edit-delete-action">
+		<td class="cell-actions text-center">
+			<div class="action-buttons">
 
-				<a class="me-2 p-2" [href]="'/edit-article/' + article.id">
-					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-edit"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+				<a class="btn-action btn-edit" [href]="'/edit-article/' + article.id" title="Éditer">
+					<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-edit"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
 				</a>
-				<a data-bs-toggle="modal" (click)="openDeleteModal(article)" data-bs-target="#delete-modal" class="p-2" href="javascript:void(0);">
-					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+				<a class="btn-action btn-delete" data-bs-toggle="modal" (click)="openDeleteModal(article)" data-bs-target="#delete-modal" title="Supprimer">
+					<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
 				</a>
 			</div>
 		</td>
@@ -194,76 +209,70 @@
 							</div>
 
 														<!-- Pagination length selector -->
-							<div class="dataTables_length mb-2" id="artisanTable_length">
-    <label>
-      Lignes par page
-      <select name="artisanTable_length"
-              aria-controls="artisanTable"
-              class="form-select form-select-sm d-inline-block w-auto ms-2 me-2"
-              [(ngModel)]="pageSize"
-              (change)="onPageSizeChange($event)">
-        <option *ngFor="let size of [10,25,50,100]" [value]="size">{{size}}</option>
-      </select>
-      entrées
-    </label>
-  </div>
+							<div class="pagination-controls-wrapper">
+    <div class="dataTables_length" id="artisanTable_length">
+      <label class="page-size-label">
+        <span class="page-size-text">Lignes par page:</span>
+        <select name="artisanTable_length"
+                aria-controls="artisanTable"
+                class="page-size-select"
+                [(ngModel)]="pageSize"
+                (change)="onPageSizeChange($event)">
+          <option *ngFor="let size of [10,25,50,100]" [value]="size">{{size}}</option>
+        </select>
+      </label>
+    </div>
   <!-- Pagination controls -->
-  <div class="dataTables_paginate paging_simple_numbers " id="artisanTable_paginate">
-    <ul class="pagination mb-0" style="margin: 2px 0 !important; white-space: nowrap !important; justify-content: flex-end !important;">
-      <li class="paginate_button page-item previous"
+  <div class="dataTables_paginate" id="artisanTable_paginate">
+    <ul class="pagination-list">
+      <li class="pagination-btn pagination-prev"
           [class.disabled]="currentPage === 1"
-          style="border: none; color: #646B72 !important; background-color: transparent !important; width: 24px; height: 24px; border: 1px solid #E6EAED; border-radius: 50px; display: inline-flex; align-items: center; justify-content: center; margin: 0 5px;"
           id="artisanTable_previous">
-        <a class="page-link"
+        <a class="pagination-link"
            href="javascript:void(0);"
            (click)="goToPage(currentPage - 1)"
            [attr.aria-disabled]="currentPage === 1"
+           title="Page précédente"
            tabindex="-1">
-          <i class="fa fa-angle-left"></i>
+          <i class="fa fa-chevron-left"></i>
         </a>
       </li>
       <li *ngFor="let page of getDisplayPages()"
-          class="paginate_button page-item"
+          class="pagination-item"
           [class.active]="currentPage === page"
-          [class.disabled]="page === '...'">
-        <a *ngIf="page !== '...'" class="page-link"
+          [class.ellipsis]="page === '...'">
+        <a *ngIf="page !== '...'" class="pagination-link"
            href="javascript:void(0);"
-           (click)="onPageClick(page, $event)">
+           (click)="onPageClick(page, $event)"
+           [title]="'Page ' + page">
           {{page}}
         </a>
-        <span style="
-    background: var(--Stroke, rgba(145, 158, 171, 0.3));
-    border-radius: 85px !important;
-    width: 25px;
-    height: 25px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #5B6670;
-    font-size: 12px;
-" *ngIf="page === '...'" class="page-link">...</span>
+        <span *ngIf="page === '...'" class="pagination-ellipsis">...</span>
       </li>
-      <li class="paginate_button page-item next"
+      <li class="pagination-btn pagination-next"
           [class.disabled]="currentPage === totalPages"
-          style="border: none; color: #646B72 !important; background-color: transparent !important; width: 24px; height: 24px; border: 1px solid #E6EAED; border-radius: 50px; display: inline-flex; align-items: center; justify-content: center; margin: 0 5px;"
           id="artisanTable_next">
-        <a class="page-link"
+        <a class="pagination-link"
            href="javascript:void(0);"
            (click)="goToPage(currentPage + 1)"
-           [attr.aria-disabled]="currentPage === totalPages">
-          <i class="fa fa-angle-right"></i>
+           [attr.aria-disabled]="currentPage === totalPages"
+           title="Page suivante">
+          <i class="fa fa-chevron-right"></i>
         </a>
       </li>
     </ul>
+  </div>
+  <div class="pagination-info">
+    <span class="info-text">Page <strong>{{ currentPage }}</strong> sur <strong>{{ totalPages }}</strong></span>
   </div>
 						</div>
 					</div>
 					<!-- /article list -->
 				</div>
-  <app-footer></app-footer>
+  
 </div>
 
-
+<app-footer></app-footer>
 
 		<!-- delete modal -->
 			<div class="modal fade" id="delete-modal">

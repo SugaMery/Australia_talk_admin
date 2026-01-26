@@ -44,6 +44,7 @@ export class CategoryComponent implements OnInit {
   // Fix: ensure searchTerm and statusFilter are initialized and used with ngModel in template
   private _searchTerm: string = '';
   private _statusFilter: string = 'all';
+  private _typeFilter: string = 'all';
 
   get searchTerm(): string {
     return this._searchTerm;
@@ -58,6 +59,14 @@ export class CategoryComponent implements OnInit {
   }
   set statusFilter(val: string) {
     this._statusFilter = val;
+    this.applyFilters();
+  }
+
+  get typeFilter(): string {
+    return this._typeFilter;
+  }
+  set typeFilter(val: string) {
+    this._typeFilter = val;
     this.applyFilters();
   }
 
@@ -91,7 +100,10 @@ export class CategoryComponent implements OnInit {
         this._statusFilter === 'all' ||
         (this._statusFilter === 'active' && cat.active) ||
         (this._statusFilter === 'inactive' && !cat.active);
-      return matchesSearch && matchesStatus;
+      const matchesType =
+        this._typeFilter === 'all' ||
+        cat.type === this._typeFilter;
+      return matchesSearch && matchesStatus && matchesType;
     });
     console.log('Filtered categories:', this.filteredCategories);
     this.currentPage = 1;

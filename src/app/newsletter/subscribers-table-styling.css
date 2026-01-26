@@ -1,0 +1,296 @@
+/* ========================================
+   Subscribers Table Styling
+   ======================================== */
+
+.subscribers-table {
+  margin-bottom: 0;
+  font-family: 'Nunito', sans-serif;
+}
+
+.subscribers-table thead {
+  background: linear-gradient(135deg, #f8f9fa 0%, #f0f2f5 100%);
+  border-bottom: 2px solid #e9ecef;
+}
+
+.subscribers-table thead th {
+  padding: 14px 16px;
+  font-weight: 600;
+  color: #2c3e50;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+  border: none;
+  white-space: nowrap;
+}
+
+.subscribers-table thead th i {
+  margin-right: 6px;
+  color: #3498db;
+  font-size: 0.9rem;
+}
+
+/* Table Body Rows */
+.subscribers-table tbody {
+  background-color: #fff;
+}
+
+.subscriber-row {
+  border-bottom: 1px solid #f0f2f5;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.subscriber-row:hover {
+  background: linear-gradient(90deg, #f8f9fa 0%, #fff 100%);
+  box-shadow: inset 0 0 0 1px #e9ecef;
+}
+
+.subscriber-row:last-child {
+  border-bottom: none;
+}
+
+.subscribers-table tbody td {
+  padding: 14px 16px;
+  vertical-align: middle;
+  color: #2c3e50;
+  font-size: 0.95rem;
+}
+
+/* Email Cell */
+.email-cell {
+  font-weight: 500;
+}
+
+.subscriber-email-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, rgba(52, 152, 219, 0.1) 0%, rgba(52, 152, 219, 0.05) 100%);
+  color: #3498db;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-family: 'Courier New', monospace;
+  border: 1px solid rgba(52, 152, 219, 0.2);
+  word-break: break-all;
+  font-weight: 500;
+}
+
+.subscriber-email-badge:hover {
+  background: linear-gradient(135deg, rgba(52, 152, 219, 0.15) 0%, rgba(52, 152, 219, 0.1) 100%);
+  border-color: rgba(52, 152, 219, 0.3);
+}
+
+/* Date Cell */
+.date-cell {
+  color: #7f8c8d;
+  font-size: 0.9rem;
+  font-family: 'Nunito', sans-serif;
+}
+
+.date-cell i {
+  font-size: 0.85rem;
+}
+
+/* Status Cell */
+.status-cell {
+  text-align: center;
+}
+
+.subscriber-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+.subscriber-status-badge i {
+  font-size: 0.95rem;
+}
+
+/* Status Active */
+.subscriber-status-badge.status-active {
+  background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(39, 174, 96, 0.3);
+}
+
+.subscriber-status-badge.status-active:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(39, 174, 96, 0.4);
+}
+
+/* Status Unsubscribed */
+.subscriber-status-badge.status-unsubscribed {
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
+}
+
+.subscriber-status-badge.status-unsubscribed:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.4);
+}
+
+/* Actions Cell */
+.actions-cell {
+  text-align: center;
+}
+
+.btn-delete-subscriber {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: linear-gradient(135deg, rgba(220, 53, 69, 0.1) 0%, rgba(220, 53, 69, 0.05) 100%);
+  color: #dc3545;
+  border: 1px solid #ffe5e5;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.btn-delete-subscriber:hover {
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+  color: #fff;
+  border-color: #dc3545;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+.btn-delete-subscriber:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(220, 53, 69, 0.2);
+}
+
+.btn-delete-subscriber:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* Empty State */
+.empty-subscriber-row td {
+  padding: 40px 20px;
+  text-align: center;
+  color: #95a5a6;
+  font-style: italic;
+  font-size: 0.95rem;
+}
+
+.empty-subscriber-row td i {
+  font-size: 1.2rem;
+  margin-bottom: 8px;
+}
+
+/* Header Badge */
+.card-header .badge {
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.card-header .badge i {
+  font-size: 0.9rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .subscribers-table thead th {
+    font-size: 0.8rem;
+    padding: 12px 10px;
+  }
+
+  .subscribers-table tbody td {
+    padding: 10px;
+    font-size: 0.9rem;
+  }
+
+  .subscriber-email-badge {
+    padding: 4px 8px;
+    font-size: 0.8rem;
+  }
+
+  .subscriber-status-badge {
+    padding: 4px 10px;
+    font-size: 0.8rem;
+  }
+
+  .btn-delete-subscriber {
+    padding: 4px 8px;
+    font-size: 0.75rem;
+  }
+
+  .card-header .badge {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.6rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .subscribers-table thead th {
+    font-size: 0.75rem;
+    padding: 10px 8px;
+  }
+
+  .subscribers-table tbody td {
+    padding: 8px;
+    font-size: 0.85rem;
+  }
+
+  .subscriber-email-badge {
+    padding: 3px 6px;
+    font-size: 0.75rem;
+  }
+
+  .subscriber-status-badge {
+    padding: 3px 8px;
+    font-size: 0.75rem;
+  }
+
+  .subscriber-status-badge i {
+    font-size: 0.85rem;
+  }
+
+  .btn-delete-subscriber {
+    padding: 4px 6px;
+    font-size: 0.7rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .btn-delete-subscriber i {
+    margin: 0 !important;
+  }
+
+  .card-header {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 8px;
+  }
+
+  .card-header .badge {
+    width: 100%;
+    justify-content: center;
+    font-size: 0.75rem;
+    padding: 0.35rem 0.5rem;
+  }
+
+  .email-cell {
+    word-break: break-word;
+  }
+
+  .subscriber-email-badge {
+    word-break: break-all;
+    max-width: 150px;
+  }
+}

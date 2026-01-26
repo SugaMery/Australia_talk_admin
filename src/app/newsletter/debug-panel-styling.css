@@ -1,0 +1,553 @@
+/* ==================== Debug Panel Styling ==================== */
+
+/* Main Card */
+.debug-panel-card {
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin-top: 2rem;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.debug-panel-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  padding: 1.25rem;
+  color: white;
+}
+
+.debug-panel-header .card-title {
+  color: white;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.debug-panel-header i {
+  color: #ffd700;
+}
+
+/* Control Buttons */
+.debug-controls {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 0 0 15px 0;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.debug-controls .btn {
+  transition: all 0.3s ease;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.debug-controls .btn-info {
+  background-color: #17a2b8;
+  border-color: #17a2b8;
+}
+
+.debug-controls .btn-info:hover {
+  background-color: #138496;
+  border-color: #117a8b;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(23, 162, 184, 0.3);
+}
+
+.debug-controls .btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+}
+
+.debug-controls .btn-success:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+}
+
+.debug-controls .btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Status Card */
+.debug-status-card {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.debug-status-header {
+  display: flex;
+  align-items: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 12px 16px;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.debug-status-header i {
+  font-size: 1.1rem;
+}
+
+.debug-status-header h6 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.debug-status-body {
+  padding: 16px;
+}
+
+.status-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #e9ecef;
+  font-size: 0.9rem;
+}
+
+.status-item:last-child {
+  border-bottom: none;
+}
+
+.status-label {
+  font-weight: 500;
+  color: #495057;
+}
+
+.status-value {
+  font-family: 'Courier New', monospace;
+  color: #667eea;
+  font-weight: 600;
+}
+
+/* Scheduled Newsletters Card */
+.debug-scheduled-card {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.debug-scheduled-header {
+  display: flex;
+  align-items: center;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+  padding: 12px 16px;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.debug-scheduled-header i {
+  font-size: 1.1rem;
+}
+
+.debug-scheduled-header h6 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.debug-scheduled-body {
+  padding: 16px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.scheduled-item {
+  padding: 10px 0;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.scheduled-item:last-child {
+  border-bottom: none;
+}
+
+.scheduled-name {
+  font-weight: 500;
+  color: #212529;
+  font-size: 0.9rem;
+  margin-bottom: 4px;
+}
+
+.scheduled-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.scheduled-status {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status-sent {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status-ready {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.status-waiting {
+  background-color: #d1ecf1;
+  color: #0c5460;
+}
+
+.scheduled-time {
+  background-color: #e2e3e5;
+  color: #383d41;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+/* Manual Send Section */
+.debug-manual-send {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+.debug-manual-header {
+  display: flex;
+  align-items: center;
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: white;
+  padding: 12px 16px;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.debug-manual-header i {
+  font-size: 1.1rem;
+}
+
+.debug-manual-header h6 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+/* Debug Table Wrapper */
+.debug-table-wrapper {
+  padding: 0;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.debug-table {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.debug-table thead {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.debug-table thead th {
+  border: none;
+  color: white;
+  font-weight: 600;
+  padding: 12px 10px;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.debug-table thead th i {
+  margin-right: 4px;
+  opacity: 0.9;
+}
+
+.debug-table tbody tr {
+  border-bottom: 1px solid #e9ecef;
+  transition: background-color 0.2s;
+}
+
+.debug-table tbody tr:hover {
+  background-color: #f0f0f0;
+}
+
+.debug-table tbody td {
+  padding: 10px;
+  vertical-align: middle;
+  border: none;
+}
+
+.debug-table tbody td small {
+  display: block;
+  color: #495057;
+}
+
+.debug-table .badge {
+  font-size: 0.75rem;
+  padding: 4px 8px;
+  font-weight: 500;
+}
+
+/* Send Button */
+.btn-send-debug {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  color: white;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn-send-debug:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.4);
+  color: white;
+}
+
+.btn-send-debug:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-send-debug i.animate-spin {
+  display: inline-block;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Manual Send Results */
+.debug-manual-send .alert {
+  margin-top: 15px;
+  margin-bottom: 0;
+  border: none;
+  border-radius: 6px;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.debug-manual-send .alert-success {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.debug-manual-send .alert-danger {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.debug-manual-send .alert strong {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.debug-manual-send .alert div {
+  margin-bottom: 4px;
+}
+
+/* Debug Logs Section */
+.debug-logs {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.debug-logs-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+  color: white;
+  padding: 12px 16px;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.debug-logs-header i {
+  font-size: 1.1rem;
+}
+
+.debug-logs-header h6 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.debug-logs-header small {
+  margin-left: auto;
+  opacity: 0.9;
+  font-weight: 400;
+}
+
+/* Debug Logs Container */
+.debug-logs-container {
+  background-color: #1a1a1a;
+  color: #00ff41;
+  font-family: 'Courier New', 'Monaco', monospace;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  padding: 16px;
+  max-height: 400px;
+  overflow-y: auto;
+  border-radius: 0 0 8px 8px;
+}
+
+.debug-log-entry {
+  padding: 4px 0;
+  word-break: break-word;
+}
+
+.debug-log-entry small {
+  color: #00ff41;
+  display: block;
+  position: relative;
+  padding-left: 20px;
+}
+
+.debug-log-entry small::before {
+  content: '➜';
+  position: absolute;
+  left: 0;
+  color: #00cc00;
+}
+
+/* Scrollbar Styling for Debug Logs */
+.debug-logs-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.debug-logs-container::-webkit-scrollbar-track {
+  background: #2a2a2a;
+  border-radius: 4px;
+}
+
+.debug-logs-container::-webkit-scrollbar-thumb {
+  background: #00ff41;
+  border-radius: 4px;
+  opacity: 0.6;
+}
+
+.debug-logs-container::-webkit-scrollbar-thumb:hover {
+  opacity: 0.9;
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+  .debug-status-card,
+  .debug-scheduled-card {
+    margin-bottom: 15px;
+  }
+
+  .debug-controls {
+    justify-content: center;
+  }
+
+  .debug-table-wrapper {
+    max-height: 300px;
+  }
+
+  .debug-logs-container {
+    max-height: 300px;
+  }
+}
+
+@media (max-width: 576px) {
+  .debug-manual-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .debug-logs-header {
+    flex-wrap: wrap;
+  }
+
+  .debug-logs-header small {
+    margin-left: 0;
+    margin-top: 4px;
+  }
+
+  .debug-table thead th {
+    padding: 8px 5px;
+    font-size: 0.8rem;
+  }
+
+  .debug-table tbody td {
+    padding: 8px 5px;
+    font-size: 0.75rem;
+  }
+
+  .btn-send-debug {
+    padding: 4px 8px;
+    font-size: 0.75rem;
+  }
+}
+
+/* Dark Theme Support */
+@media (prefers-color-scheme: dark) {
+  .debug-panel-card {
+    background-color: #2d2d2d;
+    color: #e9ecef;
+  }
+
+  .debug-status-card,
+  .debug-scheduled-card,
+  .debug-manual-send,
+  .debug-logs {
+    background: #1f1f1f;
+    border-color: #444;
+  }
+
+  .debug-status-body,
+  .debug-scheduled-body {
+    background: #252525;
+  }
+
+  .status-item,
+  .scheduled-item {
+    border-bottom-color: #444;
+  }
+
+  .status-label {
+    color: #adb5bd;
+  }
+
+  .scheduled-name {
+    color: #e9ecef;
+  }
+
+  .debug-table tbody tr:hover {
+    background-color: #3a3a3a;
+  }
+
+  .debug-table tbody tr {
+    border-bottom-color: #444;
+  }
+
+  .debug-table tbody td small {
+    color: #adb5bd;
+  }
+}

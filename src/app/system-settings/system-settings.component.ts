@@ -52,15 +52,33 @@ export class SystemSettingsComponent implements OnInit {
   loadMailSettings(): void {
     this.isLoading = true;
     this.mailSettingsService.getMailSettings().subscribe({
-      next: (settings: any) => {
+      next: (response: any) => {
+        // Extract settings from response - could be response.data or response directly
+        const settings = response.data || response;
+        
+        console.log('Loading settings into form:', settings);
+        
         // Convert 0/1 to boolean for database values
         this.mailSettings = {
-          ...settings,
-          enable_sitemap_email: settings.enable_sitemap_email === 1 || settings.enable_sitemap_email === true,
-          enable_newsletter: settings.enable_newsletter === 1 || settings.enable_newsletter === true,
-          enable_contact_form_email: settings.enable_contact_form_email === 1 || settings.enable_contact_form_email === true,
-          enable_error_notifications: settings.enable_error_notifications === 1 || settings.enable_error_notifications === true
+          id: settings.id || 0,
+          smtp_host: settings.smtp_host || 'smtp.gmail.com',
+          smtp_port: settings.smtp_port || 587,
+          smtp_username: settings.smtp_username || '',
+          smtp_password: settings.smtp_password || '',
+          from_email: settings.from_email || 'noreply@australia-talk.com',
+          from_name: settings.from_name || 'Australia Talk',
+          enable_sitemap_email: settings.enable_sitemap_email === 1 || settings.enable_sitemap_email === true || false,
+          sitemap_email_frequency: settings.sitemap_email_frequency || 'weekly',
+          enable_newsletter: settings.enable_newsletter === 1 || settings.enable_newsletter === true || false,
+          enable_contact_form_email: settings.enable_contact_form_email === 1 || settings.enable_contact_form_email === true || false,
+          enable_error_notifications: settings.enable_error_notifications === 1 || settings.enable_error_notifications === true || false,
+          max_retries: settings.max_retries || 3,
+          timeout: settings.timeout || 30000,
+          created_at: settings.created_at || '',
+          updated_at: settings.updated_at || ''
         };
+        
+        console.log('Form populated with settings:', this.mailSettings);
         this.isLoading = false;
       },
       error: (error) => {
@@ -86,26 +104,52 @@ export class SystemSettingsComponent implements OnInit {
     }
 
     this.isSaving = true;
-    this.mailSettingsService.updateMailSettings(this.mailSettings.id, this.mailSettings).subscribe({
-      next: () => {
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Succès',
-          detail: 'Paramètres email sauvegardés avec succès'
-        });
-        this.isSaving = false;
-      },
-      error: (error: any) => {
-        console.error('Erreur lors de la sauvegarde:', error);
-        const errorMsg = error?.error?.message || error?.message || 'Erreur lors de la sauvegarde';
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Erreur',
-          detail: errorMsg
-        });
-        this.isSaving = false;
-      }
-    });
+    
+    // If no ID, create new settings; otherwise update
+    if (this.mailSettings.id && this.mailSettings.id !== 0) {
+      this.mailSettingsService.updateMailSettings(this.mailSettings.id, this.mailSettings).subscribe({
+        next: () => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Succès',
+            detail: 'Paramètres email sauvegardés avec succès'
+          });
+          this.isSaving = false;
+        },
+        error: (error: any) => {
+          console.error('Erreur lors de la sauvegarde:', error);
+          const errorMsg = error?.error?.message || error?.message || 'Erreur lors de la sauvegarde';
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erreur',
+            detail: errorMsg
+          });
+          this.isSaving = false;
+        }
+      });
+    } else {
+      // Create new settings if no ID exists
+      this.mailSettingsService.createMailSettings(this.mailSettings).subscribe({
+        next: () => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Succès',
+            detail: 'Paramètres email créés et sauvegardés avec succès'
+          });
+          this.isSaving = false;
+        },
+        error: (error: any) => {
+          console.error('Erreur lors de la création:', error);
+          const errorMsg = error?.error?.message || error?.message || 'Erreur lors de la création';
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erreur',
+            detail: errorMsg
+          });
+          this.isSaving = false;
+        }
+      });
+    }
   }
 
   openTestEmailModal(): void {

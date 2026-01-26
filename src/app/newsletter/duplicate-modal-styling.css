@@ -1,0 +1,87 @@
+/* Duplicate Modal Styling */
+
+/* Duplicate Mode Info Message */
+.schedule-info-message.duplicate-mode {
+  background: linear-gradient(135deg, rgba(13, 110, 253, 0.05) 0%, rgba(13, 110, 253, 0.02) 100%);
+  border-left: 4px solid #0d6efd;
+}
+
+.schedule-info-message.duplicate-mode .info-icon {
+  background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
+}
+
+.schedule-info-message.duplicate-mode .info-content strong {
+  color: #0d6efd;
+}
+
+/* Duplicate Action Button */
+.btn-duplicate-confirm {
+  background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
+  border: none;
+  color: white;
+  padding: 10px 24px;
+  border-radius: 6px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  min-width: 160px;
+}
+
+.btn-duplicate-confirm:hover:not(:disabled) {
+  background: linear-gradient(135deg, #0b5ed7 0%, #0a58ca 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(13, 110, 253, 0.3);
+}
+
+.btn-duplicate-confirm:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 3px 10px rgba(13, 110, 253, 0.2);
+}
+
+.btn-duplicate-confirm:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
+}
+
+/* Duplicate Icon Animation */
+.duplicate-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
+  border-radius: 8px;
+  color: white;
+  font-size: 20px;
+  animation: duplicateIconBounce 0.6s ease-out;
+}
+
+@keyframes duplicateIconBounce {
+  0% {
+    transform: scale(0) rotate(-180deg);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+  .btn-duplicate-confirm {
+    min-width: 140px;
+    padding: 8px 16px;
+    font-size: 14px;
+  }
+
+  .duplicate-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+  }
+}

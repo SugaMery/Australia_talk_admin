@@ -13,6 +13,7 @@ import { RegisterComponent } from './register/register.component';
 import { HomeComponent } from './home/home.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ToastModule } from 'primeng/toast';
+import { CalendarModule } from 'primeng/calendar';
 import { MessageService } from 'primeng/api';
 import { ConfirmationService } from 'primeng/api';
 import { SidebarComponent } from './sidebar/sidebar.component';
@@ -90,6 +91,7 @@ import { CreateNewsletterComponent } from './create-newsletter/create-newsletter
     FormsModule,
     ReactiveFormsModule,
     ToastModule,
+    CalendarModule,
     EditorModule,
     MultiSelectModule,
     DropdownModule,

@@ -29,19 +29,209 @@
           </a>
         </li>
         <li>
+          <a data-bs-toggle="tooltip" data-bs-placement="top" title="Debug Scheduler" (click)="toggleDebugPanel()" class="cursor-pointer">
+            <i class="ti ti-bug"></i>
+          </a>
+        </li>
+        <li>
           <a data-bs-toggle="tooltip" data-bs-placement="top" title="Réduire" id="collapse-header" class="cursor-pointer">
             <i class="ti ti-chevron-up"></i>
           </a>
         </li>
       </ul>
       <div class="page-btn">
-        <a (click)="openNewsletterModal()" class="btn btn-primary cursor-pointer">
+        <a [routerLink]="['/create-newsletter']" class="btn btn-primary cursor-pointer">
           <i class="ti ti-circle-plus me-1"></i>Créer une Newsletter
         </a>
       </div>
     </div>
 
-    <!-- Newsletter Section -->
+    <!-- Scheduler Debug & Testing Panel -->
+    <div class="row" *ngIf="showDebugPanel">
+      <div class="col-lg-12">
+        <div class="card debug-panel-card">
+          <div class="card-header debug-panel-header">
+            <div class="d-flex justify-content-between align-items-center">
+              <h5 class="card-title mb-0">
+                <i class="ti ti-bug me-2"></i>🔧 Scheduler Debug & Testing Panel
+              </h5>
+              <button type="button" class="btn btn-sm btn-outline-danger" (click)="clearDebugLogs()">
+                <i class="ti ti-trash me-1"></i>Clear Logs
+              </button>
+            </div>
+          </div>
+          <div class="card-body">
+            <!-- Control Buttons -->
+            <div class="debug-controls mb-4">
+              <div class="d-flex gap-2 flex-wrap">
+                <button type="button" class="btn btn-sm btn-info" (click)="loadSchedulerStatus()" [disabled]="schedulerLoading">
+                  <i class="ti ti-refresh me-1" [class.spinner-border]="schedulerLoading"></i>
+                  {{ schedulerLoading ? 'Chargement...' : 'Vérifier le statut' }}
+                </button>
+                <button type="button" class="btn btn-sm btn-primary" (click)="triggerSchedulerCheckManually()" [disabled]="schedulerLoading">
+                  <i class="ti ti-lightning-2 me-1"></i>Vérification manuelle
+                </button>
+                <button type="button" class="btn btn-sm btn-success" (click)="exportDebugLogs()">
+                  <i class="ti ti-download me-1"></i>Exporter les logs
+                </button>
+              </div>
+            </div>
+
+            <!-- Status and Scheduled Newsletters Row -->
+            <div class="row mb-4">
+              <!-- Scheduler Status -->
+              <div class="col-lg-6">
+                <div class="debug-status-card">
+                  <div class="debug-status-header">
+                    <i class="ti ti-server me-2"></i>
+                    <h6>Statut du Scheduler</h6>
+                  </div>
+                  <div class="debug-status-body" *ngIf="schedulerStatus; else noStatus">
+                    <div class="status-item">
+                      <span class="status-label">Heure serveur:</span>
+                      <span class="status-value">{{ schedulerStatus.debug_info?.server_time | date: 'dd/MM/yyyy HH:mm:ss' }}</span>
+                    </div>
+                    <div class="status-item">
+                      <span class="status-label">Heure BD:</span>
+                      <span class="status-value">{{ schedulerStatus.debug_info?.database_time | date: 'dd/MM/yyyy HH:mm:ss' }}</span>
+                    </div>
+                    <div class="status-item">
+                      <span class="status-label">Décalage horaire:</span>
+                      <span class="status-value">{{ schedulerStatus.debug_info?.timezone_offset }} heures</span>
+                    </div>
+                  </div>
+                  <ng-template #noStatus>
+                    <div class="alert alert-secondary mb-0">
+                      <small>Cliquez sur "Vérifier le statut" pour charger les informations</small>
+                    </div>
+                  </ng-template>
+                </div>
+              </div>
+
+              <!-- Scheduled Newsletters -->
+              <div class="col-lg-6">
+                <div class="debug-scheduled-card">
+                  <div class="debug-scheduled-header">
+                    <i class="ti ti-calendar me-2"></i>
+                    <h6>Newsletters programmées</h6>
+                  </div>
+                  <div class="debug-scheduled-body">
+                    <div *ngIf="schedulerStatus?.debug_info?.scheduled_newsletters && schedulerStatus.debug_info.scheduled_newsletters.length > 0">
+                      <div *ngFor="let nl of schedulerStatus.debug_info.scheduled_newsletters" class="scheduled-item">
+                        <div class="scheduled-name">{{ nl.name }}</div>
+                        <div class="scheduled-details">
+                          <span class="scheduled-status" [ngClass]="{
+                            'status-sent': nl.status === 'SENT',
+                            'status-ready': nl.status === 'READY TO SEND',
+                            'status-waiting': nl.status === 'WAITING'
+                          }">
+                            {{ nl.status }}
+                          </span>
+                          <span class="scheduled-time">{{ nl.minutes_until_send }} min</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div *ngIf="!schedulerStatus?.debug_info?.scheduled_newsletters || schedulerStatus.debug_info.scheduled_newsletters.length === 0" class="alert alert-success mb-0">
+                      <i class="ti ti-check me-2"></i>Aucune newsletter programmée
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Manual Send Section -->
+            <div class="debug-manual-send">
+              <div class="debug-manual-header">
+                <i class="ti ti-send me-2"></i>
+                <h6>Envoi manuel (Contourner le Scheduler)</h6>
+              </div>
+              <div class="table-responsive debug-table-wrapper">
+                <table class="table debug-table">
+                  <thead>
+                    <tr>
+                      <th><i class="ti ti-hash me-1"></i>ID</th>
+                      <th><i class="ti ti-mail me-1"></i>Sujet</th>
+                      <th><i class="ti ti-status-change me-1"></i>Statut</th>
+                      <th><i class="ti ti-calendar me-1"></i>Créé</th>
+                      <th><i class="ti ti-settings me-1"></i>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngIf="allNewsletters.length === 0" class="text-center">
+                      <td colspan="5" class="text-muted py-3">Aucune newsletter disponible</td>
+                    </tr>
+                    <tr *ngFor="let nl of allNewsletters | slice:0:10">
+                      <td><span class="badge bg-light text-dark">{{ nl.id }}</span></td>
+                      <td><small>{{ nl.subject | slice:0:40 }}{{ nl.subject.length > 40 ? '...' : '' }}</small></td>
+                      <td>
+                        <span class="badge" [ngClass]="{
+                          'bg-success': nl.is_sent,
+                          'bg-warning text-dark': !nl.is_sent
+                        }">
+                          {{ nl.is_sent ? 'Envoyé' : 'Brouillon' }}
+                        </span>
+                      </td>
+                      <td><small>{{ nl.created_at | date: 'dd/MM HH:mm' }}</small></td>
+                      <td>
+                        <button type="button" class="btn btn-sm btn-send-debug" 
+                          (click)="sendNewsletterManuallyDebug(nl)" 
+                          [disabled]="sendingManually">
+                          <i class="ti ti-send me-1"></i>
+                          <span *ngIf="!sendingManually">Envoyer</span>
+                          <span *ngIf="sendingManually"><i class="ti ti-loader-2 animate-spin"></i></span>
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Manual Send Results -->
+              <div *ngIf="manualSendResults" class="alert mt-3" [ngClass]="{
+                'alert-success': manualSendResults.success,
+                'alert-danger': !manualSendResults.success
+              }">
+                <div class="d-flex justify-content-between align-items-start">
+                  <div>
+                    <strong>{{ manualSendResults.message }}</strong>
+                    <div *ngIf="manualSendResults.data" class="mt-2 small">
+                      <div><i class="ti ti-send me-1"></i>Envoyés: <strong>{{ manualSendResults.data.sent || 0 }}</strong></div>
+                      <div><i class="ti ti-x me-1"></i>Échoués: <strong>{{ manualSendResults.data.failed || 0 }}</strong></div>
+                      <div *ngIf="manualSendResults.data.errors && manualSendResults.data.errors.length > 0" class="mt-2">
+                        <strong>Erreurs détectées:</strong>
+                        <div *ngFor="let err of manualSendResults.data.errors" class="ms-2 mt-1">
+                          <i class="ti ti-alert-circle me-1 text-danger"></i>{{ err.email }}: {{ err.error }}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <button type="button" class="btn-close" (click)="manualSendResults = null"></button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Debug Logs -->
+            <div class="debug-logs mt-4">
+              <div class="debug-logs-header">
+                <i class="ti ti-file-text me-2"></i>
+                <h6>Logs de débogage</h6>
+                <small class="text-muted">({{ debugLogs.length }} entrées)</small>
+              </div>
+              <div class="debug-logs-container">
+                <div *ngIf="debugLogs.length === 0" class="text-muted text-center py-4">
+                  <small><i class="ti ti-inbox me-2"></i>Aucun log. Cliquez sur "Vérifier le statut" ou "Vérification manuelle" pour commencer.</small>
+                </div>
+                <div *ngFor="let log of debugLogs" class="debug-log-entry">
+                  <small>{{ log }}</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    
     <div class="row">
       <div class="col-lg-12">
         <div class="card">
@@ -53,28 +243,31 @@
               <table class="table">
                 <thead>
                   <tr>
-                    <th>ID</th>
-                    <th>Sujet</th>
-                    <th>Modèle</th>
-                    <th>Date de création</th>
-                    <th>Date d'envoi</th>
-                    <th>Statut</th>
-                    <th>Actions</th>
+                    <th><i class="ti ti-hash"></i>ID</th>
+                    <th><i class="ti ti-mail"></i>Sujet</th>
+                    <th><i class="ti ti-layout-template"></i>Modèle</th>
+                    <th><i class="ti ti-calendar"></i>Date de création</th>
+                    <th><i class="ti ti-send"></i>Date d'envoi</th>
+                    <th><i class="ti ti-status-change"></i>Statut</th>
+                    <th><i class="ti ti-settings"></i>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngIf="newsletters.length === 0">
+                  <tr *ngIf="paginatedNewsletters.length === 0">
                     <td colspan="7" class="text-center">Aucune newsletter trouvée</td>
                   </tr>
-                  <tr *ngFor="let newsletter of newsletters">
+                  <tr *ngFor="let newsletter of paginatedNewsletters">
                     <td><span class="badge bg-light text-dark">{{ newsletter.id }}</span></td>
                     <td>{{ newsletter.subject }}</td>
                     <td><span class="badge bg-secondary">{{ newsletter.template_name || 'Default' }}</span></td>
                     <td>{{ newsletter.created_at | date: 'dd/MM/yyyy HH:mm' }}</td>
                     <td>
-                      <span *ngIf="newsletter.sent_at; else noSent">{{ newsletter.sent_at | date: 'dd/MM/yyyy HH:mm' }}</span>
-                      <ng-template #noSent>
-                        <span class="text-muted">-</span>
+                      <span *ngIf="newsletter.sent_at; else checkScheduled">{{ newsletter.sent_at | date: 'dd/MM/yyyy HH:mm' }}</span>
+                      <ng-template #checkScheduled>
+                        <span *ngIf="newsletter.scheduled_at; else noDate" class="badge bg-info">{{ newsletter.scheduled_at | date: 'dd/MM/yyyy HH:mm' }}</span>
+                        <ng-template #noDate>
+                          <span class="text-muted">-</span>
+                        </ng-template>
                       </ng-template>
                     </td>
                     <td>
@@ -108,57 +301,99 @@
                 </tbody>
               </table>
             </div>
+            <!-- Pagination -->
+            <nav aria-label="Page navigation" *ngIf="newsletterTotalPages > 1" class="mt-3">
+              <ul class="pagination justify-content-center">
+                <li class="page-item" [class.disabled]="newsletterPage === 1">
+                  <a class="page-link cursor-pointer" (click)="onNewsletterPageChange(newsletterPage - 1)" 
+                    [class.disabled]="newsletterPage === 1">
+                    <i class="ti ti-chevron-left me-1"></i>Précédent
+                  </a>
+                </li>
+                <li class="page-item" *ngFor="let page of [].constructor(newsletterTotalPages); let i = index" 
+                  [class.active]="i + 1 === newsletterPage">
+                  <a class="page-link cursor-pointer" (click)="onNewsletterPageChange(i + 1)">{{ i + 1 }}</a>
+                </li>
+                <li class="page-item" [class.disabled]="newsletterPage === newsletterTotalPages">
+                  <a class="page-link cursor-pointer" (click)="onNewsletterPageChange(newsletterPage + 1)"
+                    [class.disabled]="newsletterPage === newsletterTotalPages">
+                    Suivant<i class="ti ti-chevron-right ms-1"></i>
+                  </a>
+                </li>
+              </ul>
+              <div class="text-center text-muted small mt-2">
+                Page {{ newsletterPage }} sur {{ newsletterTotalPages }} 
+                ({{ paginatedNewsletters.length }} newsletters affichées sur {{ allNewsletters.length }})
+              </div>
+            </nav>
           </div>
         </div>
       </div>
     </div>
 
     <!-- Subscribers Section -->
-    <div class="row mt-4">
+<!--     <div class="row mt-4">
       <div class="col-lg-12">
         <div class="card">
           <div class="card-header">
-            <h5 class="card-title">Abonnés</h5>
+            <div class="d-flex justify-content-between align-items-center">
+              <h5 class="card-title mb-0">
+                <i class="ti ti-users me-2"></i>Abonnés
+              </h5>
+              <span class="badge bg-info">
+                <i class="ti ti-user-check me-1"></i>{{ subscribers.length }} abonnés
+              </span>
+            </div>
           </div>
           <div class="card-body">
             <div class="table-responsive">
-              <table class="table">
+              <table class="table subscribers-table">
                 <thead>
                   <tr>
-                    <th>Email</th>
-                    <th>Date d'abonnement</th>
-                    <th>Statut</th>
-                    <th>Actions</th>
+                    <th><i class="ti ti-mail"></i>Email</th>
+                    <th><i class="ti ti-calendar-event"></i>Date d'abonnement</th>
+                    <th><i class="ti ti-badge"></i>Statut</th>
+                    <th><i class="ti ti-settings"></i>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngIf="subscribers.length === 0">
-                    <td colspan="4" class="text-center">Aucun abonné</td>
+                  <tr *ngIf="subscribers.length === 0" class="empty-subscriber-row">
+                    <td colspan="4" class="text-center">
+                      <i class="ti ti-inbox me-2"></i>Aucun abonné
+                    </td>
                   </tr>
-                  <tr *ngFor="let subscriber of subscribers">
-                    <td>{{ subscriber.email }}</td>
-                    <td>{{ subscriber.subscribed_at | date: 'dd/MM/yyyy' }}</td>
-                    <td>
-                      <span class="badge" [ngClass]="{
-                        'bg-success': subscriber.status === 'active',
-                        'bg-danger': subscriber.status === 'unsubscribed'
+                  <tr *ngFor="let subscriber of subscribers" class="subscriber-row">
+                    <td class="email-cell">
+                      <span class="subscriber-email-badge">{{ subscriber.email }}</span>
+                    </td>
+                    <td class="date-cell">
+                      <i class="ti ti-calendar text-muted me-2"></i>{{ subscriber.subscribed_at | date: 'dd/MM/yyyy' }}
+                    </td>
+                    <td class="status-cell">
+                      <span class="badge subscriber-status-badge" [ngClass]="{
+                        'status-active': subscriber.status === 'active',
+                        'status-unsubscribed': subscriber.status === 'unsubscribed'
                       }">
-                        {{ subscriber.status }}
+                        <i class="ti me-1" [ngClass]="subscriber.status === 'active' ? 'ti-check-circle' : 'ti-circle-x'"></i>
+                        {{ subscriber.status === 'active' ? 'Actif' : 'Désinscrit' }}
                       </span>
                     </td>
-                    <td>
-                      <a (click)="deleteSubscriber(subscriber.id)" class="btn btn-sm btn-delete cursor-pointer">
-                        <i class="ti ti-trash"></i>
-                      </a>
+                    <td class="actions-cell">
+                      <button type="button" class="btn btn-sm btn-delete-subscriber cursor-pointer" 
+                        (click)="deleteSubscriber(subscriber.id)"
+                        data-bs-toggle="tooltip" data-bs-placement="top" title="Supprimer cet abonné">
+                        <i class="ti ti-trash me-1"></i>Supprimer
+                      </button>
                     </td>
                   </tr>
+        
                 </tbody>
               </table>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </div> -->
   </div>
 </div>
 
@@ -228,90 +463,106 @@
 <!-- Recipients Modal -->
 <div class="modal fade" id="recipients-modal" tabindex="-1" role="dialog" aria-hidden="true" [class.show]="showRecipientsModal" [style.display]="showRecipientsModal ? 'block' : 'none'">
   <div class="modal-dialog modal-lg" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">
-          Destinataires - {{ selectedNewsletter.name }}
-        </h5>
-        <button type="button" class="btn-close" (click)="closeRecipientsModal()" aria-label="Close"></button>
+    <div class="modal-content schedule-modal-content">
+      <div class="schedule-modal-header">
+        <div class="schedule-header-content">
+          <h5 class="schedule-modal-title">
+            <i class="ti ti-mail me-2"></i>Destinataires
+          </h5>
+          <p class="schedule-modal-subtitle">{{ selectedNewsletter.name }}</p>
+        </div>
+        <button type="button" class="schedule-btn-close" (click)="closeRecipientsModal()" aria-label="Close">
+          <i class="ti ti-x"></i>
+        </button>
       </div>
-      <div class="modal-body">
+      <div class="schedule-modal-body">
         <!-- Stats Section -->
-        <div class="row mb-4" *ngIf="recipientsStats">
-          <div class="col-md-3">
-            <div class="card text-center">
-              <div class="card-body">
-                <h6 class="card-subtitle mb-2">Total</h6>
-                <h3 class="text-primary">{{ recipientsStats.total || 0 }}</h3>
-              </div>
+        <div class="recipients-stats-container mb-4" *ngIf="recipientsStats">
+          <div class="stat-card stat-card-total">
+            <div class="stat-icon">
+              <i class="ti ti-list"></i>
+            </div>
+            <div class="stat-content">
+              <span class="stat-label">Total</span>
+              <span class="stat-value">{{ recipientsStats.total || 0 }}</span>
             </div>
           </div>
-          <div class="col-md-3">
-            <div class="card text-center">
-              <div class="card-body">
-                <h6 class="card-subtitle mb-2">Envoyés</h6>
-                <h3 class="text-success">{{ recipientsStats.sent || 0 }}</h3>
-              </div>
+          <div class="stat-card stat-card-sent">
+            <div class="stat-icon">
+              <i class="ti ti-check"></i>
+            </div>
+            <div class="stat-content">
+              <span class="stat-label">Envoyés</span>
+              <span class="stat-value">{{ recipientsStats.sent || 0 }}</span>
             </div>
           </div>
-          <div class="col-md-3">
-            <div class="card text-center">
-              <div class="card-body">
-                <h6 class="card-subtitle mb-2">Échoués</h6>
-                <h3 class="text-danger">{{ recipientsStats.failed || 0 }}</h3>
-              </div>
+          <div class="stat-card stat-card-failed">
+            <div class="stat-icon">
+              <i class="ti ti-x"></i>
+            </div>
+            <div class="stat-content">
+              <span class="stat-label">Échoués</span>
+              <span class="stat-value">{{ recipientsStats.failed || 0 }}</span>
             </div>
           </div>
-          <div class="col-md-3">
-            <div class="card text-center">
-              <div class="card-body">
-                <h6 class="card-subtitle mb-2">En attente</h6>
-                <h3 class="text-secondary">{{ recipientsStats.pending || 0 }}</h3>
-              </div>
+          <div class="stat-card stat-card-pending">
+            <div class="stat-icon">
+              <i class="ti ti-clock"></i>
+            </div>
+            <div class="stat-content">
+              <span class="stat-label">En attente</span>
+              <span class="stat-value">{{ recipientsStats.pending || 0 }}</span>
             </div>
           </div>
         </div>
 
         <!-- Recipients Table -->
-        <div class="table-responsive">
-          <table class="table table-hover">
-            <thead>
-              <tr>
-                <th>Email</th>
-                <th>Nom</th>
-                <th>Statut</th>
-                <th>Date d'envoi</th>
-                <th>Message d'erreur</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngIf="newsletterRecipients.length === 0 && !recipientsLoading">
-                <td colspan="5" class="text-center">Aucun destinataire</td>
-              </tr>
-              <tr *ngIf="recipientsLoading">
-                <td colspan="5" class="text-center">
-                  <div class="spinner-border spinner-border-sm" role="status">
-                    <span class="visually-hidden">Chargement...</span>
-                  </div>
-                </td>
-              </tr>
-              <tr *ngFor="let recipient of newsletterRecipients">
-                <td>{{ recipient.email }}</td>
-                <td>{{ recipient.first_name }} {{ recipient.last_name }}</td>
-                <td>
-                  <span class="badge" [ngClass]="getStatusBadgeClass(recipient.status)">
-                    {{ getStatusLabel(recipient.status) }}
-                  </span>
-                </td>
-                <td>{{ recipient.sent_at | date: 'dd/MM/yyyy HH:mm' }}</td>
-                <td>
-                  <small *ngIf="recipient.error_message" class="text-danger">
-                    {{ recipient.error_message }}
-                  </small>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <div class="recipients-table-wrapper">
+          <div class="table-responsive">
+            <table class="table recipients-table">
+              <thead>
+                <tr>
+                  <th><i class="ti ti-mail me-2"></i>Email</th>
+                  <th><i class="ti ti-user me-2"></i>Nom</th>
+                  <th><i class="ti ti-badge me-2"></i>Statut</th>
+                  <th><i class="ti ti-calendar me-2"></i>Date d'envoi</th>
+                  <th><i class="ti ti-alert me-2"></i>Message</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngIf="newsletterRecipients.length === 0 && !recipientsLoading" class="empty-row">
+                  <td colspan="5" class="text-center text-muted">
+                    <i class="ti ti-inbox me-2"></i>Aucun destinataire
+                  </td>
+                </tr>
+                <tr *ngIf="recipientsLoading" class="loading-row">
+                  <td colspan="5" class="text-center">
+                    <div class="spinner-border spinner-border-sm" role="status">
+                      <span class="visually-hidden">Chargement...</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr *ngFor="let recipient of newsletterRecipients" class="recipient-row">
+                  <td class="email-cell">
+                    <span class="email-badge">{{ recipient.email }}</span>
+                  </td>
+                  <td class="name-cell">{{ recipient.first_name }} {{ recipient.last_name }}</td>
+                  <td class="status-cell">
+                    <span class="badge" [ngClass]="getStatusBadgeClass(recipient.status)">
+                      {{ getStatusLabel(recipient.status) }}
+                    </span>
+                  </td>
+                  <td class="date-cell">{{ recipient.sent_at | date: 'dd/MM/yyyy HH:mm' }}</td>
+                  <td class="error-cell">
+                    <small *ngIf="recipient.error_message" class="error-message" title="{{ recipient.error_message }}">
+                      <i class="ti ti-alert-triangle me-1"></i>{{ recipient.error_message | slice:0:30 }}...
+                    </small>
+                    <small *ngIf="!recipient.error_message" class="text-muted">-</small>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
 
         <!-- Pagination -->
@@ -329,8 +580,8 @@
           </ul>
         </nav>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="closeRecipientsModal()">Fermer</button>
+      <div class="schedule-modal-footer">
+        <button type="button" class="schedule-btn-cancel" (click)="closeRecipientsModal()">Fermer</button>
       </div>
     </div>
   </div>
@@ -338,3 +589,360 @@
 
 <!-- Recipients Modal Backdrop -->
 <div class="modal-backdrop fade" [class.show]="showRecipientsModal" [style.display]="showRecipientsModal ? 'block' : 'none'"></div>
+
+<!-- Schedule/Send Modal -->
+<div class="modal fade" id="schedule-modal" tabindex="-1" role="dialog" aria-hidden="true" [class.show]="showScheduleModal" [style.display]="showScheduleModal ? 'block' : 'none'">
+  <div class="modal-dialog modal-dialog-centered schedule-modal-dialog" role="document">
+    <div class="modal-content schedule-modal-content">
+      <div class="schedule-modal-header">
+        <div class="schedule-header-content">
+          <h5 class="schedule-modal-title">Envoyer ou Programmer</h5>
+          <p class="schedule-modal-subtitle">Gérez l'envoi de votre newsletter</p>
+        </div>
+        <button type="button" class="schedule-btn-close" (click)="closeSendScheduleModal()" aria-label="Close">
+          <i class="ti ti-x"></i>
+        </button>
+      </div>
+      <div class="schedule-modal-body">
+        <form>
+          <!-- Send Mode Options -->
+          <div class="send-mode-section">
+            <div class="mode-option" 
+              [class.active]="scheduleMode === 'now'"
+              (click)="scheduleMode = 'now'">
+              <div class="mode-selector">
+                <input type="radio" class="mode-radio" name="sendMode" id="sendNow" 
+                  [(ngModel)]="scheduleMode" value="now" (change)="scheduleMode = 'now'">
+                <label for="sendNow" class="mode-label">
+                  <span class="mode-icon"><i class="ti ti-send"></i></span>
+                  <span class="mode-text">
+                    <strong>Envoyer Maintenant</strong>
+                    <small>Envoi immédiat à tous les abonnés</small>
+                  </span>
+                </label>
+              </div>
+            </div>
+
+            <div class="mode-option" 
+              [class.active]="scheduleMode === 'later'"
+              (click)="scheduleMode = 'later'">
+              <div class="mode-selector">
+                <input type="radio" class="mode-radio" name="sendMode" id="sendLater" 
+                  [(ngModel)]="scheduleMode" value="later" (change)="scheduleMode = 'later'">
+                <label for="sendLater" class="mode-label">
+                  <span class="mode-icon"><i class="ti ti-calendar-event"></i></span>
+                  <span class="mode-text">
+                    <strong>Programmer pour Plus Tard</strong>
+                    <small>Planifier l'envoi à une date/heure</small>
+                  </span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Schedule Date & Time (Only shown when "later" is selected) -->
+          <div class="schedule-datetime-section" *ngIf="scheduleMode === 'later'">
+            <h6 class="datetime-section-title">Détails de Programmation</h6>
+            
+
+
+            <!-- Inputs Row -->
+            <div class="row datetime-inputs-row">
+              <!-- Date & Time Inputs -->
+              <div class="col-8">
+              <div class="datetime-input-group">
+              <label class="datetime-label-inline mb-2">
+              <i style="color: #37773a;" class="ti ti-calendar-check"></i>
+              <span style="color: #37773a;">Date d'Envoi</span>
+              </label>                  
+              <p-calendar 
+              [(ngModel)]="scheduledDate" 
+              name="scheduledDate"
+              [iconDisplay]="'input'" 
+              [showIcon]="true"
+              appendTo="body"
+              [baseZIndex]="2000"
+              inputId="scheduledDate"
+              dateFormat="dd/mm/yy"
+              placeholder="JJ/MM/AA"
+              styleClass="schedule-calendar-input schedule-date-input">
+              </p-calendar>
+              </div>
+              </div>
+
+              <div class="col-4">
+              <div class="datetime-input-group">
+              <label class="datetime-label-inline mb-2">
+              <i style="color: #37773a;" class="ti ti-clock-check"></i>
+              <span style="color: #37773a;">Heure d'Envoi</span>
+              </label>                  
+              <p-calendar 
+              [(ngModel)]="scheduledTime" 
+              name="scheduledTime"
+              [iconDisplay]="'input'" 
+              [showIcon]="true" 
+              [showTime]="true"
+              [timeOnly]="true"
+              appendTo="body"
+              [baseZIndex]="2000"
+              inputId="scheduledTime"
+              timeFormat="HH:mm"
+              placeholder="HH:mm"
+              styleClass="schedule-calendar-input schedule-time-input">
+              </p-calendar>
+              </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Info Message -->
+          <div class="schedule-info-message" [class.now-mode]="scheduleMode === 'now'" [class.later-mode]="scheduleMode === 'later'">
+            <div class="info-icon">
+              <i class="ti ti-info-circle"></i>
+            </div>
+            <div class="info-content">
+              <strong *ngIf="scheduleMode === 'now'">Envoi Immédiat</strong>
+              <strong *ngIf="scheduleMode === 'later'">Programmation</strong>
+              <p *ngIf="scheduleMode === 'now'">La newsletter sera envoyée à tous les abonnés actifs immédiatement.</p>
+              <p *ngIf="scheduleMode === 'later'">La newsletter sera programmée et envoyée à la date et heure spécifiées. Vous pourrez la modifier ou l'annuler avant l'envoi.</p>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="schedule-modal-footer">
+        <button type="button" class="schedule-btn-cancel" (click)="closeSendScheduleModal()">Annuler</button>
+        <button type="button" class="btn schedule-btn-action" 
+          [class.btn-send-now]="scheduleMode === 'now'"
+          [class.btn-schedule]="scheduleMode === 'later'"
+          (click)="confirmSendOrSchedule()"
+          [disabled]="isScheduling">
+          <i class="ti me-2" [ngClass]="scheduleMode === 'now' ? 'ti-send' : 'ti-calendar-plus'"></i>
+          <span *ngIf="!isScheduling">{{ scheduleMode === 'now' ? 'Envoyer Maintenant' : 'Programmer' }}</span>
+          <span *ngIf="isScheduling">
+            <i class="ti ti-loader-2 animate-spin me-1"></i>Traitement...
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Schedule Modal Backdrop -->
+<div class="modal-backdrop fade" [class.show]="showScheduleModal" [style.display]="showScheduleModal ? 'block' : 'none'"></div>
+<!-- Confirmation Modal -->
+<div class="modal fade" id="confirmation-modal" tabindex="-1" role="dialog" aria-hidden="true" [class.show]="showConfirmationModal" [style.display]="showConfirmationModal ? 'block' : 'none'">
+  <div class="modal-dialog modal-dialog-centered schedule-modal-dialog" role="document">
+    <div class="modal-content schedule-modal-content">
+      <div class="schedule-modal-header">
+        <div class="schedule-header-content">
+          <h5 class="schedule-modal-title">
+            <i class="ti ti-calendar-check me-2"></i>Confirmation de programmation
+          </h5>
+          <p class="schedule-modal-subtitle">Confirmez l'envoi programmé de votre newsletter</p>
+        </div>
+        <button type="button" class="schedule-btn-close" (click)="cancelConfirmation()" aria-label="Close">
+          <i class="ti ti-x"></i>
+        </button>
+      </div>
+      <div class="schedule-modal-body">
+        <!-- Confirmation Message -->
+        <div class="schedule-info-message later-mode">
+          <div class="info-icon">
+            <i class="ti ti-info-circle"></i>
+          </div>
+          <div class="info-content">
+            <strong>Programmation Confirmée</strong>
+            <p [innerHTML]="confirmationMessage"></p>
+            <div class="confirmation-details mt-3">
+              <div class="detail-row">
+                <span class="detail-label">
+                  <i class="ti ti-calendar me-2"></i>Date et heure d'envoi:
+                </span>
+                <span class="detail-value">{{ confirmationDateTime | date: 'dd/MM/yyyy HH:mm' }}</span>
+              </div>
+              <div class="detail-row mt-2">
+                <span class="detail-label">
+                  <i class="ti ti-alert-circle me-2"></i>Statut:
+                </span>
+                <span class="badge bg-warning text-dark">
+                  <i class="ti ti-clock me-1"></i>En attente de programmation
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="schedule-modal-footer">
+        <button type="button" class="schedule-btn-cancel" (click)="cancelConfirmation()">Annuler</button>
+        <button type="button" class="btn schedule-btn-action btn-schedule" 
+          (click)="confirmScheduling()"
+          [disabled]="isScheduling">
+          <i class="ti ti-calendar-plus me-2"></i>
+          <span *ngIf="!isScheduling">Confirmer et Programmer</span>
+          <span *ngIf="isScheduling">
+            <i class="ti ti-loader-2 animate-spin me-1"></i>Traitement...
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirmation Modal Backdrop -->
+<div class="modal-backdrop fade" [class.show]="showConfirmationModal" [style.display]="showConfirmationModal ? 'block' : 'none'"></div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="delete-modal" tabindex="-1" role="dialog" aria-hidden="true" [class.show]="showDeleteModal" [style.display]="showDeleteModal ? 'block' : 'none'">
+  <div class="modal-dialog modal-dialog-centered schedule-modal-dialog" role="document">
+    <div class="modal-content schedule-modal-content">
+      <div class="schedule-modal-header">
+        <div class="schedule-header-content">
+          <h5 class="schedule-modal-title">
+            <i class="ti ti-trash me-2 text-danger"></i>Supprimer la newsletter
+          </h5>
+          <p class="schedule-modal-subtitle">Cette action est irréversible</p>
+        </div>
+        <button type="button" class="schedule-btn-close" (click)="cancelDelete()" aria-label="Close">
+          <i class="ti ti-x"></i>
+        </button>
+      </div>
+      <div class="schedule-modal-body">
+        <!-- Warning Message -->
+        <div class="schedule-info-message delete-mode">
+          <div class="info-icon delete-icon">
+            <i class="ti ti-alert-triangle"></i>
+          </div>
+          <div class="info-content">
+            <strong>Attention! Suppression définitive</strong>
+            <p>
+              Vous êtes sur le point de supprimer la newsletter:<br>
+              <strong class="text-danger">{{ deleteNewsletterName }}</strong>
+            </p>
+            <p class="text-muted mb-0">
+              Cette action est irréversible. Toutes les données associées à cette newsletter seront supprimées.
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="schedule-modal-footer">
+        <button type="button" class="schedule-btn-cancel" (click)="cancelDelete()">Annuler</button>
+        <button type="button" class="btn schedule-btn-action btn-delete-confirm" 
+          (click)="confirmDelete()"
+          [disabled]="isDeleting">
+          <i class="ti ti-trash me-2"></i>
+          <span *ngIf="!isDeleting">Supprimer définitivement</span>
+          <span *ngIf="isDeleting">
+            <i class="ti ti-loader-2 animate-spin me-1"></i>Suppression...
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Modal Backdrop -->
+<div class="modal-backdrop fade" [class.show]="showDeleteModal" [style.display]="showDeleteModal ? 'block' : 'none'"></div>
+
+<!-- Duplicate Modal -->
+<div class="modal fade" id="duplicate-modal" tabindex="-1" role="dialog" aria-hidden="true" [class.show]="showDuplicateModal" [style.display]="showDuplicateModal ? 'block' : 'none'">
+  <div class="modal-dialog modal-dialog-centered schedule-modal-dialog" role="document">
+    <div class="modal-content schedule-modal-content">
+      <div class="schedule-modal-header">
+        <div class="schedule-header-content">
+          <h5 class="schedule-modal-title">
+            <i class="ti ti-copy me-2 text-primary" style="color: white !important"></i>Dupliquer la newsletter
+          </h5>
+          <p class="schedule-modal-subtitle">Créer une copie avec le même contenu</p>
+        </div>
+        <button type="button" class="schedule-btn-close" (click)="cancelDuplicate()" aria-label="Close">
+          <i class="ti ti-x"></i>
+        </button>
+      </div>
+      <div class="schedule-modal-body">
+        <!-- Info Message -->
+        <div class="schedule-info-message duplicate-mode">
+          <div class="info-icon duplicate-icon">
+            <i class="ti ti-copy"></i>
+          </div>
+          <div class="info-content">
+            <strong>Dupliquer la newsletter</strong>
+            <p>
+              Vous allez créer une copie complète de la newsletter:<br>
+              <strong class="text-primary">{{ duplicateNewsletterName }}</strong>
+            </p>
+            <p class="text-muted mb-0">
+              La nouvelle newsletter aura le même contenu, paramètres et destinataires. Vous pourrez la modifier ensuite.
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="schedule-modal-footer">
+        <button type="button" class="schedule-btn-cancel" (click)="cancelDuplicate()">Annuler</button>
+        <button type="button" class="btn schedule-btn-action btn-duplicate-confirm" 
+          (click)="confirmDuplicate()"
+          [disabled]="isDuplicating">
+          <i class="ti ti-copy me-2"></i>
+          <span *ngIf="!isDuplicating">Dupliquer la newsletter</span>
+          <span *ngIf="isDuplicating">
+            <i class="ti ti-loader-2 animate-spin me-1"></i>Duplication...
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Duplicate Modal Backdrop -->
+<div class="modal-backdrop fade" [class.show]="showDuplicateModal" [style.display]="showDuplicateModal ? 'block' : 'none'"></div>
+
+<!-- Delete Subscriber Modal -->
+<div class="modal fade" id="delete-subscriber-modal" tabindex="-1" role="dialog" aria-hidden="true" [class.show]="showDeleteSubscriberModal" [style.display]="showDeleteSubscriberModal ? 'block' : 'none'">
+  <div class="modal-dialog modal-dialog-centered schedule-modal-dialog" role="document">
+    <div class="modal-content schedule-modal-content">
+      <div class="schedule-modal-header">
+        <div class="schedule-header-content">
+          <h5 class="schedule-modal-title">
+            <i class="ti ti-user-minus me-2 text-danger" style="color: white !important;"></i>Supprimer l'abonné
+          </h5>
+          <p class="schedule-modal-subtitle">Cette action est irréversible</p>
+        </div>
+        <button type="button" class="schedule-btn-close" (click)="cancelDeleteSubscriber()" aria-label="Close">
+          <i class="ti ti-x"></i>
+        </button>
+      </div>
+      <div class="schedule-modal-body">
+        <!-- Warning Message -->
+        <div class="schedule-info-message delete-mode">
+          <div class="info-icon delete-icon">
+            <i class="ti ti-alert-triangle"></i>
+          </div>
+          <div class="info-content">
+            <strong>Attention! Suppression définitive</strong>
+            <p>
+              Vous êtes sur le point de supprimer l'abonné:<br>
+              <strong class="text-danger">{{ deleteSubscriberEmail }}</strong>
+            </p>
+            <p class="text-muted mb-0">
+              Cet abonné sera supprimé de la liste et ne recevra plus de newsletters. Cette action est irréversible.
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="schedule-modal-footer">
+        <button type="button" class="schedule-btn-cancel" (click)="cancelDeleteSubscriber()">Annuler</button>
+        <button type="button" class="btn schedule-btn-action btn-delete-confirm" 
+          (click)="confirmDeleteSubscriber()"
+          [disabled]="isDeletingSubscriber">
+          <i class="ti ti-trash me-2"></i>
+          <span *ngIf="!isDeletingSubscriber">Supprimer définitivement</span>
+          <span *ngIf="isDeletingSubscriber">
+            <i class="ti ti-loader-2 animate-spin me-1"></i>Suppression...
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Subscriber Modal Backdrop -->
+<div class="modal-backdrop fade" [class.show]="showDeleteSubscriberModal" [style.display]="showDeleteSubscriberModal ? 'block' : 'none'"></div>

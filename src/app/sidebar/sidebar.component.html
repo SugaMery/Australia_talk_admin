@@ -109,9 +109,7 @@
                                 <li [class.active]="selectedMenu === 'create-article'">
                                     <a href="create-article" (click)="selectedMenu = 'create-article'"><i class="ti ti-table-plus fs-16 me-2"></i><span>Créer Article</span></a>
                                 </li>
-                                <li [class.active]="selectedMenu === 'create-newsletter'">
-                                    <a href="create-newsletter" (click)="selectedMenu = 'create-newsletter'"><i class="ti ti-mail-plus fs-16 me-2"></i><span>Créer Newsletter</span></a>
-                                </li>
+
                                 <li [class.active]="selectedMenu === 'categories'">
                                     <a href="categories" (click)="selectedMenu = 'categories'"><i class="ti ti-list-details fs-16 me-2"></i><span>Catégories</span></a>
                                 </li>
@@ -123,6 +121,9 @@
                                 </li>
                                 <li [class.active]="selectedMenu === 'newsletter'">
                                     <a href="newsletter" (click)="selectedMenu = 'newsletter'"><i class="ti ti-mail fs-16 me-2"></i><span>Newsletter</span></a>
+                                </li>
+                                                                <li [class.active]="selectedMenu === 'create-newsletter'">
+                                    <a href="create-newsletter" (click)="selectedMenu = 'create-newsletter'"><i class="ti ti-mail-plus fs-16 me-2"></i><span>Créer Newsletter</span></a>
                                 </li>
                             </ul>
                         </li>
@@ -140,8 +141,8 @@
                         <li class="submenu-open">
                             <h6 class="submenu-hdr">Site Web</h6>
                             <ul>
-                                <li [class.active]="selectedMenu === 'system-settings'">
-                                    <a href="system-settings" (click)="selectedMenu = 'system-settings'"><i class="ti ti-world fs-16 me-2"></i><span>Paramètres du site web</span></a>
+                                <li [class.active]="selectedMenu === 'email-settings'">
+                                    <a href="email-settings" (click)="selectedMenu = 'email-settings'"><i class="ti ti-mail fs-16 me-2"></i><span>Paramètres Email</span></a>
                                 </li>
                                 <li [class.active]="selectedMenu === 'system-link'">
                                     <a href="system-link" (click)="selectedMenu = 'system-link'"><i class="ti ti-link fs-16 me-2"></i><span>Lien système</span></a>

@@ -180,3 +180,935 @@ table tbody td {
   font-weight: 600;
   font-size: 0.9rem;
 }
+
+/* Send/Schedule Dialog Styling */
+.btn-outline-primary {
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn-outline-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(0, 105, 212, 0.2);
+}
+
+.btn-outline-primary.active {
+  background-color: #0069d4;
+  border-color: #0069d4;
+  color: white;
+  box-shadow: 0 4px 12px rgba(0, 105, 212, 0.3);
+}
+
+input[type="datetime-local"] {
+  max-width: 100%;
+}
+
+.modal-header.bg-primary {
+  border-bottom: none;
+}
+
+.modal-header.bg-primary .modal-title {
+  font-weight: 600;
+  font-size: 1.25rem;
+}
+
+.card.bg-light {
+  border: 1px solid #e0e0e0;
+}
+
+.spinner-border-sm {
+  width: 1rem;
+  height: 1rem;
+  border-width: 0.2em;
+}
+
+/* Debug Panel Styles */
+.card.bg-light.border-warning {
+  border: 2px solid #ffc107 !important;
+  background-color: #fffbf0 !important;
+}
+
+.card-header.bg-warning {
+  background-color: #ffc107 !important;
+  border-bottom: 2px solid #ff9800;
+}
+
+.font-monospace {
+  font-family: 'Courier New', Courier, monospace;
+  line-height: 1.5;
+}
+
+.card.bg-dark {
+  background-color: #1a1a1a !important;
+  border: 1px solid #333;
+}
+
+.card.bg-dark.text-light {
+  color: #e0e0e0 !important;
+}
+
+.card.bg-dark .text-light {
+  color: #e0e0e0 !important;
+}
+
+.text-muted {
+  color: #6c757d !important;
+}
+
+.bg-dark .text-muted {
+  color: #888 !important;
+}
+
+/* Spinner animation */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.spinner-border {
+  animation: spin 0.75s linear infinite;
+}
+
+/* Alert customizations */
+.alert {
+  margin-bottom: 0.5rem;
+}
+
+.alert-info {
+  background-color: #d1ecf1;
+  border-color: #bee5eb;
+  color: #0c5460;
+}
+
+.alert-warning {
+  background-color: #fff3cd;
+  border-color: #ffeeba;
+  color: #856404;
+}
+
+.alert-success {
+  background-color: #d4edda;
+  border-color: #c3e6cb;
+  color: #155724;
+}
+
+.alert-danger {
+  background-color: #f8d7da;
+  border-color: #f5c6cb;
+  color: #721c24;
+}
+
+/* Schedule Modal Styling */
+.modal-header.bg-info {
+  background-color: #17a2b8 !important;
+  border-bottom: 2px solid #138496;
+}
+
+.modal-header.bg-info .modal-title {
+  font-weight: 600;
+  font-size: 1.25rem;
+}
+
+.btn-group .btn {
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 4px;
+}
+
+.btn-group .btn-outline-success {
+  border-color: #28a745;
+  color: #28a745;
+}
+
+.btn-group .btn-outline-success.active {
+  background-color: #28a745;
+  border-color: #28a745;
+  color: white;
+}
+
+.btn-group .btn-outline-info {
+  border-color: #17a2b8;
+  color: #17a2b8;
+}
+
+.btn-group .btn-outline-info.active {
+  background-color: #17a2b8;
+  border-color: #17a2b8;
+  color: white;
+}
+
+input[type="datetime-local"] {
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  padding: 10px 12px;
+  font-size: 1rem;
+}
+
+input[type="datetime-local"]:focus {
+  border-color: #17a2b8;
+  box-shadow: 0 0 0 0.2rem rgba(23, 162, 184, 0.25);
+  outline: none;
+}
+
+.btn-check:checked + label {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.form-control-lg {
+  padding: 12px 16px;
+}
+
+/* PrimeNG Calendar Styling */
+#schedule-modal ::ng-deep .p-calendar {
+  width: 100%;
+}
+
+#schedule-modal ::ng-deep .p-calendar .p-calendar-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 1rem;
+  background-color: #fff;
+}
+
+#schedule-modal ::ng-deep .p-calendar .p-calendar-input:focus {
+  border-color: #17a2b8;
+  box-shadow: 0 0 0 0.2rem rgba(23, 162, 184, 0.25);
+  outline: none;
+}
+
+#schedule-modal ::ng-deep .p-calendar .p-input-icon-right > svg {
+  right: 12px;
+  color: #17a2b8;
+  cursor: pointer;
+}
+
+#schedule-modal ::ng-deep .p-datepicker {
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+}
+
+#schedule-modal ::ng-deep .p-datepicker-header {
+  background-color: #17a2b8;
+  color: white;
+  border: none;
+}
+
+#schedule-modal ::ng-deep .p-datepicker-header .p-datepicker-title {
+  color: white;
+  font-weight: 600;
+}
+
+#schedule-modal ::ng-deep .p-datepicker-header .p-datepicker-button {
+  color: white;
+}
+
+#schedule-modal ::ng-deep .p-datepicker-header .p-datepicker-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+#schedule-modal ::ng-deep .p-datepicker-calendar-table tbody > tr > td {
+  padding: 6px;
+}
+
+#schedule-modal ::ng-deep .p-datepicker-calendar-table tbody > tr > td > button {
+  border-radius: 3px;
+  padding: 6px 8px;
+  border: 1px solid transparent;
+  color: #333;
+  background-color: #fff;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+#schedule-modal ::ng-deep .p-datepicker-calendar-table tbody > tr > td > button:hover {
+  background-color: #e9ecef;
+  border-color: #dee2e6;
+}
+
+#schedule-modal ::ng-deep .p-datepicker-calendar-table tbody > tr > td > button.p-highlight {
+  background-color: #17a2b8;
+  color: white;
+  border-color: #17a2b8;
+}
+
+#schedule-modal ::ng-deep .p-datepicker-calendar-table tbody > tr > td > button.p-highlight:hover {
+  background-color: #138496;
+  border-color: #138496;
+}
+
+#schedule-modal ::ng-deep .p-datepicker-calendar-table tbody > tr > td.p-datepicker-other-month > button {
+  color: #ccc;
+}
+
+#schedule-modal ::ng-deep .p-timepicker-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 1rem;
+  background-color: #fff;
+}
+
+#schedule-modal ::ng-deep .p-timepicker-input:focus {
+  border-color: #17a2b8;
+  box-shadow: 0 0 0 0.2rem rgba(23, 162, 184, 0.25);
+  outline: none;
+}
+
+#schedule-modal ::ng-deep .p-timepicker-spinner {
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+}
+
+#schedule-modal ::ng-deep .p-timepicker-spinner button {
+  padding: 4px 8px;
+  background-color: #f8f9fa;
+  border: none;
+  border-radius: 3px;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+#schedule-modal ::ng-deep .p-timepicker-spinner button:hover {
+  background-color: #e9ecef;
+  color: #17a2b8;
+}
+
+/* ============================================
+   ELEGANT SCHEDULE MODAL STYLING
+   ============================================ */
+
+.schedule-modal-dialog {
+  max-width: 550px;
+}
+
+.schedule-modal-content {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+}
+
+/* Header Styling */
+.schedule-modal-header {
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+  border-bottom: none;
+  padding: 28px 28px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.schedule-header-content {
+  flex: 1;
+}
+
+.schedule-modal-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+  letter-spacing: -0.3px;
+}
+
+.schedule-modal-subtitle {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.75);
+  margin: 4px 0 0 0;
+  font-weight: 400;
+}
+
+.schedule-btn-close {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  border-radius: 6px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #ffffff;
+  transition: all 0.3s ease;
+  font-size: 1.2rem;
+}
+
+.schedule-btn-close:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: rotate(90deg);
+}
+
+/* Body Styling */
+.schedule-modal-body {
+  padding: 32px 28px;
+  background-color: #ffffff;
+}
+
+/* Send Mode Section */
+.send-mode-section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 32px;
+}
+
+.mode-option {
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background-color: #f9f9f9;
+}
+
+.mode-option:hover {
+  border-color: #d0d0d0;
+  background-color: #f5f5f5;
+}
+
+.mode-option.active {
+  border-color: #2c3e50;
+  background: linear-gradient(135deg, rgba(44, 62, 80, 0.05) 0%, rgba(52, 73, 94, 0.05) 100%);
+  box-shadow: 0 4px 12px rgba(44, 62, 80, 0.1);
+}
+
+.mode-selector {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.mode-radio {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: #2c3e50;
+  flex-shrink: 0;
+}
+
+.mode-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  cursor: pointer;
+  margin: 0;
+}
+
+.mode-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background-color: #ecf0f1;
+  color: #2c3e50;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+
+.mode-option.active .mode-icon {
+  background-color: #2c3e50;
+  color: #ffffff;
+}
+
+.mode-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mode-text strong {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #2c3e50;
+  display: block;
+}
+
+.mode-text small {
+  font-size: 0.8rem;
+  color: #7f8c8d;
+  font-weight: 400;
+}
+
+/* DateTime Section */
+.schedule-datetime-section {
+  margin-bottom: 28px;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.datetime-section-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Labels Row */
+.datetime-labels-row {
+  display: flex;
+  margin-bottom: 8px;
+}
+
+.datetime-labels-container {
+  display: flex;
+  gap: 0;
+  align-items: center;
+}
+
+.datetime-label-inline {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #e74c3c;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin: 0;
+}
+
+.datetime-label-inline i {
+  font-size: 1rem;
+  color: #e74c3c;
+}
+
+/* Inputs Row */
+.datetime-inputs-row {
+  display: flex;
+  margin-bottom: 0;
+}
+
+.datetime-inputs-row .col-10 {
+  padding: 0;
+}
+
+.datetime-inputs-row .col-2 {
+  padding: 0;
+}
+
+.datetime-inputs-container {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.schedule-date-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.schedule-time-input {
+  flex: 0 0 100px;
+  min-width: 0;
+}
+
+/* Schedule Calendar Input */
+.schedule-calendar-input {
+  width: 100% !important;
+}
+
+#schedule-modal ::ng-deep .schedule-calendar-input .p-calendar-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1.5px solid #d5dce0;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  background-color: #ffffff;
+  color: #2c3e50;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+#schedule-modal ::ng-deep .schedule-calendar-input .p-calendar-input:hover {
+  border-color: #bdc3c7;
+  background-color: #f8f9fa;
+}
+
+#schedule-modal ::ng-deep .schedule-calendar-input .p-calendar-input:focus {
+  border-color: #2c3e50;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.1);
+  outline: none;
+}
+
+#schedule-modal ::ng-deep .schedule-calendar-input .p-calendar-button {
+  border: none;
+  background-color: transparent;
+  color: #2c3e50;
+  cursor: pointer;
+  padding: 0 8px;
+  transition: all 0.2s ease;
+}
+
+#schedule-modal ::ng-deep .schedule-calendar-input .p-calendar-button:hover {
+  color: #34495e;
+  transform: scale(1.1);
+}
+
+/* Calendar Dropdown Styling */
+#schedule-modal ::ng-deep .p-datepicker {
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  border: 1px solid #e0e0e0;
+}
+
+#schedule-modal ::ng-deep .p-datepicker-header {
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 12px;
+}
+
+#schedule-modal ::ng-deep .p-datepicker-header-separator {
+  display: none;
+}
+
+#schedule-modal ::ng-deep .p-datepicker-prev,
+#schedule-modal ::ng-deep .p-datepicker-next {
+  color: #ffffff;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+#schedule-modal ::ng-deep .p-datepicker-prev:hover,
+#schedule-modal ::ng-deep .p-datepicker-next:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+#schedule-modal ::ng-deep .p-datepicker-title {
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+#schedule-modal ::ng-deep .p-datepicker-calendar-table {
+  width: 100%;
+  margin-top: 8px;
+}
+
+#schedule-modal ::ng-deep .p-datepicker-calendar-table th {
+  color: #7f8c8d;
+  font-weight: 600;
+  padding: 8px 4px;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+#schedule-modal ::ng-deep .p-datepicker-calendar-table td {
+  padding: 4px;
+}
+
+#schedule-modal ::ng-deep .p-datepicker-calendar-table td a {
+  padding: 8px;
+  border-radius: 6px;
+  color: #2c3e50;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+#schedule-modal ::ng-deep .p-datepicker-calendar-table td a:hover {
+  background-color: #ecf0f1;
+  color: #2c3e50;
+}
+
+#schedule-modal ::ng-deep .p-highlight a {
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+#schedule-modal ::ng-deep .p-disabled a {
+  color: #bdc3c7;
+  cursor: not-allowed;
+}
+
+/* Time Picker Styling */
+#schedule-modal ::ng-deep .p-timepicker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  border-top: 1px solid #e0e0e0;
+}
+
+#schedule-modal ::ng-deep .p-timepicker-spinner-button {
+  background-color: #f5f5f5;
+  border: 1px solid #e0e0e0;
+  color: #2c3e50;
+  padding: 6px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  min-width: 30px;
+}
+
+#schedule-modal ::ng-deep .p-timepicker-spinner-button:hover {
+  background-color: #2c3e50;
+  color: #ffffff;
+  border-color: #2c3e50;
+}
+
+#schedule-modal ::ng-deep .p-timepicker-separator {
+  color: #2c3e50;
+  font-weight: 700;
+  margin: 0 6px;
+}
+
+#schedule-modal ::ng-deep .p-timepicker-input {
+  padding: 4px 8px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  text-align: center;
+  width: 35px;
+  color: #2c3e50;
+  font-weight: 600;
+  background-color: #ffffff;
+}
+
+/* Info Message */
+.schedule-info-message {
+  display: flex;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 8px;
+  background-color: #f0f4f8;
+  border-left: 4px solid #3498db;
+  margin-bottom: 0;
+}
+
+.schedule-info-message.later-mode {
+  border-left-color: #27ae60;
+}
+
+.info-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: rgba(52, 152, 219, 0.15);
+  color: #3498db;
+  font-size: 1rem;
+}
+
+.schedule-info-message.later-mode .info-icon {
+  background-color: rgba(39, 174, 96, 0.15);
+  color: #27ae60;
+}
+
+.info-content {
+  flex: 1;
+}
+
+.info-content strong {
+  display: block;
+  color: #2c3e50;
+  font-size: 0.9rem;
+  margin-bottom: 4px;
+}
+
+.info-content p {
+  color: #555;
+  font-size: 0.85rem;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Footer Styling */
+.schedule-modal-footer {
+  background-color: #f8f9fa;
+  border-top: 1px solid #e0e0e0;
+  padding: 16px 28px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.schedule-btn-cancel {
+  padding: 10px 24px;
+  background-color: #ecf0f1;
+  border: 1px solid #d5dbdb;
+  color: #2c3e50;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.schedule-btn-cancel:hover {
+  background-color: #d5dbdb;
+  color: #2c3e50;
+}
+
+.schedule-btn-action {
+  padding: 10px 28px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.3s ease;
+  min-width: 160px;
+  letter-spacing: 0.3px;
+}
+
+.schedule-btn-action.btn-send-now {
+  background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+}
+
+.schedule-btn-action.btn-send-now:hover:not(:disabled) {
+  background: linear-gradient(135deg, #229954 0%, #1e8449 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(39, 174, 96, 0.4);
+}
+
+.schedule-btn-action.btn-schedule {
+  background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+}
+
+.schedule-btn-action.btn-schedule:hover:not(:disabled) {
+  background: linear-gradient(135deg, #2980b9 0%, #2573a4 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(52, 152, 219, 0.4);
+}
+
+.schedule-btn-action:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Loader animation */
+.animate-spin {
+  display: inline-block;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+/* Calendar Font Family Styling */
+:global(.p-calendar),
+:global(.p-calendar *),
+:global(.p-datepicker),
+:global(.p-datepicker *),
+:global(.p-timepicker),
+:global(.p-timepicker *) {
+  font-family: 'Nunito', sans-serif !important;
+}
+
+:global(.p-calendar .p-calendar-w),
+:global(.p-datepicker),
+:global(.p-timepicker) {
+  font-family: 'Nunito', sans-serif !important;
+}
+
+:global(.p-calendar input),
+:global(.p-datepicker input),
+:global(.p-timepicker input) {
+  font-family: 'Nunito', sans-serif !important;
+}
+
+
+::ng-deep .p-datepicker .p-datepicker-header .p-datepicker-title {
+    FONT-FAMILY: 'Nunito' !important;
+}
+
+
+::ng-deep .p-datepicker table th > span , ::ng-deep .p-datepicker table td {
+    FONT-FAMILY: 'Nunito' !important;
+}
+
+/* Confirmation Modal Details */
+.confirmation-details {
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 12px;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.95rem;
+}
+
+.detail-label {
+  color: #2c3e50;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+}
+
+.detail-value {
+  color: #27ae60;
+  font-weight: 600;
+  background-color: rgba(39, 174, 96, 0.1);
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-family: 'Nunito', monospace;
+}
+
+::ng-deep .p-datepicker .p-timepicker span {
+    FONT-FAMILY: 'Nunito' !important;
+
+}
+
+::ng-deep .table tbody tr td a:hover i {
+    color: #fff !important;
+}
+
+::ng-deep .table tbody tr:only-child td {
+    text-align: justify !important;
+}
+
+::ng-deep .pagination .page-item.active .page-link{
+    background-color: #37773a !important;
+    border-color: #37773a !important ;
+    color: WHITE !important;
+}
+
+::ng-deep .pagination .page-link {
+    cursor: pointer;
+    color: #37773a !important;
+}

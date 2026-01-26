@@ -34,11 +34,13 @@ export class MailSettingsService {
   private apiUrl = 'http://localhost:5000/api/mail-settings';
   private token: string | null = localStorage.getItem('token');
   private mailSettingsSubject = new BehaviorSubject<MailSettings | null>(null);
+  private hasInitialized = false;
   
   mailSettings$ = this.mailSettingsSubject.asObservable();
 
   constructor(private http: HttpClient) {
-    this.loadMailSettingsOnInit();
+    // Don't load settings in constructor to avoid unnecessary API calls during initialization
+    // Settings will be loaded lazily when first requested
   }
 
   setToken(token: string): void {
@@ -64,32 +66,30 @@ export class MailSettingsService {
   /**
    * Load mail settings on initialization with fallback to defaults
    */
-  private loadMailSettingsOnInit(): void {
-    this.getMailSettings().subscribe({
-      next: (response: any) => {
-        const settings = response.data || response;
-        this.mailSettingsSubject.next(settings);
-      },
-      error: (err) => {
-        console.warn('Mail settings endpoint not available, using defaults:', err.status);
-        // Use default settings if endpoint fails
-        this.mailSettingsSubject.next(this.getDefaultSettings());
-      }
-    });
+  private markAsInitialized(): void {
+    this.hasInitialized = true;
   }
 
   getMailSettings(): Observable<any> {
+    // If already initialized, return cached value
+    if (this.mailSettingsSubject.value) {
+      return of({ data: this.mailSettingsSubject.value });
+    }
+
     return this.http.get<any>(this.apiUrl, { headers: this.getHeaders() }).pipe(
       tap((response: any) => {
         const settings = response.data || response;
+        console.log('Fetched mail settings:', settings);
         this.mailSettingsSubject.next(settings);
+        this.markAsInitialized();
       }),
       catchError((error) => {
         // If 404, return default settings instead of throwing error
         if (error.status === 404) {
-          console.warn('Mail settings endpoint not found, using defaults');
+          console.info('Mail settings not found, using default configuration');
           const defaults = this.getDefaultSettings();
           this.mailSettingsSubject.next(defaults);
+          this.markAsInitialized();
           return of({ data: defaults });
         }
         return this.handleError(error);
@@ -163,14 +163,20 @@ export class MailSettingsService {
    */
   private getDefaultSettings(): MailSettings {
     return {
-      smtp_host: 'localhost',
+      id: 0,
+      smtp_host: 'smtp.gmail.com',
       smtp_port: 587,
       smtp_username: '',
       smtp_password: '',
       from_email: 'noreply@australia-talk.com',
       from_name: 'Australia Talk',
+      enable_sitemap_email: false,
+      sitemap_email_frequency: 'weekly',
       enable_newsletter: true,
-      newsletter_from_email: 'newsletter@australia-talk.com'
+      enable_contact_form_email: false,
+      enable_error_notifications: false,
+      max_retries: 3,
+      timeout: 30000
     };
   }
 

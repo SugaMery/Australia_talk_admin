@@ -1,0 +1,51 @@
+<!-- Delete Modal -->
+<div class="modal fade" id="delete-modal" tabindex="-1" role="dialog" aria-hidden="true" [class.show]="showDeleteModal" [style.display]="showDeleteModal ? 'block' : 'none'">
+  <div class="modal-dialog modal-dialog-centered schedule-modal-dialog" role="document">
+    <div class="modal-content schedule-modal-content">
+      <div class="schedule-modal-header">
+        <div class="schedule-header-content">
+          <h5 class="schedule-modal-title">
+            <i class="ti ti-trash me-2 text-danger"></i>Supprimer la newsletter
+          </h5>
+          <p class="schedule-modal-subtitle">Cette action est irréversible</p>
+        </div>
+        <button type="button" class="schedule-btn-close" (click)="cancelDelete()" aria-label="Close">
+          <i class="ti ti-x"></i>
+        </button>
+      </div>
+      <div class="schedule-modal-body">
+        <!-- Warning Message -->
+        <div class="schedule-info-message delete-mode">
+          <div class="info-icon delete-icon">
+            <i class="ti ti-alert-triangle"></i>
+          </div>
+          <div class="info-content">
+            <strong>Attention! Suppression définitive</strong>
+            <p>
+              Vous êtes sur le point de supprimer la newsletter:<br>
+              <strong class="text-danger">{{ deleteNewsletterName }}</strong>
+            </p>
+            <p class="text-muted mb-0">
+              Cette action est irréversible. Toutes les données associées à cette newsletter seront supprimées.
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="schedule-modal-footer">
+        <button type="button" class="schedule-btn-cancel" (click)="cancelDelete()">Annuler</button>
+        <button type="button" class="btn schedule-btn-action btn-delete-confirm" 
+          (click)="confirmDelete()"
+          [disabled]="isDeleting">
+          <i class="ti ti-trash me-2"></i>
+          <span *ngIf="!isDeleting">Supprimer définitivement</span>
+          <span *ngIf="isDeleting">
+            <i class="ti ti-loader-2 animate-spin me-1"></i>Suppression...
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Modal Backdrop -->
+<div class="modal-backdrop fade" [class.show]="showDeleteModal" [style.display]="showDeleteModal ? 'block' : 'none'"></div>

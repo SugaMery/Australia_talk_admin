@@ -60,7 +60,7 @@ const routes: Routes = [
   { path: 'roles-permissions', component: RolesPermissionsComponent },
   { path: 'journaux-utilisateur', component: LogUsersComponent },
   { path: 'parametres-generaux', component: ParametresGenerauxComponent },
-  { path: 'system-settings', component: SystemSettingsComponent },
+  { path: 'email-settings', component: SystemSettingsComponent },
   { path: 'system-link', component: SystemLinkComponent },
   { path: 'company-settings', component: CompanySettingsComponent },
   { path: 'localization-settings', component: LocalizationSettingsComponent },

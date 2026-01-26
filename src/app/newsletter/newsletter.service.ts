@@ -520,4 +520,71 @@ export class NewsletterService {
       { headers: this.getHeaders(), responseType: 'blob' }
     );
   }
+
+  // ========================================
+  // SCHEDULER DEBUG & TESTING
+  // ========================================
+
+  /**
+   * Get scheduler status and debug information
+   */
+  getSchedulerStatus(): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(
+      `${this.apiUrl}/debug/scheduler-status`,
+      { headers: this.getHeaders() }
+    ).pipe(
+      catchError((error) => {
+        console.error('Error fetching scheduler status:', error);
+        return of({
+          success: false,
+          data: null,
+          message: 'Failed to fetch scheduler status',
+          error: error.message
+        } as ApiResponse<any>);
+      })
+    );
+  }
+
+  /**
+   * Send newsletter manually (bypasses scheduler)
+   */
+  sendNewsletterManual(id: string | number): Observable<ApiResponse<SendNewsletterResponse>> {
+    return this.http.post<ApiResponse<SendNewsletterResponse>>(
+      `${this.apiUrl}/${id}/send-manual`,
+      {},
+      { headers: this.getHeaders() }
+    ).pipe(
+      catchError((error) => {
+        console.error('Error sending newsletter manually:', error);
+        return of({
+          success: false,
+          message: error.error?.message || 'Failed to send newsletter manually',
+          sent: 0,
+          failed: 0,
+          errors: []
+        } as any);
+      })
+    );
+  }
+
+  /**
+   * Run scheduler check manually (trigger a single check cycle)
+   */
+  triggerSchedulerCheck(): Observable<ApiResponse<any>> {
+    return this.http.post<ApiResponse<any>>(
+      `${this.apiUrl}/debug/trigger-scheduler`,
+      {},
+      { headers: this.getHeaders() }
+    ).pipe(
+      catchError((error) => {
+        console.error('Error triggering scheduler check:', error);
+        return of({
+          success: false,
+          data: null,
+          message: 'Failed to trigger scheduler check',
+          error: error.message
+        } as ApiResponse<any>);
+      })
+    );
+  }
 }
