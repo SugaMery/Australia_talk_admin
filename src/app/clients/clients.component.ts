@@ -615,4 +615,14 @@ export class ClientsComponent implements OnInit {
       detail: 'Liste des utilisateurs rafraîchie'
     });
   }
+
+  // Get avatar color based on user ID
+  getAvatarColor(userId: number): string {
+    const colors = [
+      '#3498db', '#e74c3c', '#2ecc71', '#f39c12', '#9b59b6',
+      '#1abc9c', '#34495e', '#e67e22', '#16a085', '#8e44ad',
+      '#27ae60', '#2980b9', '#c0392b', '#d35400', '#7f8c8d'
+    ];
+    return colors[userId % colors.length];
+  }
 }

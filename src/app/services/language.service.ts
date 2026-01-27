@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class LanguageService {
-  private apiUrl = 'http://localhost:5000/languages';
+  private apiUrl = 'https://api.australia-talk.com/languages';
   private token: string | null = null;
 
   constructor(private http: HttpClient) {

@@ -114,7 +114,7 @@
 		</td>
     <td class="cell-article-info">
       <div class="article-info-wrapper">
-        <a href="javascript:void(0);" class="article-thumbnail">
+        <a href="javascript:void(0);" class="article-thumbnail" [routerLink]="['/article-detail', article.id]">
           <ng-container *ngIf="article.media && article.media.length > 0">
             <ng-container *ngIf="article.media[0].file_type === 'image/jpeg'; else videoThumb">
               <img [src]="article.media[0].path" alt="media" class="thumbnail-img">
@@ -129,7 +129,7 @@
             <img src="assets/img/products/stock-img-01.png" alt="product" class="thumbnail-img">
           </ng-container>
         </a>
-        <a href="javascript:void(0);" class="article-title">
+        <a href="javascript:void(0);" class="article-title" [routerLink]="['/article-detail', article.id]">
           {{ article.title }}
         </a>
       </div>
@@ -272,36 +272,70 @@
   
 </div>
 
+<!-- Delete Modal Backdrop - Only show when modal is open -->
+<div class="modal-backdrop fade" 
+     *ngIf="showDeleteModal"
+     [class.show]="showDeleteModal" 
+     (click)="cancelDelete()">
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" 
+     id="delete-modal" 
+     tabindex="-1" 
+     role="dialog" 
+     aria-hidden="true" 
+     *ngIf="showDeleteModal"
+     [class.show]="showDeleteModal" 
+     [style.display]="showDeleteModal ? 'block' : 'none'">
+  <div class="modal-dialog modal-dialog-centered schedule-modal-dialog" role="document">
+    <div class="modal-content schedule-modal-content">
+      <div class="schedule-modal-header">
+        <div class="schedule-header-content">
+          <h5 class="schedule-modal-title">
+            <i class="ti ti-trash me-2 text-danger"></i>Supprimer l'article
+          </h5>
+          <p class="schedule-modal-subtitle">Cette action est irréversible</p>
+        </div>
+        <button type="button" class="schedule-btn-close" (click)="cancelDelete()" aria-label="Close">
+          <i class="ti ti-x"></i>
+        </button>
+      </div>
+      <div class="schedule-modal-body">
+        <!-- Warning Message -->
+        <div class="schedule-info-message delete-mode">
+          <div class="info-icon delete-icon">
+            <i class="ti ti-alert-triangle"></i>
+          </div>
+          <div class="info-content">
+            <strong>Attention! Suppression définitive</strong>
+            <p>
+              Vous êtes sur le point de supprimer l'article:<br>
+              <strong class="text-danger">{{ articleToDelete?.title }}</strong>
+            </p>
+            <p class="text-muted mb-0">
+              Cette action est irréversible. Toutes les données associées à cet article seront supprimées.
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="schedule-modal-footer">
+        <button type="button" class="schedule-btn-cancel" (click)="cancelDelete()">Annuler</button>
+        <button type="button" class="btn schedule-btn-action btn-delete-confirm" 
+          (click)="confirmDeleteArticle()"
+          [disabled]="isDeleting">
+          <i class="ti ti-trash me-2"></i>
+          <span *ngIf="!isDeleting">Supprimer définitivement</span>
+          <span *ngIf="isDeleting">
+            <i class="ti ti-loader-2 animate-spin me-1"></i>Suppression...
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 <app-footer></app-footer>
 
-		<!-- delete modal -->
-			<div class="modal fade" id="delete-modal">
-			<div class="modal-dialog modal-dialog-centered">
-				<div class="modal-content">
-					<div class="page-wrapper-new p-0">
-						<div class="content p-5 px-3 text-center">
-								<span class="rounded-circle d-inline-flex p-2 bg-danger-transparent mb-2"><i class="ti ti-trash fs-24 text-danger"></i></span>
-								<h4 class="fs-20 text-gray-9 fw-bold mb-2 mt-1">Supprimer l'article</h4>
-								<p class="text-gray-6 mb-0 fs-16">Êtes-vous sûr de vouloir supprimer cet article ?</p>
-								<div class="modal-footer-btn mt-3 d-flex justify-content-center">
-									<button type="button" class="btn me-2 btn-secondary fs-13 fw-medium p-2 px-3 shadow-none" data-bs-dismiss="modal">Annuler</button>
-									<button
-  type="button"
-  class="btn btn-primary fs-13 fw-medium p-2 px-3"
-  (click)="deleteSelectedArticle()"
-  data-bs-dismiss="modal"
->Oui, supprimer</button>
-								</div>						
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-<style>
 
-</style>
-<style>
-
-</style>
 
 

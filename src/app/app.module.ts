@@ -53,6 +53,7 @@ import { LocalizationSettingsComponent } from './localization-settings/localizat
 import { EmailTemplatesComponent } from './email-templates/email-templates.component';
 import { NewsletterComponent } from './newsletter/newsletter.component';
 import { CreateNewsletterComponent } from './create-newsletter/create-newsletter.component';
+import { ArticleDetailComponent } from './article-detail/article-detail.component';
 @NgModule({
   declarations: [
     AppComponent,
@@ -71,6 +72,7 @@ import { CreateNewsletterComponent } from './create-newsletter/create-newsletter
     ArticlesComponent,
     AddArticleComponent,
     EditArticleComponent,
+    ArticleDetailComponent,
     UsersComponent,
     ClientsComponent,
     RolesPermissionsComponent,

@@ -850,3 +850,246 @@ background-color: #37773a56 !important;
     color: #092C4C !important;
 
 }
+
+/* ============================================
+   DELETE MODAL STYLING - ELEGANT DESIGN
+   ============================================ */
+
+.schedule-modal-dialog {
+  max-width: 550px;
+  z-index: 1060;
+}
+
+.schedule-modal-content {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+}
+
+/* Header Styling */
+.schedule-modal-header {
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+  border-bottom: none;
+  padding: 28px 28px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.schedule-header-content {
+  flex: 1;
+}
+
+.schedule-modal-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+  letter-spacing: -0.3px;
+  display: flex;
+  align-items: center;
+}
+
+.schedule-modal-subtitle {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.75);
+  margin: 4px 0 0 0;
+  font-weight: 400;
+}
+
+.schedule-btn-close {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  border-radius: 6px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #ffffff;
+  transition: all 0.3s ease;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+  margin-left: 12px;
+}
+
+.schedule-btn-close:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: rotate(90deg);
+}
+
+/* Body Styling */
+.schedule-modal-body {
+  padding: 32px 28px;
+  background-color: #ffffff;
+}
+
+/* Info Message */
+.schedule-info-message {
+  display: flex;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 8px;
+  background-color: #f0f4f8;
+  border-left: 4px solid #3498db;
+  margin-bottom: 0;
+}
+
+.schedule-info-message.delete-mode {
+  border-left-color: #e74c3c;
+}
+
+.info-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: rgba(52, 152, 219, 0.15);
+  color: #3498db;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.delete-icon {
+  background-color: rgba(231, 76, 60, 0.15);
+  color: #e74c3c;
+}
+
+.info-content {
+  flex: 1;
+}
+
+.info-content strong {
+  display: block;
+  color: #2c3e50;
+  font-size: 0.9rem;
+  margin-bottom: 4px;
+}
+
+.info-content p {
+  color: #555;
+  font-size: 0.85rem;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Footer Styling */
+.schedule-modal-footer {
+  background-color: #f8f9fa;
+  border-top: 1px solid #e0e0e0;
+  padding: 16px 28px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.schedule-btn-cancel {
+  padding: 10px 24px;
+  background-color: #ecf0f1;
+  border: 1px solid #d5dbdb;
+  color: #2c3e50;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.schedule-btn-cancel:hover {
+  background-color: #d5dbdb;
+  color: #2c3e50;
+}
+
+.schedule-btn-action {
+  padding: 10px 28px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.3s ease;
+  min-width: 160px;
+  letter-spacing: 0.3px;
+}
+
+.schedule-btn-action.btn-delete-confirm {
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+}
+
+.schedule-btn-action.btn-delete-confirm:hover:not(:disabled) {
+  background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(231, 76, 60, 0.4);
+}
+
+.schedule-btn-action:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Loader animation */
+.animate-spin {
+  display: inline-block;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Modal Styling */
+.modal.fade {
+  transition: opacity 0.3s ease;
+  z-index: 1060;
+}
+
+.modal.fade.show {
+  opacity: 1;
+  display: block !important;
+}
+
+.modal-backdrop {
+  z-index: 1050 !important;
+  background-color: rgba(0, 0, 0, 0.5);
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.modal-backdrop.fade {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.modal-backdrop.fade.show {
+  opacity: 1;
+  display: block !important;
+}
+
+/* Ensure backdrop is removed when not showing */
+.modal-backdrop:not(.show) {
+  display: none !important;
+}
+
+::ng-deep .table tbody tr td a.btn-edit:hover  {
+    color: #155eef !important;
+}
+
+::ng-deep .table tbody tr td a.btn-delete:hover  {
+        color: #ff0000 !important;
+}

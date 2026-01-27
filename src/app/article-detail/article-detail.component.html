@@ -1,0 +1,240 @@
+<app-header></app-header>
+<app-sidebar></app-sidebar>
+<p-toast></p-toast>
+<div class="page-wrapper">
+  <div class="content article-detail-content col-12">
+    <!-- Loading State -->
+    <div *ngIf="loading" class="loading-container">
+      <div class="spinner-wrapper">
+        <i class="ti ti-loader animate-spin"></i>
+        <p>Chargement de l'article...</p>
+      </div>
+    </div>
+
+    <!-- Not Found State -->
+    <div *ngIf="notFound && !loading" class="not-found-container">
+      <div class="not-found-content">
+        <i class="ti ti-mood-sad-dizzy"></i>
+        <h3>Article non trouvé</h3>
+        <p>Cet article n'existe pas ou a été supprimé.</p>
+        <button (click)="goBack()" class="btn btn-primary">
+          <i class="ti ti-arrow-left me-2"></i>Retour à la liste
+        </button>
+      </div>
+    </div>
+
+    <!-- Article Content -->
+    <div *ngIf="article && !loading && !notFound" class="article-detail">
+      <!-- Header Navigation -->
+      <div class="article-header-nav">
+        <button (click)="goBack()" class="btn-back-nav">
+          <i class="ti ti-arrow-left"></i>
+          <span>Retour aux articles</span>
+        </button>
+        <button (click)="editArticle()" class="btn-edit-nav">
+          <i class="ti ti-edit me-2"></i>Modifier
+        </button>
+      </div>
+
+      <!-- Main Hero Section -->
+      <div class="article-hero-section">
+        <div class="hero-image-container">
+          <ng-container *ngIf="getMainImageUrl(); else noMedia">
+            <img [src]="getMainImageUrl()" alt="{{ article.title }}" class="hero-image" (error)="onImageError($event)">
+          </ng-container>
+          <ng-template #noMedia>
+            <div class="hero-placeholder">
+              <i class="ti ti-photo-off"></i>
+            </div>
+          </ng-template>
+        </div>
+
+        <!-- Article Title Overlay -->
+        <div class="article-title-overlay">
+          <h1 class="article-main-title">{{ article.title }}</h1>
+          <div class="article-badges-top">
+            <span class="badge badge-status" [ngClass]="getStatusBadgeClass(article.status)">
+              {{ getStatusLabel(article.status) }}
+            </span>
+            <span class="badge badge-access" [ngClass]="article.isfree ? 'badge-free' : 'badge-paid'">
+              {{ article.isfree ? '✓ Gratuit' : '$ Payant' }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Article Info Cards Grid -->
+      <div class="article-info-cards-grid">
+        <!-- Author Card -->
+        <div class="info-card author-card" *ngIf="article.author">
+          <div class="card-icon-wrapper">
+            <div class="card-avatar">
+              {{ article.author.first_name.charAt(0) }}{{ article.author.last_name.charAt(0) }}
+            </div>
+          </div>
+          <div class="card-content">
+            <p class="card-label">Auteur</p>
+            <h3 class="card-title">{{ article.author.first_name }} {{ article.author.last_name }}</h3>
+          </div>
+        </div>
+
+        <!-- Created Date Card -->
+        <div class="info-card date-card" *ngIf="article.created_at">
+          <div class="card-icon-wrapper">
+            <i class="ti ti-calendar-plus"></i>
+          </div>
+          <div class="card-content">
+            <p class="card-label">Créé le</p>
+            <h3 class="card-title">{{ formatDate(article.created_at) }}</h3>
+          </div>
+        </div>
+
+        <!-- Views Card -->
+        <div class="info-card stats-card">
+          <div class="card-icon-wrapper">
+            <i class="ti ti-eye"></i>
+          </div>
+          <div class="card-content">
+            <p class="card-label">Vues</p>
+            <h3 class="card-title">{{ article.views_count ?? 0 }}</h3>
+          </div>
+        </div>
+
+        <!-- Likes Card -->
+        <div class="info-card stats-card">
+          <div class="card-icon-wrapper">
+            <i class="ti ti-heart"></i>
+          </div>
+          <div class="card-content">
+            <p class="card-label">J'aime</p>
+            <h3 class="card-title">{{ article.likes_count ?? 0 }}</h3>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Content Area -->
+      <div class="article-main-container">
+        <!-- Left Content -->
+        <div class="article-content-area">
+          <!-- Article Body -->
+          <div class="content-card article-body-card">
+            <div class="card-header-line"></div>
+            <div class="article-body-content" [innerHTML]="article.content"></div>
+          </div>
+
+          <!-- Categories Section -->
+          <div class="content-card categories-section" *ngIf="article.categories && article.categories.length > 0">
+            <div class="section-header">
+              <i class="ti ti-folder me-2"></i>
+              <h3>Catégories</h3>
+            </div>
+            <div class="categories-wrapper">
+              <span class="category-badge" *ngFor="let cat of article.categories">
+                <i class="ti ti-tag me-1"></i>{{ cat.name || cat.type }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Tags Section -->
+          <div class="content-card tags-section" *ngIf="article.tags && article.tags.length > 0">
+            <div class="section-header">
+              <i class="ti ti-hash me-2"></i>
+              <h3>Tags</h3>
+            </div>
+            <div class="tags-wrapper">
+              <span class="tag-badge" *ngFor="let tag of article.tags">
+                {{ tag.translation?.name || tag.name }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Sidebar -->
+        <div class="article-sidebar">
+          <!-- Article Meta Card -->
+          <div class="sidebar-card meta-card">
+            <h4 class="sidebar-title">Informations</h4>
+            <div class="meta-item">
+              <span class="meta-label">ID Article</span>
+              <span class="meta-value">AUS{{ article.id }}</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Statut</span>
+              <span class="meta-badge" [ngClass]="getStatusBadgeClass(article.status)">
+                {{ getStatusLabel(article.status) }}
+              </span>
+            </div>
+            <div class="meta-item" *ngIf="article.type">
+              <span class="meta-label">Type</span>
+              <span class="meta-value">{{ article.type }}</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Accès</span>
+              <span class="meta-badge" [ngClass]="article.isfree ? 'badge-free' : 'badge-paid'">
+                {{ article.isfree ? 'Gratuit' : 'Payant' }}
+              </span>
+            </div>
+            <div class="meta-item" *ngIf="article.updated_at">
+              <span class="meta-label">Modifié le</span>
+              <span class="meta-value small">{{ formatDate(article.updated_at) }}</span>
+            </div>
+          </div>
+
+          <!-- Quick Stats Card -->
+          <div class="sidebar-card stats-card-sidebar">
+            <h4 class="sidebar-title">Statistiques</h4>
+            <div class="stat-row">
+              <div class="stat-item">
+                <i class="ti ti-eye"></i>
+                <div>
+                  <p>Vues</p>
+                  <h3>{{ article.views_count ?? 0 }}</h3>
+                </div>
+              </div>
+              <div class="stat-item">
+                <i class="ti ti-heart"></i>
+                <div>
+                  <p>J'aime</p>
+                  <h3>{{ article.likes_count ?? 0 }}</h3>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Media Gallery Sidebar -->
+          <div class="sidebar-card media-gallery-card" *ngIf="article.media && article.media.length > 0">
+            <h4 class="sidebar-title">Médias</h4>
+            <div class="sidebar-gallery-grid">
+              <div class="sidebar-gallery-item" *ngFor="let media of article.media">
+                <ng-container *ngIf="media.extension === 'jpeg' || media.extension === 'jpg' || media.extension === 'png'; else videoItemSidebar">
+                  <img [src]="media.path" alt="media" class="sidebar-gallery-image" (error)="onImageError($event)">
+                </ng-container>
+                <ng-template #videoItemSidebar>
+                  <div class="video-thumbnail">
+                    <i class="ti ti-player-play"></i>
+                    <video [src]="media.path" class="sidebar-gallery-video"></video>
+                  </div>
+                </ng-template>
+              </div>
+            </div>
+          </div>
+
+          <!-- Actions Card -->
+          <div class="sidebar-card actions-card">
+            <button (click)="editArticle()" class="btn-action-full btn-edit">
+              <i class="ti ti-edit me-2"></i>Modifier
+            </button>
+            <button (click)="goBack()" class="btn-action-full btn-back">
+              <i class="ti ti-arrow-left me-2"></i>Retour
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+     
+  </div>
+ <app-footer></app-footer>
+</div>
+
+

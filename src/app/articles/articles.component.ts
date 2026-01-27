@@ -27,7 +27,7 @@ export interface Article {
 @Component({
   selector: 'app-articles',
   templateUrl: './articles.component.html',
-  styleUrls: ['./articles.component.css'],
+  styleUrls: ['./articles.component.css', './delete-modal-styling.css'],
   providers: [MessageService]
 })
 export class ArticlesComponent implements OnInit {
@@ -60,7 +60,10 @@ export class ArticlesComponent implements OnInit {
   selectedEditImagePreview: string | ArrayBuffer | null = null;
   previousEditImageId: number | null = null;
   articleToDelete: any = null;
-
+  showDeleteModal: boolean = false;
+  isDeleting: boolean = false;
+  // Confirmation modal
+  showConfirmationModal: boolean = false;
   private _searchTerm: string = '';
   private _statusFilter: string = 'all';
 
@@ -384,41 +387,51 @@ export class ArticlesComponent implements OnInit {
 
   onDeleteArticle(art: any) {
     this.articleToDelete = art;
+    this.showDeleteModal = true;
+    document.body.style.overflow = 'hidden';
   }
 
   confirmDeleteArticle() {
     if (!this.articleToDelete) return;
+    this.isDeleting = true;
     this.articleService.delete(this.articleToDelete.id).subscribe({
       next: () => {
         this.articles = this.articles.filter((a: any) => a.id !== this.articleToDelete.id);
+        this.applyFilters();
+        this.updatePagination();
         this.messageService.add({severity:'success', summary:'Succès', detail:'Article supprimé avec succès'});
-        const modal = document.getElementById('delete-modal');
-        if (modal && (window as any).bootstrap) {
-          const bsModal = (window as any).bootstrap.Modal.getInstance(modal) || new (window as any).bootstrap.Modal(modal);
-          bsModal.hide();
-        }
-        this.articleToDelete = null;
+        this.closeDeleteModal();
       },
       error: () => {
+        this.isDeleting = false;
         this.messageService.add({severity:'error', summary:'Erreur', detail:'Erreur lors de la suppression de l\'article'});
       }
     });
   }
 
-  openDeleteModal(article: any) {
-  this.articleToDelete = article;
-  // Ouvrir la modale si besoin via JS
-}
-
-deleteSelectedArticle() {
-  if (!this.articleToDelete) return;
-  this.articleService.delete(this.articleToDelete.id).subscribe(() => {
-    // Rafraîchir la liste ou retirer l'article du tableau
-    this.refreshArticles();
+  closeDeleteModal() {
+    this.showDeleteModal = false;
     this.articleToDelete = null;
-    this.messageService.add({ severity: 'success', summary: 'Succès', detail: 'Article supprimé.' });
-  });
-}
+    this.isDeleting = false;
+    document.body.style.overflow = 'auto';
+    // Remove any lingering backdrops
+    const backdrops = document.querySelectorAll('.modal-backdrop');
+    backdrops.forEach(backdrop => backdrop.remove());
+  }
+
+  cancelDelete() {
+    this.closeDeleteModal();
+  }
+
+  openDeleteModal(article: any) {
+    this.articleToDelete = article;
+    this.showDeleteModal = true;
+    document.body.style.overflow = 'hidden';
+  }
+
+  deleteSelectedArticle() {
+    this.confirmDeleteArticle();
+  }
   refreshArticles() {
     // Recharge la liste des articles depuis l'API ou le service
     this.fetchArticles();

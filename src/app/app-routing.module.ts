@@ -11,6 +11,7 @@ import { TagService } from './services/tag.service';
 import { TagsComponent } from './tags/tags.component';
 import { AddArticleComponent } from './add-article/add-article.component';
 import { ArticlesComponent } from './articles/articles.component';
+import { ArticleDetailComponent } from './article-detail/article-detail.component';
 import { EditArticleComponent } from './edit-article/edit-article.component';
 import { UsersComponent } from './users/users.component';
 import { ClientsComponent } from './clients/clients.component';
@@ -54,6 +55,7 @@ const routes: Routes = [
   { path: 'tags', component: TagsComponent },
   { path: 'create-article', component: AddArticleComponent },
   { path: 'articles', component: ArticlesComponent },
+  { path: 'article-detail/:id', component: ArticleDetailComponent },
   { path: 'edit-article/:id', component: EditArticleComponent },
   { path: 'utilisateurs', component: UsersComponent },
   { path: 'clients', component: ClientsComponent },
@@ -68,8 +70,6 @@ const routes: Routes = [
   { path: 'newsletter', component: NewsletterComponent },
   { path: 'create-newsletter', component: CreateNewsletterComponent },
   { path: 'edit-newsletter/:id', component: CreateNewsletterComponent },
-
-
 ];
 
 @NgModule({

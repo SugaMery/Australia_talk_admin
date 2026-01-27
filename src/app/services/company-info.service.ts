@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class CompanyInfoService {
-  private apiUrl = 'http://localhost:5000/company-info';
+  private apiUrl = 'https://api.australia-talk.com/company-info';
   private token: string | null = null;
 
   constructor(private http: HttpClient) {

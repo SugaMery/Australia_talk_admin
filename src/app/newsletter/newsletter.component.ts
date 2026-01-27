@@ -600,71 +600,70 @@ export class NewsletterComponent implements OnInit, OnDestroy {
    * Send newsletter immediately
    */
   sendNewsletterNow(id: string | number): void {
-    this.confirmationService.confirm({
-      message: `Vous êtes sur le point d'envoyer cette newsletter à tous les abonnés actifs. Cette action est irréversible et la newsletter sera marquée comme "envoyée".<br><br><strong>Êtes-vous sûr de vouloir continuer ?</strong>`,
-      header: '📧 Confirmation d\'envoi de newsletter',
-      icon: 'pi pi-envelope',
-      acceptLabel: 'Oui, envoyer maintenant',
-      rejectLabel: 'Annuler',
-      acceptButtonStyleClass: 'p-button-success p-button-lg',
-      rejectButtonStyleClass: 'p-button-secondary p-button-lg',
-      acceptIcon: 'pi pi-send',
-      rejectIcon: 'pi pi-times',
-      accept: () => {
-        this.loading = true;
-        this.messageService.add({
-          severity: 'info',
-          summary: '🚀 Envoi en cours',
-          detail: 'La newsletter est en cours d\'envoi aux abonnés...',
-          life: 5000
-        });
+    // Store the ID and show the elegant confirmation modal
+    this.schedulingNewsletterId = id;
+    this.confirmationMessage = `Vous êtes sur le point d'envoyer cette newsletter à tous les abonnés actifs.<br><br><strong>Cette action est irréversible et la newsletter sera marquée comme "envoyée".</strong>`;
+    this.confirmationDateTime = new Date(); // Use current date as indicator
+    this.showConfirmationModal = true;
+    this.confirmationCallback = () => this.proceedWithSendingNewsletter(id);
+  }
 
-        this.newsletterService.sendNewsletter(id, false, [])
-          .pipe(takeUntil(this.destroy$))
-          .subscribe({
-            next: (response) => {
-              this.loading = false;
-              if (response.data) {
-                const { sent, failed } = response.data;
-                if (sent > 0 && failed === 0) {
-                  this.messageService.add({
-                    severity: 'success',
-                    summary: '✅ Newsletter envoyée avec succès',
-                    detail: `La newsletter a été envoyée à ${sent} abonné(s)`,
-                    life: 8000
-                  });
-                } else if (sent > 0 && failed > 0) {
-                  this.messageService.add({
-                    severity: 'warn',
-                    summary: '⚠️ Envoi partiellement réussi',
-                    detail: `Newsletter envoyée à ${sent} abonné(s), ${failed} échec(s)`,
-                    life: 10000
-                  });
-                } else {
-                  this.messageService.add({
-                    severity: 'error',
-                    summary: '❌ Échec de l\'envoi',
-                    detail: 'Aucun email n\'a pu être envoyé',
-                    life: 8000
-                  });
-                }
-                this.loadNewsletters();
-              }
-            },
-            error: (error) => {
-              this.loading = false;
-              const errorMsg = error?.error?.message || error?.error?.error || 'Erreur lors de l\'envoi de la newsletter';
+  /**
+   * Proceed with sending newsletter (after confirmation)
+   */
+  proceedWithSendingNewsletter(id: string | number): void {
+    this.loading = true;
+    this.messageService.add({
+      severity: 'info',
+      summary: '🚀 Envoi en cours',
+      detail: 'La newsletter est en cours d\'envoi aux abonnés...',
+      life: 5000
+    });
+
+    this.newsletterService.sendNewsletter(id, false, [])
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.loading = false;
+          if (response.data) {
+            const { sent, failed } = response.data;
+            if (sent > 0 && failed === 0) {
               this.messageService.add({
-                severity: 'error',
-                summary: '❌ Erreur d\'envoi',
-                detail: errorMsg,
+                severity: 'success',
+                summary: '✅ Newsletter envoyée avec succès',
+                detail: `La newsletter a été envoyée à ${sent} abonné(s)`,
+                life: 8000
+              });
+            } else if (sent > 0 && failed > 0) {
+              this.messageService.add({
+                severity: 'warn',
+                summary: '⚠️ Envoi partiellement réussi',
+                detail: `Newsletter envoyée à ${sent} abonné(s), ${failed} échec(s)`,
                 life: 10000
               });
-              console.error('Error sending newsletter:', error);
+            } else {
+              this.messageService.add({
+                severity: 'error',
+                summary: '❌ Échec de l\'envoi',
+                detail: 'Aucun email n\'a pu être envoyé',
+                life: 8000
+              });
             }
+            this.loadNewsletters();
+          }
+        },
+        error: (error) => {
+          this.loading = false;
+          const errorMsg = error?.error?.message || error?.error?.error || 'Erreur lors de l\'envoi de la newsletter';
+          this.messageService.add({
+            severity: 'error',
+            summary: '❌ Erreur d\'envoi',
+            detail: errorMsg,
+            life: 10000
           });
-      }
-    });
+          console.error('Error sending newsletter:', error);
+        }
+      });
   }
 
   /**
@@ -733,11 +732,28 @@ export class NewsletterComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Cancel confirmation and go back to schedule modal
+   * Confirm and proceed with sending (for send now confirmation modal)
+   */
+  confirmSending(): void {
+    if (this.confirmationCallback) {
+      this.showConfirmationModal = false;
+      this.confirmationCallback();
+      this.confirmationCallback = null;
+    }
+  }
+
+  /**
+   * Cancel confirmation and go back or close modal
    */
   cancelConfirmation(): void {
     this.showConfirmationModal = false; // Hide confirmation modal
-    this.showScheduleModal = true; // Show schedule modal again
+    if (this.confirmationCallback) {
+      // If it's a send callback, just close
+      this.confirmationCallback = null;
+    } else {
+      // If it's a schedule callback, go back to schedule modal
+      this.showScheduleModal = true;
+    }
     this.confirmationMessage = '';
     this.confirmationDateTime = null;
   }

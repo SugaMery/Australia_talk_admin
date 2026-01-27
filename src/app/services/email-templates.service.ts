@@ -28,7 +28,7 @@ export interface EmailTemplate {
   providedIn: 'root'
 })
 export class EmailTemplatesService {
-  private apiUrl = 'http://localhost:5000/email-templates';
+  private apiUrl = 'https://api.australia-talk.com/email-templates';
   private token: string | null = localStorage.getItem('token');
   private templatesSubject = new BehaviorSubject<EmailTemplate[]>([]);
   

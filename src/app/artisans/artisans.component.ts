@@ -22,7 +22,8 @@ export class ArtisansComponent implements OnInit {
 
   addModel: any = {};
   editModel: any = {};
-  deleteTarget: any = null;
+  personToDelete: any = null;
+  isDeleting: boolean = false;
 
   franceCities: string[] = [
     'Paris', 'Marseille', 'Lyon', 'Toulouse', 'Nice', 'Nantes', 'Strasbourg', 'Montpellier', 'Bordeaux', 'Lille',
@@ -237,27 +238,27 @@ export class ArtisansComponent implements OnInit {
   }
 
   confirmDelete(person: any) {
-    this.deleteTarget = person;
+    this.personToDelete = person;
   }
 
   deleteArtisan() {
-    if (!this.deleteTarget) return;
-    console.log('Delete', this.deleteTarget);
-    this.artisanService.delete(this.deleteTarget.id).subscribe({
+    if (!this.personToDelete) return;
+    this.isDeleting = true;
+    console.log('Delete', this.personToDelete);
+    this.artisanService.delete(this.personToDelete.id).subscribe({
       next: () => {
-      console.log('Delete success');
-      
-      this.messageService.add({severity:'success', summary:'Succès', detail:'Artisan supprimé avec succès'});
-      this.refresh();
-      this.deleteTarget = null;
-      const modal = document.getElementById('delete-modal');
-      if (modal) {
-        (window as any).bootstrap.Modal.getInstance(modal)?.hide();
-      }
+        console.log('Delete success');
+        this.messageService.add({severity:'success', summary:'Succès', detail:'Artisan supprimé avec succès'});
+        this.isDeleting = false;
+        this.personToDelete = null;
+        this.refresh();
+        // Control backdrop and modal state
+        document.body.style.overflow = '';
       },
       error: (err) => {
-      this.messageService.add({severity:'error', summary:'Erreur', detail:"Erreur lors de la suppression de l'artisan"});
-      console.error('Erreur lors de la suppression de l\'artisan:', err);
+        this.isDeleting = false;
+        this.messageService.add({severity:'error', summary:'Erreur', detail:"Erreur lors de la suppression de l'artisan"});
+        console.error('Erreur lors de la suppression de l\'artisan:', err);
       }
     });
   }

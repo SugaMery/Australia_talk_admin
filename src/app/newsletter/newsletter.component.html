@@ -735,18 +735,33 @@
     <div class="modal-content schedule-modal-content">
       <div class="schedule-modal-header">
         <div class="schedule-header-content">
-          <h5 class="schedule-modal-title">
+          <h5 class="schedule-modal-title" *ngIf="confirmationCallback">
+            <i class="ti ti-send me-2"></i>Confirmation d'envoi
+          </h5>
+          <h5 class="schedule-modal-title" *ngIf="!confirmationCallback">
             <i class="ti ti-calendar-check me-2"></i>Confirmation de programmation
           </h5>
-          <p class="schedule-modal-subtitle">Confirmez l'envoi programmé de votre newsletter</p>
+          <p class="schedule-modal-subtitle" *ngIf="confirmationCallback">Confirmez l'envoi immédiat de votre newsletter</p>
+          <p class="schedule-modal-subtitle" *ngIf="!confirmationCallback">Confirmez l'envoi programmé de votre newsletter</p>
         </div>
         <button type="button" class="schedule-btn-close" (click)="cancelConfirmation()" aria-label="Close">
           <i class="ti ti-x"></i>
         </button>
       </div>
       <div class="schedule-modal-body">
-        <!-- Confirmation Message -->
-        <div class="schedule-info-message later-mode">
+        <!-- Confirmation Message for Send Now -->
+        <div class="schedule-info-message now-mode" *ngIf="confirmationCallback">
+          <div class="info-icon">
+            <i class="ti ti-alert-circle"></i>
+          </div>
+          <div class="info-content">
+            <strong>⚠️ Attention!</strong>
+            <p [innerHTML]="confirmationMessage"></p>
+          </div>
+        </div>
+
+        <!-- Confirmation Message for Schedule Later -->
+        <div class="schedule-info-message later-mode" *ngIf="!confirmationCallback">
           <div class="info-icon">
             <i class="ti ti-info-circle"></i>
           </div>
@@ -774,7 +789,18 @@
       </div>
       <div class="schedule-modal-footer">
         <button type="button" class="schedule-btn-cancel" (click)="cancelConfirmation()">Annuler</button>
+        <button type="button" class="btn schedule-btn-action btn-send-now" 
+          *ngIf="confirmationCallback"
+          (click)="confirmSending()"
+          [disabled]="loading">
+          <i class="ti ti-send me-2"></i>
+          <span *ngIf="!loading">Envoyer Maintenant</span>
+          <span *ngIf="loading">
+            <i class="ti ti-loader-2 animate-spin me-1"></i>Envoi...
+          </span>
+        </button>
         <button type="button" class="btn schedule-btn-action btn-schedule" 
+          *ngIf="!confirmationCallback"
           (click)="confirmScheduling()"
           [disabled]="isScheduling">
           <i class="ti ti-calendar-plus me-2"></i>

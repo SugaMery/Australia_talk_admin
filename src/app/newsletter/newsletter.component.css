@@ -1112,3 +1112,15 @@ input[type="datetime-local"]:focus {
     cursor: pointer;
     color: #37773a !important;
 }
+
+/* Confirmation Modal Styles */
+.schedule-info-message.now-mode {
+  border-left-color: #f39c12;
+  background: linear-gradient(135deg, #fffaf0 0%, #fffbf5 100%);
+}
+
+.schedule-info-message.now-mode .info-icon {
+  background: linear-gradient(135deg, rgba(243, 156, 18, 0.15) 0%, rgba(230, 126, 34, 0.1) 100%);
+  color: #f39c12;
+  box-shadow: 0 4px 12px rgba(243, 156, 18, 0.1);
+}
