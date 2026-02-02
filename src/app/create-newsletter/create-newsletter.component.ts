@@ -267,7 +267,17 @@ export class CreateNewsletterComponent implements OnInit, OnDestroy {
 
           // Filter to only active subscribers (assuming all returned are active)
           this.subscribers = subscribers as SubscriberWithUser[];
-          this.activeSubscribers = subscribers;
+          this.newsletterService.getSubscribersActive()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data) => {
+          console.log('Loaded subscribers from NewsletterService as fallback:', data);
+          this.activeSubscribers = Array.isArray(data) ? data : (data && (data as any).data) ? (data as any).data : [];
+        },
+        error: (error) => {
+          console.error('Error loading subscribers from service:', error);
+        }
+      });
           this.loading = false;
 
           if (this.activeSubscribers.length === 0) {
@@ -298,13 +308,12 @@ export class CreateNewsletterComponent implements OnInit, OnDestroy {
    * Fallback: Load subscribers from newsletter service
    */
   private loadSubscribersFromService(): void {
-    this.newsletterService.getSubscribers()
+    this.newsletterService.getSubscribersActive()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data) => {
-          this.activeSubscribers = data.filter(
-            sub => sub.status === 'active'
-          ) as SubscriberWithUser[];
+          console.log('Loaded subscribers from NewsletterService as fallback:', data);
+          this.activeSubscribers = Array.isArray(data) ? data : (data && (data as any).data) ? (data as any).data : [];
         },
         error: (error) => {
           console.error('Error loading subscribers from service:', error);

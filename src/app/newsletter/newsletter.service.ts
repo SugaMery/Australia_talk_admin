@@ -128,6 +128,7 @@ export interface EmailTemplate {
 export class NewsletterService {
   private apiUrl = `${environment.apiUrl}/api/newsletters`;
   private subscribersUrl = `${environment.apiUrl}/api/subscribers`;
+  private subscribersUrl1 = `${environment.apiUrl}/api/newsletters/recipients/available`;
   private templatesUrl = `${environment.apiUrl}/api/email-templates`;
   private token: string | null = localStorage.getItem('token');
   
@@ -399,6 +400,26 @@ export class NewsletterService {
     );
   }
 
+
+    getSubscribersActive(): Observable<Subscriber[]> {
+    return this.http.get<Subscriber[]>(
+      this.subscribersUrl1,
+      { headers: this.getHeaders() }
+    ).pipe(
+      tap(data => this.subscribersSubject.next(data)),
+      catchError((error) => {
+        // If 404, return empty array instead of throwing error
+        if (error.status === 404) {
+          console.warn('Subscribers endpoint not found, returning empty array');
+          this.subscribersSubject.next([]);
+          return of([]);
+        }
+        console.error('Error loading subscribers:', error);
+        // Return empty array on other errors
+        return of([]);
+      })
+    );
+  }
   /**
    * Get available recipients for newsletter creation
    */
