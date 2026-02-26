@@ -116,9 +116,9 @@
       <div class="article-info-wrapper">
         <a href="javascript:void(0);" class="article-thumbnail" [routerLink]="['/article-detail', article.id]">
           <ng-container *ngIf="article.media && article.media.length > 0">
-            <ng-container *ngIf="article.media[0].file_type === 'image/jpeg'; else videoThumb">
-              <img [src]="article.media[0].path" alt="media" class="thumbnail-img">
-            </ng-container>
+			<ng-container *ngIf="article.media[0].file_type === 'image/jpeg' || article.media[0].file_type === 'image/png' || article.media[0].file_type === 'image/jpg' || article.media[0].file_type === 'image/gif' || article.media[0].file_type === 'image/webp'; else videoThumb">
+			  <img [src]="article.media[0].path" alt="media" class="thumbnail-img">
+			</ng-container>
             <ng-template #videoThumb>
               <video class="thumbnail-img" muted>
                 <source [src]="article.media[0].path" type="video/mp4">
@@ -151,11 +151,11 @@
 		</td>
 		<td class="cell-status text-center">
 			<span class="badge" [ngClass]="{
-				'badge-primary': article.status === 'published',
+				'badge-primary': article.status === 'validated',
 				'badge-warning': article.status === 'pending',
 				'badge-danger': article.status === 'draft'
 			}">
-				{{ article.status === 'published' ? 'Publié' : (article.status === 'pending' ? 'En attente' : article.status) }}
+				{{ article.status === 'validated' ? 'Publié' : (article.status === 'pending' ? 'En attente' : article.status) }}
 			</span>
 		</td>
 		<td class="cell-tags">

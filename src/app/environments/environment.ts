@@ -1,4 +1,4 @@
 // src/environments/environment.ts
 export const environment = {
-  apiUrl: 'https://api.australia-talk.com' // Adjust to your backend URL
+  apiUrl: 'http://localhost:5000' // Adjust to your backend URL
 };
