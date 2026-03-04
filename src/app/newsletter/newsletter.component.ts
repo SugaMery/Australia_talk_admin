@@ -46,6 +46,7 @@ export class NewsletterComponent implements OnInit, OnDestroy {
   recipientsTotal: number = 0;
   recipientsTotalPages: number = 0;
   recipientsStats: any = {};
+  recipientsSearchQuery: string = ''; // Search query for filtering recipients
 
   // Scheduler debugging
   showDebugPanel: boolean = false;
@@ -953,9 +954,61 @@ export class NewsletterComponent implements OnInit, OnDestroy {
   /**
    * Change recipients page
    */
-  onRecipientsPageChange(event: any): void {
-    this.recipientsPage = event.page + 1;
-    this.loadRecipients();
+  onRecipientsPageChange(page: number): void {
+    if (page >= 1 && page <= this.recipientsTotalPages) {
+      this.recipientsPage = page;
+      this.loadRecipients();
+    }
+  }
+
+  /**
+   * Get visible page numbers for pagination (show max 7 pages at a time)
+   */
+  getVisiblePages(): number[] {
+    const maxVisible = 7;
+    const pages: number[] = [];
+    const totalPages = this.recipientsTotalPages;
+    const currentPage = this.recipientsPage;
+    
+    if (totalPages <= maxVisible) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      let start = currentPage - 3;
+      let end = currentPage + 3;
+      
+      if (start < 1) {
+        start = 1;
+        end = maxVisible;
+      }
+      if (end > totalPages) {
+        end = totalPages;
+        start = totalPages - maxVisible + 1;
+      }
+      
+      // Add first page if not visible
+      if (start > 1) {
+        pages.push(1);
+        if (start > 2) {
+          pages.push(-1); // -1 represents ellipsis
+        }
+      }
+      
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+      
+      // Add last page if not visible
+      if (end < totalPages) {
+        if (end < totalPages - 1) {
+          pages.push(-1); // -1 represents ellipsis
+        }
+        pages.push(totalPages);
+      }
+    }
+    
+    return pages;
   }
 
   /**
@@ -965,6 +1018,21 @@ export class NewsletterComponent implements OnInit, OnDestroy {
     this.showRecipientsModal = false;
     this.newsletterRecipients = [];
     this.recipientsStats = {};
+    this.recipientsSearchQuery = '';
+  }
+
+  /**
+   * Filter recipients by email search query
+   */
+  getFilteredRecipients(): any[] {
+    if (!this.recipientsSearchQuery || this.recipientsSearchQuery.trim() === '') {
+      return this.newsletterRecipients;
+    }
+    
+    const query = this.recipientsSearchQuery.toLowerCase().trim();
+    return this.newsletterRecipients.filter(recipient => 
+      recipient.email.toLowerCase().includes(query)
+    );
   }
 
   /**

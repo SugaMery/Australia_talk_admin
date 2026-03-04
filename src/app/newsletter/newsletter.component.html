@@ -516,6 +516,25 @@
           </div>
         </div>
 
+        <!-- Search Bar -->
+        <div class="recipients-search-container mb-4">
+          <div class="input-group">
+            <span class="input-group-text">
+              <i class="ti ti-search"></i>
+            </span>
+            <input type="text" class="form-control" placeholder="Rechercher par adresse email..." 
+              [(ngModel)]="recipientsSearchQuery" name="recipientsSearch">
+            <button class="btn btn-outline-secondary" type="button" 
+              *ngIf="recipientsSearchQuery" 
+              (click)="recipientsSearchQuery = ''; recipientsPage = 1;">
+              <i class="ti ti-x"></i>Effacer
+            </button>
+          </div>
+          <small class="text-muted mt-2 d-block" *ngIf="recipientsSearchQuery">
+            Résultats trouvés: {{ getFilteredRecipients().length }} sur {{ recipientsTotal }}
+          </small>
+        </div>
+
         <!-- Recipients Table -->
         <div class="recipients-table-wrapper">
           <div class="table-responsive">
@@ -530,9 +549,11 @@
                 </tr>
               </thead>
               <tbody>
-                <tr *ngIf="newsletterRecipients.length === 0 && !recipientsLoading" class="empty-row">
+                <tr *ngIf="getFilteredRecipients().length === 0 && !recipientsLoading" class="empty-row">
                   <td colspan="5" class="text-center text-muted">
-                    <i class="ti ti-inbox me-2"></i>Aucun destinataire
+                    <i class="ti ti-inbox me-2"></i>
+                    <span *ngIf="recipientsSearchQuery">Aucun destinataire trouvé avec "{{ recipientsSearchQuery }}"</span>
+                    <span *ngIf="!recipientsSearchQuery">Aucun destinataire</span>
                   </td>
                 </tr>
                 <tr *ngIf="recipientsLoading" class="loading-row">
@@ -542,7 +563,7 @@
                     </div>
                   </td>
                 </tr>
-                <tr *ngFor="let recipient of newsletterRecipients" class="recipient-row">
+                <tr *ngFor="let recipient of getFilteredRecipients()" class="recipient-row">
                   <td class="email-cell">
                     <span class="email-badge">{{ recipient.email }}</span>
                   </td>
@@ -566,18 +587,33 @@
         </div>
 
         <!-- Pagination -->
-        <nav aria-label="Page navigation" *ngIf="recipientsTotalPages > 1">
+        <nav aria-label="Page navigation" *ngIf="recipientsTotalPages > 1" class="mt-3">
           <ul class="pagination justify-content-center">
             <li class="page-item" [class.disabled]="recipientsPage === 1">
-              <a class="page-link" (click)="recipientsPage > 1 && onRecipientsPageChange({page: recipientsPage - 2})">Précédent</a>
+              <a class="page-link cursor-pointer" 
+                (click)="recipientsPage > 1 && onRecipientsPageChange(recipientsPage - 1)"
+                [style.cursor]="recipientsPage === 1 ? 'not-allowed' : 'pointer'">
+                <i class="ti ti-chevron-left me-1"></i>Précédent
+              </a>
             </li>
-            <li class="page-item" *ngFor="let p of [].constructor(recipientsTotalPages); let i = index" [class.active]="i + 1 === recipientsPage">
-              <a class="page-link" (click)="onRecipientsPageChange({page: i})">{{ i + 1 }}</a>
+            <li class="page-item" *ngFor="let page of getVisiblePages()" 
+              [class.active]="page === recipientsPage"
+              [class.disabled]="page === -1">
+              <a *ngIf="page !== -1" class="page-link cursor-pointer" (click)="onRecipientsPageChange(page)">{{ page }}</a>
+              <span *ngIf="page === -1" class="page-link">...</span>
             </li>
             <li class="page-item" [class.disabled]="recipientsPage === recipientsTotalPages">
-              <a class="page-link" (click)="recipientsPage < recipientsTotalPages && onRecipientsPageChange({page: recipientsPage})">Suivant</a>
+              <a class="page-link cursor-pointer" 
+                (click)="recipientsPage < recipientsTotalPages && onRecipientsPageChange(recipientsPage + 1)"
+                [style.cursor]="recipientsPage === recipientsTotalPages ? 'not-allowed' : 'pointer'">
+                Suivant<i class="ti ti-chevron-right ms-1"></i>
+              </a>
             </li>
           </ul>
+          <div class="text-center text-muted small mt-2">
+            Page {{ recipientsPage }} sur {{ recipientsTotalPages }} 
+            ({{ newsletterRecipients.length }} destinataires affichés sur {{ recipientsStats.total || 0 }})
+          </div>
         </nav>
       </div>
       <div class="schedule-modal-footer">
