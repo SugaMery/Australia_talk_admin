@@ -261,7 +261,7 @@ export class MediasComponent implements OnInit {
   event.preventDefault();
   const url = media.path && media.path.startsWith('http')
     ? media.path
-    : 'https://api.australia-talk.com/uploads/' + media.filename;
+    : 'http://localhost:5000/uploads/' + media.filename;
   window.open(url, '_blank');
 }
 

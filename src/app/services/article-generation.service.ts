@@ -17,7 +17,7 @@ export interface GenerateArticleResponse {
   providedIn: 'root'
 })
 export class ArticleGenerationService {
-  private apiUrl = 'https://api.australia-talk.com/api/generate-article';
+  private apiUrl = 'http://localhost:5000/api/generate-article';
   private token: string | null = localStorage.getItem('token');
 
   constructor(private http: HttpClient) {}

@@ -76,7 +76,7 @@ export class SubscriberService {
   }
 
   getUsersWithSubscribers(): Observable<Subscriber[]> {
-    return this.http.get<Subscriber[]>('https://api.australia-talk.com/users-with-subscribers', { headers: this.getHeaders() }).pipe(
+    return this.http.get<Subscriber[]>('http://localhost:5000/users-with-subscribers', { headers: this.getHeaders() }).pipe(
       catchError(this.handleError)
     );
   }

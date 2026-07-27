@@ -31,7 +31,7 @@ export interface MailSettings {
   providedIn: 'root'
 })
 export class MailSettingsService {
-  private apiUrl = 'https://api.australia-talk.com/api/mail-settings';
+  private apiUrl = 'http://localhost:5000/api/mail-settings';
   private token: string | null = localStorage.getItem('token');
   private mailSettingsSubject = new BehaviorSubject<MailSettings | null>(null);
   private hasInitialized = false;

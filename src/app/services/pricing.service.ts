@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class PricingService {
-  private apiUrl = 'https://api.australia-talk.com/pricing';
+  private apiUrl = 'http://localhost:5000/pricing';
   private token: string | null = null;
 
   constructor(private http: HttpClient) {

@@ -7,7 +7,7 @@ import { catchError } from 'rxjs/operators';
   providedIn: 'root'
 })
 export class SystemLinksService {
-  private apiUrl = 'https://api.australia-talk.com/company-links';
+  private apiUrl = 'http://localhost:5000/company-links';
   private token: string | null = localStorage.getItem('token');
 
   constructor(private http: HttpClient) {}

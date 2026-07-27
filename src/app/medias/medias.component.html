@@ -78,10 +78,10 @@
 							<div class="card">
 								<div class="card-body">
 									<div class="img-sec w-100 position-relative mb-3">
-										<a [href]="media.path.startsWith('http') ? media.path : 'https://api.australia-talk.com/uploads/' + media.filename" target="_blank">
+										<a [href]="media.path.startsWith('http') ? media.path : 'http://localhost:5000/uploads/' + media.filename" target="_blank">
 											<ng-container *ngIf="media.extension === 'mp4'; else imagePreview">
 												<video
-													[src]="media.path.startsWith('http') ? media.path : 'https://api.australia-talk.com/uploads/' + media.filename"
+													[src]="media.path.startsWith('http') ? media.path : 'http://localhost:5000/uploads/' + media.filename"
 													controls
 													style="height: 200px; object-fit: cover;"
 													class="img-fluid rounded w-100"
@@ -91,7 +91,7 @@
 											<ng-template #imagePreview>
 												<img
 													style="height: 200px; object-fit: cover;"
-													[src]="media.path.startsWith('http') ? media.path : 'https://api.australia-talk.com/uploads/' + media.filename"
+													[src]="media.path.startsWith('http') ? media.path : 'http://localhost:5000/uploads/' + media.filename"
 													[alt]="media.filename"
 													class="img-fluid rounded w-100"
 												>
@@ -123,7 +123,7 @@
 
 <a
   class="link-default p-1 d-flex align-items-center"
-  [href]="media.path.startsWith('http') ? media.path : 'https://api.australia-talk.com/uploads/' + media.filename"
+  [href]="media.path.startsWith('http') ? media.path : 'http://localhost:5000/uploads/' + media.filename"
   [attr.download]="media.extension !== 'mp4' ? media.filename : null"
   title="Télécharger"
   (click)="media.extension !== 'mp4' ? null : $event.preventDefault()"
@@ -138,7 +138,7 @@
                                         
 									</div>
                                     <h5>
-										<a [href]="media.path.startsWith('http') ? media.path : 'https://api.australia-talk.com/uploads/' + media.filename" class="fs-16 text-truncate">{{media.filename}}</a>
+										<a [href]="media.path.startsWith('http') ? media.path : 'http://localhost:5000/uploads/' + media.filename" class="fs-16 text-truncate">{{media.filename}}</a>
 									</h5>
 
 								</div>

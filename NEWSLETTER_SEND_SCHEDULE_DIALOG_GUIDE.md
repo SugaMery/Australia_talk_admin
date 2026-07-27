@@ -413,7 +413,7 @@ input[type="datetime-local"]:focus {
 
 **Request:**
 ```bash
-curl -X POST https://api.australia-talk.com/newsletters/32/send-manual \
+curl -X POST http://localhost:5000/newsletters/32/send-manual \
   -H "Authorization: Bearer [JWT_TOKEN]" \
   -H "Content-Type: application/json"
 ```
@@ -435,7 +435,7 @@ curl -X POST https://api.australia-talk.com/newsletters/32/send-manual \
 
 **Request:**
 ```bash
-curl -X POST https://api.australia-talk.com/newsletters/32/schedule \
+curl -X POST http://localhost:5000/newsletters/32/schedule \
   -H "Authorization: Bearer [JWT_TOKEN]" \
   -H "Content-Type: application/json" \
   -d '{"scheduled_at": "2026-01-28T10:30:00Z"}'

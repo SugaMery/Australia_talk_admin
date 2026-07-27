@@ -204,7 +204,7 @@ export class CreateNewsletterComponent implements OnInit, OnDestroy {
       headers = headers.set('Authorization', `Bearer ${token}`);
     }
 
-    this.http.get<any>('https://api.australia-talk.com/api/newsletters/templates/available', { headers })
+    this.http.get<any>('http://localhost:5000/api/newsletters/templates/available', { headers })
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (res) => {

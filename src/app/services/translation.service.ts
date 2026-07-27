@@ -21,7 +21,7 @@ export interface TranslateResponse {
   providedIn: 'root'
 })
 export class TranslationService {
-  private apiUrl = 'https://api.australia-talk.com/translate';
+  private apiUrl = 'http://localhost:5000/translate';
   private token: string | null = localStorage.getItem('token');
 
   constructor(private http: HttpClient) {}
